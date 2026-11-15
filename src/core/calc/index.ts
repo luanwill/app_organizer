@@ -1,28 +1,95 @@
-// STUB do orquestrador — o subagente S2 substitui por implementações reais (mesmas assinaturas de CalcApi).
+/**
+ * Núcleo de cálculo geométrico (S2): funções puras, sem React/store/DOM.
+ * Exporta por nome todas as funções de CalcApi + alguns helpers.
+ */
 import type { CalcApi } from '@/core/model';
-const pendente = (): never => {
-  throw new Error('core/calc ainda não implementado (S2)');
+import {
+  areaPoligono,
+  caixaEnvolvente,
+  centroidePoligono,
+  comprimentoPolilinha,
+  distancia,
+  perimetroPoligono,
+  pontoEmPoligono,
+  projetarNaPolilinha,
+  projetarNoSegmento,
+  restringirOrtogonal,
+  retanguloParaPoligono,
+  snapVertice,
+} from './geometria';
+import { calcularEscala, paraM2, paraMetros, paraUnidades } from './escala';
+import { construirGrafoParedes } from './grafo';
+import { contarMudancasDirecao, rotaOrtogonal } from './rotas';
+import { arredondar, formatarNumero, formatarQuantidade, lerNumero } from './formato';
+
+export {
+  // geometria
+  distancia,
+  comprimentoPolilinha,
+  areaPoligono,
+  perimetroPoligono,
+  centroidePoligono,
+  pontoEmPoligono,
+  projetarNoSegmento,
+  projetarNaPolilinha,
+  restringirOrtogonal,
+  snapVertice,
+  retanguloParaPoligono,
+  caixaEnvolvente,
+  // escala
+  calcularEscala,
+  paraMetros,
+  paraM2,
+  paraUnidades,
+  // grafo de paredes
+  construirGrafoParedes,
+  // rotas
+  rotaOrtogonal,
+  contarMudancasDirecao,
+  // formatação pt-BR
+  arredondar,
+  formatarNumero,
+  formatarQuantidade,
+  lerNumero,
 };
-export const distancia: CalcApi['distancia'] = pendente;
-export const comprimentoPolilinha: CalcApi['comprimentoPolilinha'] = pendente;
-export const areaPoligono: CalcApi['areaPoligono'] = pendente;
-export const perimetroPoligono: CalcApi['perimetroPoligono'] = pendente;
-export const centroidePoligono: CalcApi['centroidePoligono'] = pendente;
-export const pontoEmPoligono: CalcApi['pontoEmPoligono'] = pendente;
-export const projetarNoSegmento: CalcApi['projetarNoSegmento'] = pendente;
-export const projetarNaPolilinha: CalcApi['projetarNaPolilinha'] = pendente;
-export const restringirOrtogonal: CalcApi['restringirOrtogonal'] = pendente;
-export const snapVertice: CalcApi['snapVertice'] = pendente;
-export const retanguloParaPoligono: CalcApi['retanguloParaPoligono'] = pendente;
-export const caixaEnvolvente: CalcApi['caixaEnvolvente'] = pendente;
-export const calcularEscala: CalcApi['calcularEscala'] = pendente;
-export const paraMetros: CalcApi['paraMetros'] = pendente;
-export const paraM2: CalcApi['paraM2'] = pendente;
-export const paraUnidades: CalcApi['paraUnidades'] = pendente;
-export const construirGrafoParedes: CalcApi['construirGrafoParedes'] = pendente;
-export const rotaOrtogonal: CalcApi['rotaOrtogonal'] = pendente;
-export const contarMudancasDirecao: CalcApi['contarMudancasDirecao'] = pendente;
-export const arredondar: CalcApi['arredondar'] = pendente;
-export const formatarNumero: CalcApi['formatarNumero'] = pendente;
-export const formatarQuantidade: CalcApi['formatarQuantidade'] = pendente;
-export const lerNumero: CalcApi['lerNumero'] = pendente;
+
+// helpers adicionais
+export {
+  areaComSinal,
+  distanciaPontoPoligono,
+  intersecaoSegmentos,
+  pontoNoSegmento,
+  segmentosDaPolilinha,
+} from './geometria';
+export type { CaixaEnvolvente, Segmento } from './geometria';
+export { escalaValida } from './escala';
+export { classificarNo } from './grafo';
+export { mesmaDirecao } from './rotas';
+export * from './config';
+
+/** Verificação de tipo: o módulo satisfaz o contrato CalcApi. */
+export const calcApi = {
+  distancia,
+  comprimentoPolilinha,
+  areaPoligono,
+  perimetroPoligono,
+  centroidePoligono,
+  pontoEmPoligono,
+  projetarNoSegmento,
+  projetarNaPolilinha,
+  restringirOrtogonal,
+  snapVertice,
+  retanguloParaPoligono,
+  caixaEnvolvente,
+  calcularEscala,
+  paraMetros,
+  paraM2,
+  paraUnidades,
+  construirGrafoParedes,
+  rotaOrtogonal,
+  contarMudancasDirecao,
+  arredondar,
+  formatarNumero,
+  formatarQuantidade,
+  lerNumero,
+} satisfies CalcApi;
