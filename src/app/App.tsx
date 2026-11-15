@@ -6,7 +6,8 @@ import { useLevantamento } from '@/core/store';
 import { PainelEscala, Visualizador } from '@/features/viewer';
 import { ArvoreLevantamento } from './ArvoreLevantamento';
 import { useLevantamentoCalculado } from './levantamento';
-import { MODULOS, PAINEIS, type DisciplinaComModulo } from './modulos';
+import { MODULOS, type DisciplinaComModulo } from './modulos';
+import { PAINEIS } from './paineis';
 
 type Etapa = 1 | 2 | 3;
 type Aba = DisciplinaComModulo | 'materiais' | 'importar';

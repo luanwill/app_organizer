@@ -47,8 +47,8 @@ export interface RegraAmbiente {
 }
 
 export const PALAVRAS_CHAVE_AMBIENTE: RegraAmbiente[] = [
-  { tipo: 'area-servico', areaMolhada: true, palavras: ['serv', 'lavand'] },
   { tipo: 'banheiro', areaMolhada: true, palavras: ['banh', 'wc', 'lavabo', 'sanit'] },
+  { tipo: 'area-servico', areaMolhada: true, palavras: ['serv', 'lavand'] },
   { tipo: 'cozinha', areaMolhada: true, palavras: ['coz', 'copa'] },
   { tipo: 'quarto', areaMolhada: false, palavras: ['quarto', 'dorm', 'suite'] },
   { tipo: 'sala', areaMolhada: false, palavras: ['sala', 'estar', 'jantar'] },
