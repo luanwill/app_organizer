@@ -1,10 +1,13 @@
 /** Registro dos módulos (preenchido pelo orquestrador a cada leva). */
 import type { ComponentType } from 'react';
 import type { MateriaisApi, ModuloDisciplina } from '@/core/model';
+import { moduloArquitetura, PainelDadosEssenciais } from '@/features/arq';
 
 export type DisciplinaComModulo = 'arquitetura' | 'estrutura' | 'eletrica' | 'hidraulica';
 
-export const MODULOS: Partial<Record<DisciplinaComModulo, ModuloDisciplina>> = {};
+export const MODULOS: Partial<Record<DisciplinaComModulo, ModuloDisciplina>> = {
+  arquitetura: moduloArquitetura,
+};
 
 export const materiaisApi: MateriaisApi | null = null;
 
@@ -15,4 +18,6 @@ export const PAINEIS: {
   Exportacao?: ComponentType;
   Importacao?: ComponentType;
   Vista3D?: ComponentType;
-} = {};
+} = {
+  DadosEssenciais: PainelDadosEssenciais,
+};

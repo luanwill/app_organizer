@@ -1,0 +1,14 @@
+/* Arquitetura: ajustes compactos para a coluna esquerda. */
+.arq-tabela th, .arq-tabela td { padding: 2px 3px; font-size: 12px; }
+.arq-tabela input, .arq-tabela select { width: 100%; padding: 2px 4px; }
+.arq-tabela tr.arq-acoes td { padding-bottom: 6px; }
+.arq-tabela tr.arq-dados td { border-bottom: 0; }
+.arq-tabela button, .arq-lista button { font-size: 12px; padding: 2px 8px; }
+.arq-difere { color: var(--alerta); }
+.arq-lista { list-style: none; margin: 0; padding: 0; }
+.arq-lista li > button { display: flex; gap: 6px; width: 100%; text-align: left; margin: 2px 0; padding: 4px 8px; }
+.arq-lista .arq-nome { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.arq-lista .arq-medida { font-variant-numeric: tabular-nums; color: var(--texto-suave); }
+.arq-edicao { background: var(--painel-2); border: 1px solid var(--borda); border-radius: 6px; padding: 6px 8px; margin: 6px 0; }
+.arq-edicao .campo input[type='checkbox'] { justify-self: start; }
+.arq-nota { font-size: 12px; margin: 2px 0 6px; }
