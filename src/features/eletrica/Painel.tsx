@@ -34,13 +34,20 @@ const TENSOES = [127, 220] as const;
 const ALTURAS_PARAMETRO = ['baixa', 'media', 'alta', 'interruptor'] as const;
 
 /** Campo numérico pt-BR: aceita vírgula, grava ao sair do campo ou com Enter; inválido → volta ao valor. */
-function CampoNumero(props: { rotulo: string; valor: number; casas?: number; aoMudar: (valor: number) => void }) {
-  const { rotulo, valor, casas = 2, aoMudar } = props;
+function CampoNumero(props: {
+  rotulo: string;
+  valor: number;
+  casas?: number;
+  /** Aceita zero (potência); os parâmetros exigem valor positivo. */
+  permiteZero?: boolean;
+  aoMudar: (valor: number) => void;
+}) {
+  const { rotulo, valor, casas = 2, permiteZero = false, aoMudar } = props;
   const [texto, definirTexto] = useState(formatarNumero(valor, casas));
   useEffect(() => definirTexto(formatarNumero(valor, casas)), [valor, casas]);
   const gravar = () => {
     const lido = lerNumero(texto);
-    if (lido !== null && lido >= 0 && lido !== valor) aoMudar(lido);
+    if (lido !== null && (lido > 0 || (permiteZero && lido === 0)) && lido !== valor) aoMudar(lido);
     else definirTexto(formatarNumero(valor, casas));
   };
   return (
@@ -173,6 +180,7 @@ export function PainelEletrica() {
               rotulo="Potência (VA)"
               valor={selecionado.props.potenciaVA}
               casas={0}
+              permiteZero
               aoMudar={(potenciaVA) => editar({ potenciaVA })}
             />
           )}
