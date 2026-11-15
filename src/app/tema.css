@@ -40,3 +40,35 @@ h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: v
 .suave { color: var(--texto-suave); }
 .selo { display: inline-block; border: 1px solid var(--borda); border-radius: 999px; padding: 2px 9px; color: var(--texto-suave); font-size: 12px; }
 .carregando { display: grid; place-items: center; height: 100%; color: var(--texto-suave); }
+
+/* ---- casca do app (3 colunas) ---- */
+.app { display: grid; grid-template-columns: 340px minmax(0, 1fr) 340px; grid-template-rows: auto minmax(0, 1fr); height: 100%; }
+.topo { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; padding: 6px 12px; background: var(--painel); border-bottom: 1px solid var(--borda); }
+.topo .espaco { flex: 1; }
+.nome-projeto { width: 240px; }
+.coluna { background: var(--painel); overflow: auto; padding: 10px; min-height: 0; }
+.coluna.esquerda { border-right: 1px solid var(--borda); }
+.coluna.direita { border-left: 1px solid var(--borda); }
+.centro { min-width: 0; min-height: 0; position: relative; overflow: hidden; }
+.etapas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 10px; }
+.etapas button { padding: 6px 4px; font-size: 12px; }
+.etapas .numero { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--borda); font-size: 11px; }
+.etapas button.ativo .numero { background: var(--destaque); color: #08121f; }
+.abas { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.abas button { padding: 3px 8px; font-size: 12px; }
+.bolinha { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
+.arvore .ramo-titulo { display: flex; gap: 6px; align-items: center; width: 100%; background: none; border: 0; padding: 4px 2px; text-align: left; }
+.arvore .ramo-nome { flex: 1; font-weight: 600; }
+.arvore .ramo-filhos { padding-left: 12px; border-left: 1px solid var(--borda); margin-left: 6px; }
+.arvore .ramo-filhos .ramo-nome { font-weight: 500; }
+.arvore .seta { width: 10px; color: var(--texto-suave); }
+.arvore-tabela td { font-size: 12px; vertical-align: top; }
+.arvore-tabela tr { cursor: pointer; }
+.arvore-tabela tr:hover td { background: var(--painel-2); }
+.arvore .alertas { list-style: none; margin: 4px 0; padding: 0; font-size: 12px; }
+.arvore .alertas li { cursor: pointer; padding: 2px 0; }
+.arvore .vazio { padding: 4px 0; font-size: 12px; }
+.aviso-pendentes { border: 1px solid var(--pendente); border-radius: 6px; padding: 6px 8px; margin: 6px 0 10px; display: grid; gap: 6px; }
+.acoes-disciplina { margin: 4px 0; }
+.acoes-disciplina button, .aviso-pendentes button { font-size: 12px; padding: 2px 8px; }
+.selo-manual { color: var(--alerta); }
