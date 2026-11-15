@@ -1,0 +1,42 @@
+/* Tema escuro compartilhado. Os módulos usam estas variáveis e classes utilitárias. */
+:root {
+  --fundo: #14161a;
+  --painel: #1c1f25;
+  --painel-2: #242831;
+  --borda: #323744;
+  --texto: #e6e8ec;
+  --texto-suave: #9aa3b2;
+  --destaque: #4da3ff;
+  --pendente: #ff5fa2;
+  --alerta: #ffb020;
+  --erro: #ff5c5c;
+  --ok: #3ddc97;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { background: var(--fundo); color: var(--texto); font: 13px/1.45 system-ui, 'Segoe UI', Roboto, sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { background: var(--painel-2); border: 1px solid var(--borda); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--destaque); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.primario { background: var(--destaque); border-color: var(--destaque); color: #08121f; font-weight: 600; }
+button.ativo { border-color: var(--destaque); background: #20324a; }
+input, select, textarea { background: var(--fundo); border: 1px solid var(--borda); border-radius: 6px; padding: 4px 7px; min-width: 0; }
+input:focus, select:focus, button:focus-visible { outline: 2px solid var(--destaque); outline-offset: 1px; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--borda); }
+th { color: var(--texto-suave); font-weight: 500; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+h2, h3, h4 { margin: 0 0 6px; }
+h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); }
+.campo { display: grid; grid-template-columns: 1fr 96px; gap: 6px; align-items: center; margin: 4px 0; }
+.campo > span { color: var(--texto-suave); }
+.linha { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.secao { border-top: 1px solid var(--borda); padding: 10px 0; }
+.aviso { background: #3a2f12; border: 1px solid #6b531a; color: #ffd98a; border-radius: 6px; padding: 6px 8px; margin: 6px 0; }
+.alerta-faltante { color: var(--alerta); }
+.pendente { color: var(--pendente); }
+.suave { color: var(--texto-suave); }
+.selo { display: inline-block; border: 1px solid var(--borda); border-radius: 999px; padding: 2px 9px; color: var(--texto-suave); font-size: 12px; }
+.carregando { display: grid; place-items: center; height: 100%; color: var(--texto-suave); }
