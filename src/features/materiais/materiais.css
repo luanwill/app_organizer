@@ -1,5 +1,5 @@
 /* Aba Materiais: tabela compacta de composições (coluna de 340 px). */
-.mat-selo { position: sticky; top: -10px; z-index: 1; margin-top: 0; font-size: 12px; }
+.mat-selo { position: sticky; top: 0; z-index: 1; margin-top: 0; font-size: 12px; }
 .mat-nota { font-size: 12px; margin: 4px 0 8px; }
 .mat-tabela { table-layout: fixed; }
 .mat-tabela th, .mat-tabela td { padding: 2px 2px; font-size: 12px; border-bottom: 0; }

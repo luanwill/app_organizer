@@ -18,12 +18,12 @@ function textoDoNumero(valor: number): string {
 }
 
 /** Campo de texto que grava no blur/Enter (uma alteração por edição). */
-function EntradaTexto({ valor, aoMudar, rotulo, placeholder }: { valor: string; aoMudar: (v: string) => void; rotulo: string; placeholder?: string }) {
+function EntradaTexto({ valor, aoMudar, rotulo, placeholder, obrigatorio = false }: { valor: string; aoMudar: (v: string) => void; rotulo: string; placeholder?: string; obrigatorio?: boolean }) {
   const [texto, setTexto] = useState(valor);
   useEffect(() => setTexto(valor), [valor]);
   const confirmar = () => {
     const limpo = texto.trim();
-    if (limpo === valor) setTexto(valor);
+    if (limpo === valor || (obrigatorio && limpo === '')) setTexto(valor);
     else aoMudar(limpo);
   };
   return (
@@ -101,10 +101,10 @@ export function PainelMateriais() {
               ...c.insumos.map((ins, i) => (
                 <tr key={`${c.id}:${i}`}>
                   <td>
-                    <EntradaTexto valor={ins.material} rotulo="Material" aoMudar={(v) => v && alterarInsumo(c.id, i, { material: v })} />
+                    <EntradaTexto valor={ins.material} rotulo="Material" obrigatorio aoMudar={(v) => alterarInsumo(c.id, i, { material: v })} />
                   </td>
                   <td className="mat-un">
-                    <EntradaTexto valor={ins.unidade} rotulo="Unidade" aoMudar={(v) => v && alterarInsumo(c.id, i, { unidade: v })} />
+                    <EntradaTexto valor={ins.unidade} rotulo="Unidade" obrigatorio aoMudar={(v) => alterarInsumo(c.id, i, { unidade: v })} />
                   </td>
                   <td className="mat-num">
                     <EntradaNumero valor={ins.coeficiente} rotulo={`Coeficiente (${ins.unidade}/${servico.unidade})`} aoMudar={(v) => alterarInsumo(c.id, i, { coeficiente: v })} />
