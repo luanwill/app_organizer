@@ -1,0 +1,10 @@
+.v3d { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--fundo); }
+.v3d-tela { position: absolute; inset: 0; }
+.v3d-tela canvas { display: block; }
+.v3d-camadas { position: absolute; top: 8px; left: 8px; display: flex; gap: 4px; flex-wrap: wrap; z-index: 1; }
+.v3d-camadas button { font-size: 12px; padding: 3px 8px; }
+.v3d-camada-oculta { opacity: .55; }
+.v3d-alertas { position: absolute; left: 8px; bottom: 8px; max-width: min(420px, 70%); z-index: 1; }
+.v3d-alertas .aviso { margin: 4px 0 0; font-size: 12px; }
+.v3d-vazio { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--texto-suave); pointer-events: none; }
+.v3d-dica { position: absolute; right: 8px; bottom: 8px; font-size: 11px; color: var(--texto-suave); pointer-events: none; }

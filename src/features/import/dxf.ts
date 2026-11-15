@@ -65,7 +65,7 @@ function construtorDoParser(): ConstrutorParser {
   return candidato as ConstrutorParser;
 }
 
-const pontoValido = (p: { x: number; y: number } | undefined): p is { x: number; y: number } =>
+const pontoValido = <T extends { x: number; y: number }>(p: T | undefined): p is T =>
   p !== undefined && Number.isFinite(p.x) && Number.isFinite(p.y);
 
 /** Remove os códigos de formatação do MTEXT (\P, \fArial|...;, chaves) e espaços repetidos. */
