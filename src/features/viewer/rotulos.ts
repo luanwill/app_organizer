@@ -1,7 +1,17 @@
 /** Textos exibidos na planta: medidas ao vivo, rótulos de elementos, status da escala. Lógica pura. */
 import type { Elemento, Geometria, Ponto, TipoEsquadria } from '@/core/model';
-import { areaPoligono, comprimentoPolilinha, formatarNumero, formatarQuantidade, paraM2, paraMetros } from '@/core/calc';
-import { CASAS_ESCALA, CASAS_MEDIDA, ESTILO_TIPO, LETRA_PONTO_ELETRICO } from './config';
+import {
+  areaPoligono,
+  caixaEnvolvente,
+  centroidePoligono,
+  comprimentoPolilinha,
+  formatarNumero,
+  formatarQuantidade,
+  paraM2,
+  paraMetros,
+  pontoEmPoligono,
+} from '@/core/calc';
+import { CASAS_ESCALA, CASAS_MEDIDA, ESTILO_TIPO, LETRA_PONTO_ELETRICO, TIPOS_PONTO_COM_ROTULO_FIXO } from './config';
 
 /**
  * Medida formatada em pt-BR: comprimento (m) para polilinha, área (m²) para polígono.
@@ -66,4 +76,44 @@ export function rotuloDoElemento(el: Elemento, ctx: ContextoRotulo): RotuloEleme
 export function textoEscala(escala: number | null): string {
   if (escala === null || !(escala > 0)) return 'Página sem escala';
   return `Escala: 1 un = ${formatarNumero(escala, CASAS_ESCALA)} m`;
+}
+
+/**
+ * Canto superior esquerdo (da etiqueta) do nome do ambiente: junto ao vértice mais próximo do canto
+ * superior esquerdo do polígono, deslocado para dentro pela margem (unidades do PDF) — longe do
+ * centro, onde costuma ficar o ponto de luz. Se não couber dentro do polígono, usa o centroide.
+ */
+export function ancoraRotuloAmbiente(pontos: Ponto[], margem: number): Ponto {
+  const caixa = caixaEnvolvente(pontos);
+  let canto = pontos[0];
+  let menor = Infinity;
+  for (const p of pontos) {
+    const d = p.x - caixa.minX + (p.y - caixa.minY);
+    if (d < menor) {
+      menor = d;
+      canto = p;
+    }
+  }
+  const candidato = { x: canto.x + margem, y: canto.y + margem };
+  return pontoEmPoligono(candidato, pontos) ? candidato : centroidePoligono(pontos);
+}
+
+/**
+ * Decide se o rótulo de texto de um elemento aparece. Linhas e polígonos: sempre. Pontos: só os
+ * de rótulo fixo (pilar, esquadria) ou quando destacados (selecionados ou sob o mouse).
+ */
+export function rotuloVisivel(el: Elemento, destacado: boolean): boolean {
+  if (el.geometria.tipo !== 'ponto') return true;
+  return destacado || TIPOS_PONTO_COM_ROTULO_FIXO.includes(el.tipo);
+}
+
+/** Rótulo de uma rota derivada: só com a rota sob o mouse ou o elemento associado destacado. */
+export function rotuloDerivadoVisivel(
+  derivado: { id: string; elementoId?: string },
+  sobreId: string | null,
+  selecaoIds: string[],
+): boolean {
+  if (sobreId === derivado.id) return true;
+  const alvo = derivado.elementoId;
+  return alvo !== undefined && (sobreId === alvo || selecaoIds.includes(alvo));
 }

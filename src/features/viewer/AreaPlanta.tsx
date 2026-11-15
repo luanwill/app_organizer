@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type 
 import Konva from 'konva';
 import type { KonvaEventObject } from 'konva/lib/Node';
 import { Circle, Layer, Line, Rect, Stage } from 'react-konva';
-import { COR_DISCIPLINA, DISCIPLINA_DO_TIPO, type GeometriaDerivada, type Ponto } from '@/core/model';
+import { COR_DISCIPLINA, DISCIPLINA_DO_TIPO, type Elemento, type GeometriaDerivada, type Ponto } from '@/core/model';
 import { useLevantamento } from '@/core/store';
 import {
   comAlfa,
@@ -48,7 +48,7 @@ import {
 import { Etiqueta, FormaDerivada, FormaElemento } from './FormaElemento';
 import { renderizarPagina, type DocumentoPdf } from './pdf';
 import { registrarCapturador } from './registro';
-import { numerosContagem, rotuloDoElemento, rotuloMedida } from './rotulos';
+import { numerosContagem, rotuloDerivadoVisivel, rotuloDoElemento, rotuloMedida } from './rotulos';
 import type { DimensoesPagina } from './usePdf';
 
 // arrastar elementos só com o botão esquerdo (o do meio move a vista)
@@ -120,6 +120,8 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
   const [cursor, setCursor] = useState<{ ponto: Ponto; snap: boolean } | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [edicao, setEdicao] = useState<{ id: string; indice: number; ponto: Ponto } | null>(null);
+  /** Id do elemento/rota sob o mouse (mostra o rótulo). */
+  const [sobreId, setSobreId] = useState<string | null>(null);
   const [espaco, setEspaco] = useState(false);
   const [arrastandoVista, setArrastandoVista] = useState(false);
   const [medidaTexto, setMedidaTexto] = useState('');
@@ -341,6 +343,10 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
     }
   }, []);
 
+  const aoPassar = useCallback((id: string, dentro: boolean) => {
+    setSobreId((atual) => (dentro ? id : atual === id ? null : atual));
+  }, []);
+
   const aoMoverPonto = useCallback((id: string, ponto: Ponto, no: Konva.Node) => {
     const st = useLevantamento.getState();
     const el = st.projeto.elementos.find((e) => e.id === id);
@@ -363,6 +369,32 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
   const classeCursor = arrastandoVista ? 'vz-arrastando' : modo === 'pan' || espaco ? 'vz-pan' : desenhando ? 'vz-mira' : '';
   const mensagem = aviso ?? bloqueio ?? INSTRUCAO_MODO[modo] ?? null;
 
+  // só pontos sobem ao passar o mouse (reordenar polígonos sobrepostos trocaria quem recebe o mouse)
+  const sobrePonto = visiveis.find((e) => e.id === sobreId && e.geometria.tipo === 'ponto');
+  const emOrdem = sobrePonto ? [...visiveis.filter((e) => e !== sobrePonto), sobrePonto] : visiveis;
+  const desenharElemento = (el: Elemento) => {
+    const r = rotuloDoElemento(el, contextoRotulo);
+    const provisorio =
+      edicao && edicao.id === el.id ? pontosDaGeometria(moverVertice(el.geometria, edicao.indice, edicao.ponto)) : undefined;
+    return (
+      <FormaElemento
+        key={el.id}
+        elemento={el}
+        zoom={zoom}
+        escala={escala}
+        selecionado={selecaoIds.includes(el.id)}
+        sobre={sobreId === el.id}
+        interativo={selecionando}
+        simbolo={r.simbolo}
+        texto={r.texto}
+        pontosProvisorios={provisorio}
+        aoPressionar={aoPressionarElemento}
+        aoMoverPonto={aoMoverPonto}
+        aoPassar={aoPassar}
+      />
+    );
+  };
+
   return (
     <div className={`vz-planta ${classeCursor}`}>
       <canvas
@@ -384,33 +416,29 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
         scaleY={zoom}
         onMouseDown={aoPressionarMouse}
         onMouseMove={aoMoverMouse}
-        onMouseLeave={() => setCursor(null)}
+        onMouseLeave={() => {
+          setCursor(null);
+          setSobreId(null);
+        }}
         onWheel={aoRolar}
       >
-        <Layer ref={camadaRef} listening={selecionando && !espaco}>
+        {/* escuta o mouse também fora do modo selecionar, para os rótulos de hover */}
+        <Layer ref={camadaRef} listening={modo !== 'pan' && !espaco && !arrastandoVista}>
+          {/* polígonos embaixo; rotas derivadas sobre eles (para receberem o mouse); linhas e pontos por cima;
+              o elemento sob o mouse vai por último, para o rótulo não ficar atrás do símbolo vizinho */}
+          {emOrdem.filter((el) => el.geometria.tipo === 'poligono').map(desenharElemento)}
           {derivadosVisiveis.map((d) => (
-            <FormaDerivada key={d.id} derivado={d} zoom={zoom} interativo={selecionando} aoPressionar={aoPressionarElemento} />
+            <FormaDerivada
+              key={d.id}
+              derivado={d}
+              zoom={zoom}
+              interativo={selecionando}
+              mostrarRotulo={rotuloDerivadoVisivel(d, sobreId, selecaoIds)}
+              aoPressionar={aoPressionarElemento}
+              aoPassar={aoPassar}
+            />
           ))}
-          {visiveis.map((el) => {
-            const r = rotuloDoElemento(el, contextoRotulo);
-            const provisorio =
-              edicao && edicao.id === el.id ? pontosDaGeometria(moverVertice(el.geometria, edicao.indice, edicao.ponto)) : undefined;
-            return (
-              <FormaElemento
-                key={el.id}
-                elemento={el}
-                zoom={zoom}
-                escala={escala}
-                selecionado={selecaoIds.includes(el.id)}
-                interativo={selecionando}
-                simbolo={r.simbolo}
-                texto={r.texto}
-                pontosProvisorios={provisorio}
-                aoPressionar={aoPressionarElemento}
-                aoMoverPonto={aoMoverPonto}
-              />
-            );
-          })}
+          {emOrdem.filter((el) => el.geometria.tipo !== 'poligono').map(desenharElemento)}
         </Layer>
         <Layer listening={selecionando && !espaco}>
           {selecionados.flatMap((el) =>

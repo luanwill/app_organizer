@@ -17,15 +17,19 @@ import {
   LARGURA_DERIVADO_PX,
   LARGURA_EXTRA_SELECAO_PX,
   LARGURA_TOQUE_PX,
+  MARGEM_ROTULO_AMBIENTE_PX,
   OPACIDADE_FUNDO_ETIQUETA,
   OPACIDADE_PAREDE,
   PADDING_ETIQUETA_PX,
+  TAMANHO_FONTE_PEQUENA_PX,
   TAMANHO_FONTE_PX,
+  TIPOS_PONTO_COM_ROTULO_FIXO,
   TRACEJADO_DERIVADO,
   TRACEJADO_PENDENTE,
   type EstiloTipo,
 } from './config';
 import { larguraParedeUnidades } from './elementos';
+import { ancoraRotuloAmbiente, rotuloVisivel } from './rotulos';
 
 function achatar(pontos: Ponto[]): number[] {
   return pontos.flatMap((p) => [p.x, p.y]);
@@ -45,11 +49,13 @@ interface EtiquetaProps {
   texto: string;
   /** Centraliza a etiqueta no ponto (senão fica à direita dele). */
   centralizada?: boolean;
+  /** O ponto é o canto superior esquerdo da etiqueta. */
+  cantoSuperiorEsquerdo?: boolean;
   deslocamentoPx?: number;
 }
 
 /** Texto com fundo escuro, em tamanho de tela constante. */
-export function Etiqueta({ x, y, zoom, texto, centralizada, deslocamentoPx = 0 }: EtiquetaProps) {
+export function Etiqueta({ x, y, zoom, texto, centralizada, cantoSuperiorEsquerdo, deslocamentoPx = 0 }: EtiquetaProps) {
   return (
     <Label
       x={x}
@@ -59,6 +65,11 @@ export function Etiqueta({ x, y, zoom, texto, centralizada, deslocamentoPx = 0 }
       listening={false}
       ref={(no: Konva.Label | null) => {
         if (!no) return;
+        if (cantoSuperiorEsquerdo) {
+          no.offsetX(0);
+          no.offsetY(0);
+          return;
+        }
         no.offsetX(centralizada ? no.width() / 2 : -deslocamentoPx);
         no.offsetY(no.height() / 2);
       }}
@@ -88,6 +99,8 @@ export interface FormaElementoProps {
   /** Escala da página (m por unidade) ou null. */
   escala: number | null;
   selecionado: boolean;
+  /** Mouse em cima do elemento. */
+  sobre: boolean;
   /** Modo 'selecionar': responde a cliques e permite arrastar pontos. */
   interativo: boolean;
   /** Letra/número dentro do símbolo. */
@@ -98,10 +111,15 @@ export interface FormaElementoProps {
   pontosProvisorios?: Ponto[];
   aoPressionar(id: string, adicionar: boolean): void;
   aoMoverPonto(id: string, ponto: Ponto, no: Konva.Node): void;
+  /** Mouse entrou (true) ou saiu (false) do elemento. */
+  aoPassar(id: string, dentro: boolean): void;
 }
 
 export const FormaElemento = memo(function FormaElemento(props: FormaElementoProps) {
-  const { elemento: el, zoom, escala, selecionado, interativo, simbolo, texto, pontosProvisorios } = props;
+  const { elemento: el, zoom, escala, selecionado, sobre, interativo, simbolo, pontosProvisorios } = props;
+  const texto = props.texto && rotuloVisivel(el, selecionado || sobre) ? props.texto : null;
+  const entrar = () => props.aoPassar(el.id, true);
+  const sair = () => props.aoPassar(el.id, false);
   const estilo = ESTILO_TIPO[el.tipo];
   const pendente = el.status === 'pendente';
   const cor = pendente ? COR_PENDENTE : COR_DISCIPLINA[el.disciplina];
@@ -113,6 +131,8 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
   if (el.geometria.tipo === 'ponto') {
     const p = el.geometria.ponto;
     const t = estilo.tamanhoPx;
+    // rótulo fixo (pilar, esquadria) em fonte pequena; ao destacar, fonte normal
+    const fonte = TIPOS_PONTO_COM_ROTULO_FIXO.includes(el.tipo) && !selecionado && !sobre ? TAMANHO_FONTE_PEQUENA_PX : TAMANHO_FONTE_PX;
     return (
       <Group
         x={p.x}
@@ -121,6 +141,8 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
         scaleY={1 / zoom}
         draggable={interativo}
         onMouseDown={pressionar}
+        onMouseEnter={entrar}
+        onMouseLeave={sair}
         onDragEnd={(e) => props.aoMoverPonto(el.id, { x: e.target.x(), y: e.target.y() }, e.target)}
       >
         {selecionado && (
@@ -143,9 +165,9 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
           />
         )}
         {texto && (
-          <Label x={t / 2 + DESLOCAMENTO_ETIQUETA_PX} y={-TAMANHO_FONTE_PX / 2 - PADDING_ETIQUETA_PX} listening={false}>
+          <Label x={t / 2 + DESLOCAMENTO_ETIQUETA_PX} y={-fonte / 2 - PADDING_ETIQUETA_PX} listening={false}>
             <Tag fill={COR_FUNDO_ETIQUETA} opacity={OPACIDADE_FUNDO_ETIQUETA} cornerRadius={3} />
-            <Text text={texto} fontSize={TAMANHO_FONTE_PX} padding={PADDING_ETIQUETA_PX} fill={COR_TEXTO_ETIQUETA} />
+            <Text text={texto} fontSize={fonte} padding={PADDING_ETIQUETA_PX} fill={COR_TEXTO_ETIQUETA} />
           </Label>
         )}
       </Group>
@@ -161,9 +183,15 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
   const largura = ehParede
     ? larguraParedeUnidades(el.props.espessura, escala, zoom, ESPESSURA_MIN_PAREDE_PX)
     : estilo.larguraPx;
-  const centro = fechado ? centroidePoligono(pontos) : pontoMedio(pontos);
+  // nome do ambiente: no canto superior esquerdo interno (o centro costuma ter o ponto de luz)
+  const noCanto = el.tipo === 'ambiente' && fechado;
+  const centro = noCanto
+    ? ancoraRotuloAmbiente(pontos, MARGEM_ROTULO_AMBIENTE_PX / zoom)
+    : fechado
+      ? centroidePoligono(pontos)
+      : pontoMedio(pontos);
   return (
-    <Group onMouseDown={pressionar}>
+    <Group onMouseDown={pressionar} onMouseEnter={entrar} onMouseLeave={sair}>
       {selecionado && (
         <Line
           points={coords}
@@ -188,7 +216,9 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
         hitStrokeWidth={ehParede ? Math.max(largura, LARGURA_TOQUE_PX / zoom) : LARGURA_TOQUE_PX}
         lineJoin="round"
       />
-      {texto && <Etiqueta x={centro.x} y={centro.y} zoom={zoom} texto={texto} centralizada />}
+      {texto && (
+        <Etiqueta x={centro.x} y={centro.y} zoom={zoom} texto={texto} centralizada={!noCanto} cantoSuperiorEsquerdo={noCanto} />
+      )}
     </Group>
   );
 });
@@ -197,11 +227,15 @@ export interface FormaDerivadaProps {
   derivado: GeometriaDerivada;
   zoom: number;
   interativo: boolean;
+  /** Mostrar o rótulo (rota sob o mouse ou elemento associado destacado). */
+  mostrarRotulo: boolean;
   aoPressionar(id: string, adicionar: boolean): void;
+  aoPassar(id: string, dentro: boolean): void;
 }
 
 /** Rota automática: linha tracejada fina na cor da disciplina (ou de pendente). */
-export const FormaDerivada = memo(function FormaDerivada({ derivado, zoom, interativo, aoPressionar }: FormaDerivadaProps) {
+export const FormaDerivada = memo(function FormaDerivada(props: FormaDerivadaProps) {
+  const { derivado, zoom, interativo, mostrarRotulo, aoPressionar, aoPassar } = props;
   if (derivado.pontos.length < 2) return null;
   const cor = derivado.status === 'pendente' ? COR_PENDENTE : COR_DISCIPLINA[derivado.disciplina];
   const meio = pontoMedio(derivado.pontos);
@@ -215,12 +249,13 @@ export const FormaDerivada = memo(function FormaDerivada({ derivado, zoom, inter
         strokeScaleEnabled={false}
         dash={TRACEJADO_DERIVADO}
         hitStrokeWidth={LARGURA_TOQUE_PX}
-        listening={interativo && alvo !== undefined}
+        onMouseEnter={() => aoPassar(derivado.id, true)}
+        onMouseLeave={() => aoPassar(derivado.id, false)}
         onMouseDown={(e) => {
-          if (alvo !== undefined && e.evt.button === 0) aoPressionar(alvo, e.evt.shiftKey);
+          if (interativo && alvo !== undefined && e.evt.button === 0) aoPressionar(alvo, e.evt.shiftKey);
         }}
       />
-      {derivado.rotulo && <Etiqueta x={meio.x} y={meio.y} zoom={zoom} texto={derivado.rotulo} centralizada />}
+      {mostrarRotulo && derivado.rotulo && <Etiqueta x={meio.x} y={meio.y} zoom={zoom} texto={derivado.rotulo} centralizada />}
     </Group>
   );
 });

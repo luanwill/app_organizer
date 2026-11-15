@@ -11,7 +11,7 @@ import {
   verticesDeSnap,
   vincularElemento,
 } from './elementos';
-import { numerosContagem, rotuloDoElemento } from './rotulos';
+import { ancoraRotuloAmbiente, numerosContagem, rotuloDerivadoVisivel, rotuloDoElemento, rotuloVisivel } from './rotulos';
 
 const base = { pagina: 2, vinculos: {}, origem: 'desenhado', status: 'confirmado' } as const;
 
@@ -196,5 +196,47 @@ describe('aparência', () => {
     expect(rotuloDoElemento(dist, { ...ctx, escala: null }).texto).toBeNull();
     expect(rotuloDoElemento(esq, ctx).texto).toBe('J1');
     expect(rotuloDoElemento(ambiente, ctx).texto).toBe('Sala');
+  });
+});
+
+describe('legibilidade dos rótulos', () => {
+  const ponto = (tipo: 'pilar' | 'quadro', id: string): Elemento =>
+    ({ ...base, id, disciplina: 'estrutura', tipo, props: tipo === 'pilar' ? { secaoB: 0.14, secaoH: 0.3 } : {}, geometria: { tipo: 'ponto', ponto: { x: 1, y: 1 } } }) as Elemento;
+
+  it('rótulo de ponto só aparece destacado (selecionado/hover); pilar e esquadria ficam sempre', () => {
+    expect(rotuloVisivel(ponto('quadro', 'q'), false)).toBe(false);
+    expect(rotuloVisivel(ponto('quadro', 'q'), true)).toBe(true);
+    expect(rotuloVisivel(ponto('pilar', 'p'), false)).toBe(true);
+    const contagem = novo({ modo: 'contagem' }, [{ x: 1, y: 1 }]) as Elemento;
+    expect(rotuloVisivel(contagem, false)).toBe(false);
+    expect(rotuloVisivel(ambiente, false)).toBe(true);
+    expect(rotuloVisivel(parede, false)).toBe(true);
+  });
+
+  it('rótulo de rota derivada só no hover da rota ou no hover/seleção do elemento associado', () => {
+    const rota = { id: 'r1', elementoId: 'tom1' };
+    expect(rotuloDerivadoVisivel(rota, null, [])).toBe(false);
+    expect(rotuloDerivadoVisivel(rota, 'outro', ['outro'])).toBe(false);
+    expect(rotuloDerivadoVisivel(rota, 'r1', [])).toBe(true);
+    expect(rotuloDerivadoVisivel(rota, 'tom1', [])).toBe(true);
+    expect(rotuloDerivadoVisivel(rota, null, ['x', 'tom1'])).toBe(true);
+    expect(rotuloDerivadoVisivel({ id: 'r2' }, null, ['tom1'])).toBe(false);
+  });
+
+  it('nome do ambiente fica no canto superior esquerdo interno, com margem', () => {
+    const pts = ambiente.geometria.tipo === 'poligono' ? ambiente.geometria.pontos : [];
+    expect(ancoraRotuloAmbiente(pts, 4)).toEqual({ x: 4, y: 4 });
+    // a ordem dos vértices não importa
+    expect(ancoraRotuloAmbiente([pts[2], pts[3], pts[0], pts[1]], 4)).toEqual({ x: 4, y: 4 });
+    // em L (sem o quadrante superior esquerdo): usa o vértice mais próximo daquele canto
+    const emL = [{ x: 100, y: 0 }, { x: 200, y: 0 }, { x: 200, y: 200 }, { x: 0, y: 200 }, { x: 0, y: 100 }, { x: 100, y: 100 }];
+    expect(ancoraRotuloAmbiente(emL, 4)).toEqual({ x: 104, y: 4 });
+  });
+
+  it('se o canto com margem cair fora do polígono, usa o centroide', () => {
+    const triangulo = [{ x: 0, y: 0 }, { x: 10, y: 100 }, { x: -10, y: 100 }];
+    const a = ancoraRotuloAmbiente(triangulo, 4);
+    expect(a.x).toBeCloseTo(0, 9);
+    expect(a.y).toBeCloseTo(200 / 3, 9);
   });
 });

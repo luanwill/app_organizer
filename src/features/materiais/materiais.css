@@ -1,0 +1,15 @@
+/* Aba Materiais: tabela compacta de composições (coluna de 340 px). */
+.mat-selo { position: sticky; top: -10px; z-index: 1; margin-top: 0; font-size: 12px; }
+.mat-nota { font-size: 12px; margin: 4px 0 8px; }
+.mat-tabela { table-layout: fixed; }
+.mat-tabela th, .mat-tabela td { padding: 2px 2px; font-size: 12px; border-bottom: 0; }
+.mat-tabela input { width: 100%; padding: 2px 4px; }
+.mat-tabela .mat-un { width: 40px; }
+.mat-tabela .mat-num { width: 58px; }
+.mat-tabela .mat-acao { width: 24px; }
+.mat-tabela td.mat-num input { text-align: right; }
+.mat-servico td { padding-top: 8px; border-top: 1px solid var(--borda); }
+.mat-servico .linha { flex-wrap: nowrap; }
+.mat-servico strong { flex: 1; min-width: 0; }
+.mat-servico input { width: 84px; flex: none; }
+.mat-tabela button { padding: 0 6px; font-size: 12px; }

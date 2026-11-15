@@ -39,6 +39,10 @@ export const RAIO_VERTICE_PREVIA_PX = 3;
 export const TAMANHO_INDICADOR_SNAP_PX = 12;
 export const TAMANHO_FONTE_PX = 11;
 export const PADDING_ETIQUETA_PX = 2;
+/** Fonte do rótulo sempre visível de elementos de ponto (ex.: P1 do pilar). */
+export const TAMANHO_FONTE_PEQUENA_PX = 9;
+/** Margem (px de tela) do nome do ambiente em relação ao canto superior esquerdo interno. */
+export const MARGEM_ROTULO_AMBIENTE_PX = 6;
 export const DESLOCAMENTO_ETIQUETA_PX = 6;
 export const LARGURA_EXTRA_SELECAO_PX = 5;
 export const LARGURA_TOQUE_PX = 12;
@@ -95,6 +99,12 @@ export const ESTILO_TIPO: Record<TipoElemento, EstiloTipo> = {
   'caixa-inspecao': { larguraPx: 1.5, preenchimento: 0, simbolo: 'quadrado', tamanhoPx: 14, simboloCheio: false, letra: 'C' },
   tubo: { larguraPx: 2, preenchimento: 0, simbolo: 'losango', tamanhoPx: 8, simboloCheio: true, letra: '' },
 };
+
+/**
+ * Elementos de ponto cujo rótulo de texto fica sempre visível (em fonte pequena). Nos demais, o
+ * texto só aparece com o elemento selecionado ou sob o mouse — evita rótulos sobrepostos.
+ */
+export const TIPOS_PONTO_COM_ROTULO_FIXO: readonly TipoElemento[] = ['pilar', 'esquadria'];
 
 /** Letra do símbolo de ponto elétrico, por tipo de ponto. */
 export const LETRA_PONTO_ELETRICO = { luz: 'L', tug: 'T', tue: 'E', interruptor: 'I' } as const;
