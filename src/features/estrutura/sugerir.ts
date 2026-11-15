@@ -77,8 +77,8 @@ export function sugerirEstrutura(projeto: Projeto, pagina: number): Elemento[] {
     let numero = ultimoNumero(restantes, tipo);
     return () => `${PREFIXO_ROTULO[tipo]}${++numero}`;
   };
-  const mantidos = <K extends TipoElemento>(tipo: K): ElementoDe<K>[] =>
-    daPagina.filter((e): e is ElementoDe<K> => e.tipo === tipo);
+  const mantidos = <K extends TipoElemento>(tipo: K): Extract<Elemento, { tipo: K }>[] =>
+    daPagina.filter((e): e is Extract<Elemento, { tipo: K }> => e.tipo === tipo);
 
   // ---- grafo das paredes
   const paredes = mantidos('parede').flatMap((e) =>

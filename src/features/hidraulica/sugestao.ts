@@ -55,7 +55,9 @@ export function posicoesNoPerimetro(poligono: Ponto[], quantidade: number, recuo
         restante -= comprimento;
         continue;
       }
-      const t = restante / comprimento;
+      // afasta dos cantos: o ponto fica a pelo menos `recuo` das duas paredes do canto
+      const aoLongo = comprimento > 2 * recuo ? Math.min(Math.max(restante, recuo), comprimento - recuo) : comprimento / 2;
+      const t = aoLongo / comprimento;
       const base = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
       const normal = { x: -(b.y - a.y) / comprimento, y: (b.x - a.x) / comprimento };
       const candidatos = [1, -1].map((s) => ({ x: base.x + s * normal.x * recuo, y: base.y + s * normal.y * recuo }));

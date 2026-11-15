@@ -95,7 +95,7 @@ function quadro(posM: Ponto): Elemento {
   };
 }
 
-function porta(id: string, posM: Ponto): Elemento {
+function porta(id: string, posM: Ponto, tipoEsquadriaId = 'P1'): Elemento {
   return {
     id,
     tipo: 'esquadria',
@@ -105,7 +105,7 @@ function porta(id: string, posM: Ponto): Elemento {
     vinculos: {},
     origem: 'desenhado',
     status: 'confirmado',
-    props: { tipoEsquadriaId: 'P1' },
+    props: { tipoEsquadriaId },
   };
 }
 
@@ -244,7 +244,7 @@ describe('sugestão automática', () => {
       { id: 'P1', codigo: 'P1', categoria: 'porta', largura: 0.8, altura: 2.1, peitoril: 0, quantidade: 2 },
       { id: 'J1', codigo: 'J1', categoria: 'janela', largura: 1.2, altura: 1.2, peitoril: 1, quantidade: 1 },
     ];
-    const janela: Elemento = { ...porta('janela', { x: 3, y: 2 }), props: { tipoEsquadriaId: 'J1' } };
+    const janela = porta('janela', { x: 3, y: 2 }, 'J1');
     projeto.elementos = [
       ambiente('sala', 'sala', 3, 4),
       porta('porta-a', { x: 1.5, y: -0.07 }), // sobre o eixo da parede (7 cm fora do polígono)
