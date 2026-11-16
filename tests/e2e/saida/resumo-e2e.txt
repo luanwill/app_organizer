@@ -91,7 +91,7 @@ PASSOU | CRITÉRIO 9: Excel abre sem erro (relido com a lib xlsx) | 124953 bytes
 PASSOU | CRITÉRIO 9: 9 abas na ordem | Resumo, Ambientes, Esquadrias, Paredes, Acabamentos, Estrutura, Elétrica, Hidráulica, Materiais
 PASSOU | CRITÉRIO 9: Resumo tem exatamente as mesmas linhas do painel (DOM da árvore) | painel 207, excel 207; só painel: ; só excel: 
 PASSOU | CRITÉRIO 9: totais do Resumo batem com o painel (confirmado e pendente, a 2 casas)
-PASSOU | Resumo: cabeçalho (nome, pé-direito, pessoas) | {"Levantamento":"Caso de exemplo QA","Data":"15/11/2026","Arquivo da planta":"planta-caso.pdf","Pé-direito (m)":2.8,"Nº de pessoas":4}
+PASSOU | Resumo: cabeçalho (nome, pé-direito, pessoas) | {"Levantamento":"Caso de exemplo QA","Data":"16/11/2026","Arquivo da planta":"planta-caso.pdf","Pé-direito (m)":2.8,"Nº de pessoas":4}
 INFO   | formato da 1ª célula de quantidade: t=n z=undefined w=12.00
 PASSOU | JSON exportado: envelope com o projeto completo | 90 elementos
 PASSOU | "Novo levantamento" zera elementos, planta e dados essenciais | {"n":0,"pdf":0,"gerais":{"peDireito":null,"espessuraParede":null,"numeroPessoas":null}}
@@ -123,13 +123,13 @@ PASSOU | comprimento total das paredes desenhadas ≈ 35,60 m (snap nos vértice
 PASSOU | snap a vértice: paredes consecutivas compartilham exatamente o mesmo ponto
 PASSOU | 4 ambientes desenhados (retângulo, 2 cliques) | Ambiente 1, Ambiente 2, Ambiente 3, Ambiente 4
 INFO   | painel Arquitetura após desenhar: Arquitetura | Estrutura | Elétrica | Hidráulica | Materiais | Importar | DESENHAR | Ambiente (polígono) | Ambiente (retângulo) | Parede | ESQUADRIAS | Nenhum tipo cadastrado. Adicione portas e janelas para posicioná-las nas paredes. | + Porta | + Janela | AMBIENTES | Ambiente 1 | 12,03 m² · 14,02 m | Ambiente 2 | 14,09 m² · 15,05 m | Ambiente 3 | 10,03 m² · 13,02 m | Ambiente 4 | 10,23 m² · 12,79 m
-PASSOU | clicar no ambiente na lista do painel seleciona-o | ["c4aa2c72-59b6-4cf4-9f1b-ba394a795781"]
+PASSOU | clicar no ambiente na lista do painel seleciona-o | ["db3134a7-3ab0-4847-b4d1-6f1c14752f45"]
 PASSOU | trocar o tipo para "banheiro" no painel marca área molhada automaticamente | {"nome":"Ambiente 3","tipoAmbiente":"banheiro","areaMolhada":true,"coberto":true}
 PASSOU | Sala desenhada com o mouse (snap nos vértices das paredes): 12 m² / 14 m ±1% | {"Sala — área":12.03,"Sala — perímetro":14.02,"Cozinha — área":14.09,"Cozinha — perímetro":15.05,"Banheiro — área":10.03,"Banheiro — perímetro":13.02,"Quarto — área":10.23,"Quarto — perímetro":12.79}
 INFO   | Quarto (cliques a 6–10 cm dos vértices das paredes): o snap puxou os cantos para os vértices → 10.23 m² / 12.79 m (esperado sem snap: 9,15 / 12,10)
 PASSOU | cadastro: "+ Porta" cria P1 0,80 × 2,10 e "+ Janela" cria J1 1,20 × 1,00 | [["P1",0.8,2.1],["J1",1.2,1]]
 PASSOU | esquadrias posicionadas com clique na parede (clique longe de parede não cria) | 3 esquadrias
-PASSOU | esquadria clicada a 20 cm do eixo é projetada no eixo da parede e vinculada a ela | {"p":{"x":99.75544404145077,"y":49.50045475712437},"v":{"paredeId":"cd95b6ed-6ff2-420a-88ad-d5d952c786a0","ambienteId":"4a2eefbb-95dd-4f69-9723-e211d6a659f0"}}
+PASSOU | esquadria clicada a 20 cm do eixo é projetada no eixo da parede e vinculada a ela | {"p":{"x":99.75544404145077,"y":49.50045475712437},"v":{"paredeId":"954833c7-a8f2-45db-934a-0e2246500bb9","ambienteId":"42809418-e915-417e-8c59-fb5f985cb106"}}
 PASSOU | cadastro mostra a divergência "posicionadas 2 de 1" | posicionadas 2 de 1 | posicionadas 1 de 1
 PASSOU | quadro, reservatório e caixa de inspeção posicionados com clique (confirmados) | [["quadro","confirmado","em-ambiente"],["reservatorio","confirmado","em-ambiente"],["caixa-inspecao","confirmado","fora"]]
 PASSOU | ponto dentro de ambiente ganha vinculos.ambienteId; fora, não | [["quadro","confirmado","em-ambiente"],["reservatorio","confirmado","em-ambiente"],["caixa-inspecao","confirmado","fora"]]

@@ -38,7 +38,7 @@
     {
       "ok": true,
       "descricao": "clicar no ambiente na lista do painel seleciona-o",
-      "detalhe": "[\"c4aa2c72-59b6-4cf4-9f1b-ba394a795781\"]"
+      "detalhe": "[\"db3134a7-3ab0-4847-b4d1-6f1c14752f45\"]"
     },
     {
       "ok": true,
@@ -63,7 +63,7 @@
     {
       "ok": true,
       "descricao": "esquadria clicada a 20 cm do eixo é projetada no eixo da parede e vinculada a ela",
-      "detalhe": "{\"p\":{\"x\":99.75544404145077,\"y\":49.50045475712437},\"v\":{\"paredeId\":\"cd95b6ed-6ff2-420a-88ad-d5d952c786a0\",\"ambienteId\":\"4a2eefbb-95dd-4f69-9723-e211d6a659f0\"}}"
+      "detalhe": "{\"p\":{\"x\":99.75544404145077,\"y\":49.50045475712437},\"v\":{\"paredeId\":\"954833c7-a8f2-45db-934a-0e2246500bb9\",\"ambienteId\":\"42809418-e915-417e-8c59-fb5f985cb106\"}}"
     },
     {
       "ok": true,
@@ -144,7 +144,7 @@
   "registro": {
     "erros": [],
     "avisos": [
-      "[.WebGL-0x39ec008fec00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      "[.WebGL-0x3bcc001aa200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
     ],
     "externas": []
   }

@@ -1,13 +1,13 @@
 {
   "formato": "bim-leve",
   "versao": 1,
-  "exportadoEm": "2026-11-15T23:25:02.490Z",
+  "exportadoEm": "2026-11-16T09:28:01.519Z",
   "projeto": {
-    "id": "824442d8-c2dd-4ec5-a330-81a840a35543",
+    "id": "3f3dcc76-fb09-40ff-9c6c-3c7156905b12",
     "nome": "Caso de exemplo QA",
     "versao": 1,
-    "criadoEm": "2026-11-15T23:24:55.708Z",
-    "atualizadoEm": "2026-11-15T23:25:00.155Z",
+    "criadoEm": "2026-11-16T09:27:54.294Z",
+    "atualizadoEm": "2026-11-16T09:27:59.007Z",
     "arquivoNome": "planta-caso.pdf",
     "totalPaginas": 1,
     "paginas": {
