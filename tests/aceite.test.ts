@@ -160,7 +160,7 @@ describe('3. Planta em "L" (6 cantos) + parede interna em T: pilares', () => {
       expect(c, v.rotulo).toBeLessThanOrEqual(4 + 1e-9);
     }
   });
-  it('vão de exatamente 4,00 m não ganha intermediário; 4,01 m ganha', () => {
+  it('vão de exatamente 4,00 m não ganha intermediário; acima da tolerância de 1% (4,05 m) ganha', () => {
     const caso = (lado: number) => {
       const p = casoBase();
       p.elementos = [
@@ -172,7 +172,8 @@ describe('3. Planta em "L" (6 cantos) + parede interna em T: pilares', () => {
       return pilaresDe(comSugestoes(p, 'estrutura')).length;
     };
     expect(caso(4)).toBe(4);
-    expect(caso(4.01)).toBe(6);
+    expect(caso(4.01)).toBe(4); // erro de calibração: dentro da tolerância
+    expect(caso(4.05)).toBe(6);
   });
   it('todas as sugestões nascem pendentes e "sugerido-auto"', () => {
     const sug = projeto.elementos.filter((e) => e.disciplina === 'estrutura');

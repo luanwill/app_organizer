@@ -22,8 +22,14 @@ export const TOLERANCIA_ORTOGONAL_M = 0.01;
 /** Coordenadas da grade de união mais próximas que isto (unidades do PDF) são a mesma coordenada. */
 export const EPSILON_GRADE = 1e-6;
 
-/** Folga relativa na comparação vão × vão máximo (vão EXATAMENTE igual ao máximo não recebe pilar). */
+/** Folga numérica na comparação vão × vão máximo (vão EXATAMENTE igual ao máximo não recebe pilar). */
 export const EPSILON_VAO = 1e-9;
+
+/**
+ * Tolerância relativa do vão máximo (1%): absorve o erro de calibração por clique na planta.
+ * Um vão só recebe pilar intermediário quando passa de vão máximo × (1 + tolerância).
+ */
+export const TOLERANCIA_VAO_RELATIVA = 0.01;
 
 // ---------------------------------------------------------------- pilares
 

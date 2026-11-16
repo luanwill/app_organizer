@@ -5,17 +5,20 @@
 import type { GrafoParedes, Ponto } from '@/core/model';
 import { distancia } from '@/core/calc';
 import { acumulados, estacaNaCadeia, pontoNaEstaca, type Cadeia } from './cadeias';
-import { EPSILON_VAO, FORCA_NO, type NoTipoPilar } from './config';
+import { EPSILON_VAO, FORCA_NO, TOLERANCIA_VAO_RELATIVA, type NoTipoPilar } from './config';
 
 export interface PilarSugerido {
   ponto: Ponto;
   noTipo: NoTipoPilar;
 }
 
-/** Nº de pilares intermediários de um vão (m): ceil(vão / máximo) − 1; vão igual ao máximo → 0. */
+/**
+ * Nº de pilares intermediários de um vão (m): ceil(vão / máximo) − 1; vão igual ao máximo → 0.
+ * O máximo é comparado com a tolerância de calibração (TOLERANCIA_VAO_RELATIVA).
+ */
 export function pilaresIntermediarios(vao: number, vaoMaximo: number): number {
   if (!(vaoMaximo > 0) || !(vao > 0)) return 0;
-  return Math.max(0, Math.ceil(vao / vaoMaximo - EPSILON_VAO) - 1);
+  return Math.max(0, Math.ceil(vao / (vaoMaximo * (1 + TOLERANCIA_VAO_RELATIVA)) - EPSILON_VAO) - 1);
 }
 
 /**

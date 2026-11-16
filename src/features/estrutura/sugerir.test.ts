@@ -19,7 +19,8 @@ describe('pilares automáticos', () => {
 
   it('vão exatamente igual ao máximo não recebe intermediário', () => {
     expect(pilaresIntermediarios(4, 4)).toBe(0);
-    expect(pilaresIntermediarios(4.01, 4)).toBe(1);
+    expect(pilaresIntermediarios(4.01, 4)).toBe(0); // dentro da tolerância de calibração (1%)
+    expect(pilaresIntermediarios(4.05, 4)).toBe(1);
     expect(pilaresIntermediarios(8, 4)).toBe(1);
     expect(pilaresIntermediarios(9, 4)).toBe(2);
     expect(pilaresIntermediarios(3, 4)).toBe(0);
