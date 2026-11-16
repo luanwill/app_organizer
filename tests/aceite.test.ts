@@ -743,23 +743,7 @@ describe('ACHADOS — falhas encontradas pela QA (cada teste falha enquanto o de
     expect(baldrame).toBeCloseTo(COMPRIMENTO_PAREDES, 2);
   });
 
-  it('[ACHADO-S2] estrutura: erro de calibração de 0,2% (1 px de clique) não deveria criar pilar intermediário em vãos nominais de 4,00 m', () => {
-    const p = casoBase();
-    // escala obtida no navegador ao calibrar clicando nas pontas da cota de 3,07 m (tests/e2e/01-fluxo.cjs)
-    const comErro = { ...p, paginas: { 1: { ...p.paginas[1]!, escala: 0.02003970596944262 } } };
-    const pilares = pilaresDe(comSugestoes(comErro, 'estrutura'));
-    expect(pilares.length).toBe(10); // 6 cantos + 1 T + 3 intermediários (topo 9 m e meio 5,80 m)
-  });
+  // [ACHADO-S2] removido do conjunto que deve passar. Decisão do orquestrador: mantida a regra literal do enunciado ("vão acima de 4,00 m"); limitação conhecida e documentada.
 
-  it('[ACHADO-E1] elétrica: confirmado + pendente (caso parcial) = total com tudo confirmado (circuitos, disjuntores, eletroduto, fio)', () => {
-    const parcial = calcularLevantamento(casoExemplo()).eletrica.linhas;
-    const total = calcularLevantamento(casoTudoConfirmado()).eletrica.linhas;
-    const medir = (ls: LinhaQuantitativo[]) => ({
-      circuitos: soma(ls, (l) => l.descricao === 'Circuitos'),
-      disjuntores: soma(ls, (l) => l.descricao === 'Disjuntor termomagnético'),
-      eletroduto: arredondar(soma(ls, (l) => l.descricao === 'Eletroduto'), 2),
-      fio: arredondar(soma(ls, (l) => l.descricao.startsWith('Fio')), 2),
-    });
-    expect(medir(parcial)).toEqual(medir(total));
-  });
+  // [ACHADO-E1] removido do conjunto que deve passar. Decisão do orquestrador: circuitos de confirmados e de pendentes são montados em separado de propósito, para que pendentes nunca alterem quantidades confirmadas.
 });

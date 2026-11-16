@@ -438,7 +438,10 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
               aoPassar={aoPassar}
             />
           ))}
-          {emOrdem.filter((el) => el.geometria.tipo !== 'poligono').map(desenharElemento)}
+          {/* linhas, depois pontos; fundação embaixo do pilar, para o pilar receber o clique */}
+          {emOrdem.filter((el) => el.geometria.tipo === 'polilinha').map(desenharElemento)}
+          {emOrdem.filter((el) => el.geometria.tipo === 'ponto' && el.tipo === 'fundacao').map(desenharElemento)}
+          {emOrdem.filter((el) => el.geometria.tipo === 'ponto' && el.tipo !== 'fundacao').map(desenharElemento)}
         </Layer>
         <Layer listening={selecionando && !espaco}>
           {selecionados.flatMap((el) =>

@@ -97,12 +97,12 @@ export function acoPecaLinear(
     {
       chave: 'aco-longitudinal',
       kg: d.barrasLongitudinais * comprimento * pesoLinearAco(d.bitolaLongitudinalMm),
-      detalhe: `Ø${d.bitolaLongitudinalMm} mm`,
+      detalhe: `Ø${String(d.bitolaLongitudinalMm).replace('.', ',')} mm`,
     },
     {
       chave: 'aco-estribo',
       kg: estribos * comprimentoEstribo(secaoB, secaoH, estrutura.cobrimento) * pesoLinearAco(d.bitolaEstriboMm),
-      detalhe: `Ø${d.bitolaEstriboMm} mm`,
+      detalhe: `Ø${String(d.bitolaEstriboMm).replace('.', ',')} mm`,
     },
   ];
 }

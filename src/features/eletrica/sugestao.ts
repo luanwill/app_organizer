@@ -231,30 +231,31 @@ export function sugerirAmbiente(projeto: Projeto, ambiente: Ambiente, escala: nu
 
 /**
  * Sugestões da página (todas 'sugerido-auto' / 'pendente'). Página sem escala → [].
- * Ambientes que já possuem pontos elétricos confirmados são respeitados (nada é sugerido para eles).
+ * Sugestões já aceitas não são repetidas (o que falta é sugerido de novo); ambientes com pontos
+ * confirmados postos à mão não recebem sugestão.
  */
 export function sugerirEletrica(projeto: Projeto, pagina: number): Elemento[] {
   const escala = escalaDaPagina(projeto, pagina);
   if (escala === null) return [];
-  const comConfirmados = new Set<string>();
-  // Ids que continuarão no projeto depois de store.substituirSugestoes (não podem ser repetidos).
+  // Ambientes com pontos confirmados que NÃO vieram de sugestão (postos à mão) são respeitados por inteiro.
+  const comManuais = new Set<string>();
+  // Ids que continuarão no projeto depois de store.substituirSugestoes: sugestões já aceitas não são repetidas.
   const idsMantidos = new Set<string>();
   for (const el of projeto.elementos) {
     const seraSubstituido =
       el.disciplina === 'eletrica' && el.origem === 'sugerido-auto' && el.status === 'pendente' && el.pagina === pagina;
     if (!seraSubstituido) idsMantidos.add(el.id);
-    if (ehPontoEletrico(el) && el.status === 'confirmado' && el.vinculos.ambienteId) {
-      comConfirmados.add(el.vinculos.ambienteId);
+    if (ehPontoEletrico(el) && el.status === 'confirmado' && el.origem !== 'sugerido-auto' && el.vinculos.ambienteId) {
+      comManuais.add(el.vinculos.ambienteId);
     }
   }
   const sugestoes: Elemento[] = [];
   for (const ambiente of projeto.elementos) {
-    if (!ehAmbiente(ambiente) || ambiente.pagina !== pagina || comConfirmados.has(ambiente.id)) continue;
+    if (!ehAmbiente(ambiente) || ambiente.pagina !== pagina || comManuais.has(ambiente.id)) continue;
     for (const sugestao of sugerirAmbiente(projeto, ambiente, escala)) {
-      let id = sugestao.id;
-      for (let n = 2; idsMantidos.has(id); n++) id = `${sugestao.id}~${n}`;
-      idsMantidos.add(id);
-      sugestoes.push({ ...sugestao, id });
+      if (idsMantidos.has(sugestao.id)) continue; // já aceita: fica como está
+      idsMantidos.add(sugestao.id);
+      sugestoes.push(sugestao);
     }
   }
   return sugestoes;

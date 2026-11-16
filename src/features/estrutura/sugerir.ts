@@ -11,6 +11,7 @@ import {
   escalaValida,
   paraUnidades,
   retanguloParaPoligono,
+  projetarNaPolilinha,
 } from '@/core/calc';
 import { montarCadeias } from './cadeias';
 import {
@@ -121,10 +122,13 @@ export function sugerirEstrutura(projeto: Projeto, pagina: number): Elemento[] {
   const sugerirVigas = (tipo: 'viga-baldrame' | 'viga-superior', secao: { secaoB: number; secaoH: number }): void => {
     const existentes = mantidos(tipo).flatMap((e) => (e.geometria.tipo === 'polilinha' ? [e.geometria.pontos] : []));
     const perto = (a: Ponto, b: Ponto | undefined): boolean => b !== undefined && distancia(a, b) <= tolerancia;
+    // Já existe se as extremidades coincidem ou se o meio do trecho cai sobre uma viga mantida (sobreposição).
     const jaExiste = ([a, b]: [Ponto, Ponto]): boolean =>
       existentes.some((v) => {
         const [c, d] = [v[0], v[v.length - 1]];
-        return (perto(a, c) && perto(b, d)) || (perto(a, d) && perto(b, c));
+        if ((perto(a, c) && perto(b, d)) || (perto(a, d) && perto(b, c))) return true;
+        const meio = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+        return projetarNaPolilinha(meio, v).distancia <= tolerancia;
       });
     const proximo = numerador(tipo);
     for (const trecho of trechos) {

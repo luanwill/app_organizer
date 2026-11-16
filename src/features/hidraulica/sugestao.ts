@@ -101,13 +101,17 @@ export function sugerirPontosDoAmbiente(ambiente: Ambiente, escala: number): Ele
 export function sugerirHidraulica(projeto: Projeto, pagina: number): Elemento[] {
   const escala = projeto.paginas[pagina]?.escala;
   if (!escalaValida(escala)) return [];
-  const comConfirmados = new Set<string>();
+  // Ambientes com pontos confirmados postos à mão são respeitados por inteiro;
+  // sugestões já aceitas (mesmo id) não são repetidas — só o que falta é sugerido de novo.
+  const comManuais = new Set<string>();
+  const idsConfirmados = new Set<string>();
   for (const e of projeto.elementos) {
-    if (e.tipo === 'ponto-hidraulico' && e.status === 'confirmado' && e.vinculos.ambienteId) {
-      comConfirmados.add(e.vinculos.ambienteId);
-    }
+    if (e.tipo !== 'ponto-hidraulico' || e.status !== 'confirmado') continue;
+    idsConfirmados.add(e.id);
+    if (e.origem !== 'sugerido-auto' && e.vinculos.ambienteId) comManuais.add(e.vinculos.ambienteId);
   }
   return ambientesDaPagina(projeto, pagina)
-    .filter((a) => !comConfirmados.has(a.id))
-    .flatMap((a) => sugerirPontosDoAmbiente(a, escala));
+    .filter((a) => !comManuais.has(a.id))
+    .flatMap((a) => sugerirPontosDoAmbiente(a, escala))
+    .filter((s) => !idsConfirmados.has(s.id));
 }

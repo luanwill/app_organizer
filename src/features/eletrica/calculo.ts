@@ -9,7 +9,7 @@ import type {
   ResultadoDisciplina,
   Status,
 } from '@/core/model';
-import { comprimentoPolilinha, distancia, paraMetros, rotaOrtogonal } from '@/core/calc';
+import { comprimentoPolilinha, distancia, formatarNumero, paraMetros, rotaOrtogonal } from '@/core/calc';
 import {
   ALTURA_QUADRO_M,
   CAIXA_POR_TIPO,
@@ -254,7 +254,7 @@ export function calcularEletrica(projeto: Projeto): ResultadoDisciplina {
     linhas.somar(
       `eletroduto:${diametroMm}`,
       status,
-      { grupo: GRUPOS.eletrodutos, descricao: 'Eletroduto', unidade: 'm', ehMaterial: true, detalhe: `Ø${diametroMm} mm` },
+      { grupo: GRUPOS.eletrodutos, descricao: 'Eletroduto', unidade: 'm', ehMaterial: true, detalhe: `Ø${formatarNumero(diametroMm, Number.isInteger(diametroMm) ? 0 : 1)} mm` },
       comprimentoM,
       ids,
     );
@@ -262,7 +262,7 @@ export function calcularEletrica(projeto: Projeto): ResultadoDisciplina {
     linhas.somar(
       `fio:${secaoMm2}`,
       status,
-      { grupo: GRUPOS.eletrodutos, descricao: 'Fio / cabo de cobre', unidade: 'm', ehMaterial: true, detalhe: `${secaoMm2} mm²` },
+      { grupo: GRUPOS.eletrodutos, descricao: 'Fio / cabo de cobre', unidade: 'm', ehMaterial: true, detalhe: `${formatarNumero(secaoMm2, Number.isInteger(secaoMm2) ? 0 : 1)} mm²` },
       comprimentoM * condutores,
       ids,
     );

@@ -296,11 +296,11 @@ describe('sugestão automática', () => {
     projeto.elementos = [ambiente('sala', 'sala', 3, 4)];
     const primeira = sugerir(projeto);
     expect(sugerir(projeto)).toEqual(primeira);
-    // um ponto aceito que foi arrastado para fora do ambiente mantém o id antigo
+    // uma sugestão já aceita (mesmo id) não é repetida; o restante do ambiente é sugerido de novo
     const aceito = { ...primeira[0]!, status: 'confirmado' as const, vinculos: {} };
     projeto.elementos = [...projeto.elementos, aceito, ...primeira.slice(1)];
     const segunda = sugerir(projeto);
-    expect(segunda).toHaveLength(primeira.length);
+    expect(segunda).toHaveLength(primeira.length - 1);
     expect(segunda.some((s) => s.id === aceito.id)).toBe(false);
   });
 });
@@ -378,7 +378,7 @@ describe('quantitativos', () => {
     expect(qtd(projeto, 'eletrica:fio:1.5:confirmado')).toBeCloseTo(3.2 * 2, 9);
     const eletroduto = linha(projeto, 'eletrica:eletroduto:25:confirmado');
     expect(eletroduto).toMatchObject({ unidade: 'm', ehMaterial: true, detalhe: 'Ø25 mm', grupo: 'Eletrodutos e fios' });
-    expect(linha(projeto, 'eletrica:fio:2.5:confirmado')?.detalhe).toBe('2.5 mm²');
+    expect(linha(projeto, 'eletrica:fio:2.5:confirmado')?.detalhe).toBe('2,5 mm²');
     expect(ALTURA_QUADRO_M).toBe(1.5);
   });
 

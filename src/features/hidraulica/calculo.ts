@@ -99,7 +99,7 @@ export function diametroDoPonto(ponto: PontoH, sistema: SistemaRede, params: Par
   return ponto.props.diametroEsgoto ?? params.diametroEsgotoMm[ponto.props.aparelho];
 }
 
-const detalheDiametro = (d: number): string => `Ø${d} mm`;
+const detalheDiametro = (d: number): string => `Ø${String(d).replace('.', ',')} mm`;
 
 function posicao(el: PontoH | Terminal): Ponto | null {
   return el.geometria.tipo === 'ponto' ? el.geometria.ponto : null;
