@@ -72,3 +72,14 @@ h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: v
 .acoes-disciplina { margin: 4px 0; }
 .acoes-disciplina button, .aviso-pendentes button { font-size: 12px; padding: 2px 8px; }
 .selo-manual { color: var(--alerta); }
+
+/* ---- telas estreitas (celular/tablet): planta em cima, colunas empilhadas abaixo ---- */
+@media (max-width: 900px) {
+  html, body, #root { height: auto; min-height: 100%; }
+  .app { display: flex; flex-direction: column; height: auto; }
+  .topo { flex-wrap: wrap; position: sticky; top: 0; z-index: 5; }
+  .nome-projeto { width: 100%; order: 9; }
+  .centro { order: 1; height: 70vh; min-height: 360px; border-bottom: 1px solid var(--borda); }
+  .coluna.esquerda { order: 2; border-right: 0; border-bottom: 1px solid var(--borda); overflow: visible; }
+  .coluna.direita { order: 3; border-left: 0; overflow: visible; }
+}
