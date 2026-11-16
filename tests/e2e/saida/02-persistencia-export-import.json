@@ -1,0 +1,174 @@
+{
+  "itens": [
+    {
+      "ok": true,
+      "descricao": "caso de exemplo montado no navegador",
+      "detalhe": "90 elementos, PDF 9241 bytes, escala 0.02"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 10: nome do projeto persiste",
+      "detalhe": "Caso de exemplo QA"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 10: elementos (tipos e status pendente/confirmado) persistem",
+      "detalhe": "{\"parede/confirmado\":7,\"ambiente/confirmado\":4,\"esquadria/confirmado\":5,\"quadro/confirmado\":1,\"reservatorio/confirmado\":1,\"caixa-inspecao/confirmado\":1,\"pilar/confirmado\":10,\"viga-baldrame/confirmado\":11,\"viga-superior/pendente\":11,\"laje/pendente\":4,\"fundacao/pendente\":10,\"ponto-eletrico/confirmado\":6,\"ponto-eletrico/pendente\":13,\"ponto-hidraulico/pendente\":2,\"ponto-hidraulico/confirmado\":4}"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 10: escala persiste",
+      "detalhe": "0.02"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 10: parâmetros (pé-direito, espessura, pessoas) persistem",
+      "detalhe": "{\"peDireito\":2.8,\"espessuraParede\":0.15,\"numeroPessoas\":4}"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 10: cadastro de esquadrias persiste",
+      "detalhe": "[\"P1\",\"J1\",\"J2\"]"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 10: planta (bytes do PDF, nome, páginas) persiste",
+      "detalhe": "planta-caso.pdf, 9241 bytes"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 10: camadas ligadas/desligadas persistem",
+      "detalhe": "{\"arquitetura\":true,\"estrutura\":true,\"eletrica\":true,\"hidraulica\":false,\"materiais\":true}"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 10: levantamento recalculado idêntico após o reload",
+      "detalhe": "364 linhas, 81 materiais"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 10: a planta é redesenhada após o reload (pixels escuros no canvas do PDF)",
+      "detalhe": "11406 px"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 10: árvore (painel) idêntica após o reload",
+      "detalhe": "207 linhas"
+    },
+    {
+      "ok": true,
+      "descricao": "após o reload o histórico de desfazer começa vazio",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "nova aba do mesmo navegador carrega o mesmo levantamento",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "download do Excel",
+      "detalhe": "caso-de-exemplo-qa.xlsx"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 9: Excel abre sem erro (relido com a lib xlsx)",
+      "detalhe": "124953 bytes"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 9: 9 abas na ordem",
+      "detalhe": "Resumo, Ambientes, Esquadrias, Paredes, Acabamentos, Estrutura, Elétrica, Hidráulica, Materiais"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 9: Resumo tem exatamente as mesmas linhas do painel (DOM da árvore)",
+      "detalhe": "painel 207, excel 207; só painel: ; só excel: "
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 9: totais do Resumo batem com o painel (confirmado e pendente, a 2 casas)",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "Resumo: cabeçalho (nome, pé-direito, pessoas)",
+      "detalhe": "{\"Levantamento\":\"Caso de exemplo QA\",\"Data\":\"15/11/2026\",\"Arquivo da planta\":\"planta-caso.pdf\",\"Pé-direito (m)\":2.8,\"Nº de pessoas\":4}"
+    },
+    {
+      "ok": true,
+      "descricao": "JSON exportado: envelope com o projeto completo",
+      "detalhe": "90 elementos"
+    },
+    {
+      "ok": true,
+      "descricao": "\"Novo levantamento\" zera elementos, planta e dados essenciais",
+      "detalhe": "{\"n\":0,\"pdf\":0,\"gerais\":{\"peDireito\":null,\"espessuraParede\":null,\"numeroPessoas\":null}}"
+    },
+    {
+      "ok": true,
+      "descricao": "JSON do próprio app é reimportável: mesmos elementos e mesmo levantamento",
+      "detalhe": "90 elementos, 364 linhas"
+    },
+    {
+      "ok": true,
+      "descricao": "JSON reimportado: escala, parâmetros e esquadrias",
+      "detalhe": "{\"e\":0.02,\"g\":{\"peDireito\":2.8,\"espessuraParede\":0.15,\"numeroPessoas\":4},\"q\":[\"P1\",\"J1\",\"J2\"]}"
+    },
+    {
+      "ok": true,
+      "descricao": "importação avisa que a planta (PDF) não faz parte do JSON",
+      "detalhe": "A planta não faz parte do JSON: carregue novamente o arquivo \"planta-caso.pdf\"."
+    },
+    {
+      "ok": true,
+      "descricao": "recarregar o PDF depois do JSON mantém elementos e escala",
+      "detalhe": "90 elementos, escala 0.02"
+    },
+    {
+      "ok": true,
+      "descricao": "DXF: sem escolher a unidade, o botão fica desabilitado (unidade não é presumida)",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "DXF mínimo: polilinha fechada vira ambiente pendente (origem \"importado\")",
+      "detalhe": "[\"ambiente/pendente/importado\",\"parede/pendente/importado\"]"
+    },
+    {
+      "ok": true,
+      "descricao": "DXF: tudo o que foi importado nasce pendente",
+      "detalhe": "[\"ambiente/pendente/importado\",\"parede/pendente/importado\"]"
+    },
+    {
+      "ok": true,
+      "descricao": "DXF mínimo: par de linhas paralelas vira parede",
+      "detalhe": "[\"ambiente/pendente/importado\",\"parede/pendente/importado\"]"
+    },
+    {
+      "ok": true,
+      "descricao": "DXF mínimo: ambiente \"Sala\" de 4 × 3 m = 12,00 m² (texto vira nome, escala do DXF)",
+      "detalhe": "Sala — área=12.00 m² (pendente) | Sala — perímetro=14.00 m (pendente) | Sala — teto=12.00 m² (pendente) | Sala — piso=12.00 m² (pendente)"
+    },
+    {
+      "ok": true,
+      "descricao": "DXF sem planta: cria planta em branco calibrada",
+      "detalhe": "pdf 352 bytes, escala 0.004058329077036984"
+    },
+    {
+      "ok": true,
+      "descricao": "nenhum erro de console / pageerror",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "nenhuma requisição de rede fora do localhost",
+      "detalhe": ""
+    }
+  ],
+  "registro": {
+    "erros": [],
+    "avisos": [],
+    "externas": []
+  }
+}

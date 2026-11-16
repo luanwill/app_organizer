@@ -1,0 +1,348 @@
+{
+  "itens": [
+    {
+      "ok": true,
+      "descricao": "3 colunas (etapas | planta | árvore)",
+      "detalhe": "[{\"x\":0,\"w\":340},{\"x\":340,\"w\":820},{\"x\":1160,\"w\":340}]"
+    },
+    {
+      "ok": true,
+      "descricao": "html lang=\"pt-BR\"",
+      "detalhe": "pt-BR"
+    },
+    {
+      "ok": true,
+      "descricao": "sem planta: ferramentas de medição desabilitadas",
+      "detalhe": "Selecionar, Mover vista, Distância, Polilinha, Polígono, Retângulo, Contagem, Parede, ↶ Desfazer, ↷ Refazer"
+    },
+    {
+      "ok": true,
+      "descricao": "PDF aberto: 1 página",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "dimensões da página em unidades do PDF",
+      "detalhe": "{\"escala\":null,\"largura\":550.08002,\"altura\":460.07999}"
+    },
+    {
+      "ok": true,
+      "descricao": "etapa 1 avisa \"Medições bloqueadas\" sem calibração",
+      "detalhe": "ESCALA — PÁGINA 1 /  / Página sem escala"
+    },
+    {
+      "ok": true,
+      "descricao": "sem escala: Distância/Polilinha/Polígono/Retângulo/Contagem/Parede desabilitadas com dica",
+      "detalhe": "Distância: Calibre a escala desta página primeiro | Polilinha: Calibre a escala desta página primeiro | Polígono: Calibre a escala desta página primeiro | Retângulo: Calibre a escala desta página primeiro | Contagem: Calibre a escala desta página primeiro | Parede: Calibre a escala desta página primeiro | ↶ Desfazer: Desfazer (Ctrl+Z) | ↷ Refazer: Refazer (Ctrl+Y)"
+    },
+    {
+      "ok": true,
+      "descricao": "sem escala: clicar com a ferramenta Distância forçada não cria medição",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "calibração pela interface: escala ≈ 0,02 m/unidade (±1%)",
+      "detalhe": "0.02003970596944262"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 1: linha sobre a cota de 3,07 m mede 3,07 m ±1%",
+      "detalhe": "[3.0700000000000003]"
+    },
+    {
+      "ok": true,
+      "descricao": "árvore mostra \"3,07 m\" (vírgula decimal)",
+      "detalhe": "Medição — comprimento\t3,07 m"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 2 (desenhado com o mouse): retângulo 3,07 × 2,98 ≈ 9,15 m² e 12,10 m (tolerância de clique)",
+      "detalhe": "[[\"Medição — área\",9.161879534883724],[\"Medição — perímetro\",12.108651162790698]]"
+    },
+    {
+      "ok": true,
+      "descricao": "parede desenhada com o mouse (clique + duplo clique) tem 2 vértices",
+      "detalhe": "[{\"n\":2,\"esp\":null}]"
+    },
+    {
+      "ok": true,
+      "descricao": "parede desenhada sem espessura padrão informada nasce com espessura null (nada assumido)",
+      "detalhe": "[{\"n\":2,\"esp\":null}]"
+    },
+    {
+      "ok": true,
+      "descricao": "árvore mostra \"Dado faltante\" (espessura e pé-direito/altura)",
+      "detalhe": "⚠ Dado faltante: Espessura não informada (Parede 1) ⚠ Dado faltante: Altura não informada (Parede 1): informe o pé-direito ou a altura da parede — alvenaria não calculada ⚠ Dado faltante: Informe o nº de pessoas para dimensionar o reservatório"
+    },
+    {
+      "ok": true,
+      "descricao": "etapa 2: 3 avisos \"Dado faltante\" com os campos vazios",
+      "detalhe": "3 avisos"
+    },
+    {
+      "ok": true,
+      "descricao": "etapa 2: campos essenciais nascem vazios (sem valor assumido)",
+      "detalhe": "[\"\",\"\",\"\"]"
+    },
+    {
+      "ok": true,
+      "descricao": "etapa 2: \"2,80\" / \"0,15\" / \"4\" aceitos com vírgula decimal",
+      "detalhe": "{\"peDireito\":2.8,\"espessuraParede\":0.15,\"numeroPessoas\":4}"
+    },
+    {
+      "ok": true,
+      "descricao": "campo mostra o valor com vírgula decimal",
+      "detalhe": "2,8"
+    },
+    {
+      "ok": true,
+      "descricao": "aba Arquitetura lista o Quarto com 9,15 m²",
+      "detalhe": "9,15 m² · 12,10 m"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 2 na árvore: Quarto — área = 9,15 m²",
+      "detalhe": "9,15 m²"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 2 na árvore: Quarto — perímetro = 12,10 m",
+      "detalhe": "12,10 m"
+    },
+    {
+      "ok": true,
+      "descricao": "aviso fixo da estrutura presente",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "botão \"Sugerir estrutura\": 10 pilares e 11 trechos de baldrame, todos pendentes",
+      "detalhe": "{\"pilar/pendente\":10,\"viga-baldrame/pendente\":11,\"viga-superior/pendente\":11,\"laje/pendente\":4,\"fundacao/pendente\":10}"
+    },
+    {
+      "ok": true,
+      "descricao": "árvore mostra pendentes em separado (\"pend.\")",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "árvore: Pilares = só pendente (\"+ 10,00 un pend.\"), nada confirmado",
+      "detalhe": "+ 10,00 un pend."
+    },
+    {
+      "ok": true,
+      "descricao": "aviso para conferir as seções dos condutores",
+      "detalhe": "Seções de condutores e disjuntores são valores padrão — confira com o projeto elétrico."
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 5 pelo botão \"Sugerir pontos (NBR 5410)\": sala = 160 VA de luz e 3 TUGs",
+      "detalhe": "[[\"luz\",160,\"pendente\"],[\"interruptor\",0,\"pendente\"],[\"interruptor\",0,\"pendente\"],[\"tug\",100,\"pendente\"],[\"tug\",100,\"pendente\"],[\"tug\",100,\"pendente\"]]"
+    },
+    {
+      "ok": true,
+      "descricao": "sugestões elétricas nascem pendentes",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 6 pelo botão \"Sugerir pontos hidráulicos\": vaso, lavatório, chuveiro e ralo",
+      "detalhe": "[\"chuveiro\",\"lavatorio\",\"ralo\",\"vaso\"]"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 6 na árvore: tubos separados por diâmetro (Ø100, Ø40, Ø25)",
+      "detalhe": "Tubo de água fria (Ø25 mm) + 25,08 m pend. | Tubo de esgoto (Ø50 mm) + 10,50 m pend. | Tubo de esgoto (Ø100 mm) + 6,37 m pend. | Tubo de esgoto (Ø40 mm) + 3,25 m pend."
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 8: materiais — Cimento só como pendente enquanto a estrutura está pendente",
+      "detalhe": "+ 3.352,50 kg pend."
+    },
+    {
+      "ok": true,
+      "descricao": "aviso \"N sugestões pendentes — fora dos totais confirmados\"",
+      "detalhe": "71 sugestões pendentes — fora dos totais confirmados"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 8: \"Aceitar pendentes\" (Estrutura) move pilares de pendente para confirmado",
+      "detalhe": "+ 10,00 un pend. → 10,00 un"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 8: materiais — Cimento passa a confirmado",
+      "detalhe": "+ 3.352,50 kg pend. → 3.352,50 kg"
+    },
+    {
+      "ok": true,
+      "descricao": "botão \"Descartar\" (Hidráulica) remove os pendentes",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "Desfazer/Refazer da sugestão hidráulica",
+      "detalhe": "0 → 6"
+    },
+    {
+      "ok": true,
+      "descricao": "árvore: TUG = 3,00 un confirmadas + 9,00 un pend.",
+      "detalhe": "3,00 un+ 9,00 un pend."
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Parede 1 — alvenaria\" muda com o pé-direito 2,80 → 3,00",
+      "detalhe": "25,20 m² → 27,00 m²"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Sala — pintura de parede\" muda com o pé-direito 2,80 → 3,00",
+      "detalhe": "36,80 m² → 39,60 m²"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Concreto — pilares\" muda com o pé-direito 2,80 → 3,00",
+      "detalhe": "1,30 m³ → 1,39 m³"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Forma — pilares\" muda com o pé-direito 2,80 → 3,00",
+      "detalhe": "27,28 m² → 29,04 m²"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Eletroduto\" muda com o pé-direito 2,80 → 3,00",
+      "detalhe": "32,87 m+ 114,28 m pend. → 34,27 m+ 116,68 m pend."
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Tubo de água fria\" muda com o pé-direito 2,80 → 3,00",
+      "detalhe": "11,88 m+ 13,20 m pend. → 12,48 m+ 13,60 m pend."
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Bloco cerâmico\" muda com o pé-direito 2,80 → 3,00",
+      "detalhe": "1.702,40 un → 1.827,00 un"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Tinta acrílica\" muda com o pé-direito 2,80 → 3,00",
+      "detalhe": "39,38 L → 41,16 L"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Cimento\" muda com o pé-direito 2,80 → 3,00",
+      "detalhe": "3.352,50 kg → 3.383,37 kg"
+    },
+    {
+      "ok": true,
+      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Fio / cabo de cobre (1.5\" muda com o pé-direito 2,80 → 3,00",
+      "detalhe": "26,80 m+ 61,27 m pend. → 28,00 m+ 62,07 m pend."
+    },
+    {
+      "ok": true,
+      "descricao": "Parede 1 (9 m) — alvenaria = 27,00 m² com pé-direito 3,00",
+      "detalhe": "27,00 m²"
+    },
+    {
+      "ok": true,
+      "descricao": "pé-direito vazio: alvenaria, concreto de pilares, eletroduto e tubo de água somem (nada assumido)",
+      "detalhe": "{\"Parede 1 — alvenaria\":null,\"Sala — pintura de parede\":null,\"Concreto — pilares\":null,\"Forma — pilares\":null,\"Eletroduto\":null,\"Tubo de água fria\":null,\"Bloco cerâmico\":null,\"Tinta acrílica\":\"15,35 L\",\"Cimento\":\"2.874,02 kg\",\"Fio / cabo de cobre (1.5\":null}"
+    },
+    {
+      "ok": true,
+      "descricao": "pé-direito vazio: alertas \"Dado faltante\" nas 4 disciplinas",
+      "detalhe": "4 blocos de alerta"
+    },
+    {
+      "ok": true,
+      "descricao": "voltar a 2,80 restaura exatamente as quantidades",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "botões de camada por disciplina",
+      "detalhe": "Arquitetura, Estrutura, Elétrica, Hidráulica"
+    },
+    {
+      "ok": true,
+      "descricao": "liga/desliga de camadas altera o estado",
+      "detalhe": "{\"arquitetura\":true,\"estrutura\":false,\"eletrica\":false,\"hidraulica\":false,\"materiais\":true}"
+    },
+    {
+      "ok": true,
+      "descricao": "ocultar camadas muda o desenho da planta",
+      "detalhe": "60751 → 20314 bytes de PNG"
+    },
+    {
+      "ok": true,
+      "descricao": "clicar numa linha da árvore seleciona o elemento na planta",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "clicar num pilar na planta (ferramenta Selecionar) seleciona 1 elemento",
+      "detalhe": "[\"est-1-F4\"]"
+    },
+    {
+      "ok": true,
+      "descricao": "selo fixo de materiais presente",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "botão \"Recortes IA\" desabilitado",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "botão \"Recortes IA\" com a dica \"em breve\"",
+      "detalhe": "em breve"
+    },
+    {
+      "ok": true,
+      "descricao": "vista 3D: canvas renderizado",
+      "detalhe": "{\"x\":340,\"y\":43.84375,\"width\":820,\"height\":856}"
+    },
+    {
+      "ok": true,
+      "descricao": "vista 3D: contexto WebGL ativo",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "vista 3D: clicar num sólido seleciona o elemento",
+      "detalhe": "[\"est-1-L1\"]"
+    },
+    {
+      "ok": true,
+      "descricao": "no navegador: ids de linha únicos e nenhuma quantidade inválida",
+      "detalhe": "{\"duplicados\":[],\"ruins\":[],\"alertas\":[]}"
+    },
+    {
+      "ok": true,
+      "descricao": "sem avisos do React de chave duplicada",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "nenhum erro de console / pageerror em todo o fluxo",
+      "detalhe": ""
+    },
+    {
+      "ok": true,
+      "descricao": "nenhuma requisição de rede fora do localhost",
+      "detalhe": ""
+    }
+  ],
+  "registro": {
+    "erros": [],
+    "avisos": [
+      "[.WebGL-0x1e44001a7800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "[.WebGL-0x1e44001a7800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "[.WebGL-0x1e44001a7800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    ],
+    "externas": []
+  }
+}

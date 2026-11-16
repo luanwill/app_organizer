@@ -1,0 +1,157 @@
+########## tests/e2e/01-fluxo.cjs
+PASSOU | 3 colunas (etapas | planta | árvore) | [{"x":0,"w":340},{"x":340,"w":820},{"x":1160,"w":340}]
+PASSOU | html lang="pt-BR" | pt-BR
+PASSOU | sem planta: ferramentas de medição desabilitadas | Selecionar, Mover vista, Distância, Polilinha, Polígono, Retângulo, Contagem, Parede, ↶ Desfazer, ↷ Refazer
+PASSOU | PDF aberto: 1 página
+PASSOU | dimensões da página em unidades do PDF | {"escala":null,"largura":550.08002,"altura":460.07999}
+PASSOU | etapa 1 avisa "Medições bloqueadas" sem calibração | ESCALA — PÁGINA 1 /  / Página sem escala
+PASSOU | sem escala: Distância/Polilinha/Polígono/Retângulo/Contagem/Parede desabilitadas com dica | Distância: Calibre a escala desta página primeiro | Polilinha: Calibre a escala desta página primeiro | Polígono: Calibre a escala desta página primeiro | Retângulo: Calibre a escala desta página primeiro | Contagem: Calibre a escala desta página primeiro | Parede: Calibre a escala desta página primeiro | ↶ Desfazer: Desfazer (Ctrl+Z) | ↷ Refazer: Refazer (Ctrl+Y)
+PASSOU | sem escala: clicar com a ferramenta Distância forçada não cria medição
+PASSOU | calibração pela interface: escala ≈ 0,02 m/unidade (±1%) | 0.02003970596944262
+PASSOU | CRITÉRIO 1: linha sobre a cota de 3,07 m mede 3,07 m ±1% | [3.0700000000000003]
+PASSOU | árvore mostra "3,07 m" (vírgula decimal) | Medição — comprimento	3,07 m
+PASSOU | CRITÉRIO 2 (desenhado com o mouse): retângulo 3,07 × 2,98 ≈ 9,15 m² e 12,10 m (tolerância de clique) | [["Medição — área",9.161879534883724],["Medição — perímetro",12.108651162790698]]
+INFO   | árvore após o retângulo: Medição — área	9,16 m² Medição — perímetro	12,11 m
+PASSOU | parede desenhada com o mouse (clique + duplo clique) tem 2 vértices | [{"n":2,"esp":null}]
+PASSOU | parede desenhada sem espessura padrão informada nasce com espessura null (nada assumido) | [{"n":2,"esp":null}]
+PASSOU | árvore mostra "Dado faltante" (espessura e pé-direito/altura) | ⚠ Dado faltante: Espessura não informada (Parede 1) ⚠ Dado faltante: Altura não informada (Parede 1): informe o pé-direito ou a altura da parede — alvenaria não calculada ⚠ Dado faltante: Informe o nº de pessoas para dimensionar o reservatório
+PASSOU | etapa 2: 3 avisos "Dado faltante" com os campos vazios | 3 avisos
+PASSOU | etapa 2: campos essenciais nascem vazios (sem valor assumido) | ["","",""]
+PASSOU | etapa 2: "2,80" / "0,15" / "4" aceitos com vírgula decimal | {"peDireito":2.8,"espessuraParede":0.15,"numeroPessoas":4}
+PASSOU | campo mostra o valor com vírgula decimal | 2,8
+PASSOU | aba Arquitetura lista o Quarto com 9,15 m² | 9,15 m² · 12,10 m
+PASSOU | CRITÉRIO 2 na árvore: Quarto — área = 9,15 m² | 9,15 m²
+PASSOU | CRITÉRIO 2 na árvore: Quarto — perímetro = 12,10 m | 12,10 m
+PASSOU | aviso fixo da estrutura presente
+PASSOU | botão "Sugerir estrutura": 10 pilares e 11 trechos de baldrame, todos pendentes | {"pilar/pendente":10,"viga-baldrame/pendente":11,"viga-superior/pendente":11,"laje/pendente":4,"fundacao/pendente":10}
+PASSOU | árvore mostra pendentes em separado ("pend.")
+PASSOU | árvore: Pilares = só pendente ("+ 10,00 un pend."), nada confirmado | + 10,00 un pend.
+PASSOU | aviso para conferir as seções dos condutores | Seções de condutores e disjuntores são valores padrão — confira com o projeto elétrico.
+PASSOU | CRITÉRIO 5 pelo botão "Sugerir pontos (NBR 5410)": sala = 160 VA de luz e 3 TUGs | [["luz",160,"pendente"],["interruptor",0,"pendente"],["interruptor",0,"pendente"],["tug",100,"pendente"],["tug",100,"pendente"],["tug",100,"pendente"]]
+PASSOU | sugestões elétricas nascem pendentes
+INFO   | painel elétrica (resumo por ambiente): Sala  Chuveiro
+PASSOU | CRITÉRIO 6 pelo botão "Sugerir pontos hidráulicos": vaso, lavatório, chuveiro e ralo | ["chuveiro","lavatorio","ralo","vaso"]
+PASSOU | CRITÉRIO 6 na árvore: tubos separados por diâmetro (Ø100, Ø40, Ø25) | Tubo de água fria (Ø25 mm) + 25,08 m pend. | Tubo de esgoto (Ø50 mm) + 10,50 m pend. | Tubo de esgoto (Ø100 mm) + 6,37 m pend. | Tubo de esgoto (Ø40 mm) + 3,25 m pend.
+PASSOU | CRITÉRIO 8: materiais — Cimento só como pendente enquanto a estrutura está pendente | + 3.352,50 kg pend.
+PASSOU | aviso "N sugestões pendentes — fora dos totais confirmados" | 71 sugestões pendentes — fora dos totais confirmados
+PASSOU | CRITÉRIO 8: "Aceitar pendentes" (Estrutura) move pilares de pendente para confirmado | + 10,00 un pend. → 10,00 un
+PASSOU | CRITÉRIO 8: materiais — Cimento passa a confirmado | + 3.352,50 kg pend. → 3.352,50 kg
+PASSOU | botão "Descartar" (Hidráulica) remove os pendentes
+PASSOU | Desfazer/Refazer da sugestão hidráulica | 0 → 6
+PASSOU | árvore: TUG = 3,00 un confirmadas + 9,00 un pend. | 3,00 un+ 9,00 un pend.
+PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Parede 1 — alvenaria" muda com o pé-direito 2,80 → 3,00 | 25,20 m² → 27,00 m²
+PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Sala — pintura de parede" muda com o pé-direito 2,80 → 3,00 | 36,80 m² → 39,60 m²
+PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Concreto — pilares" muda com o pé-direito 2,80 → 3,00 | 1,30 m³ → 1,39 m³
+PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Forma — pilares" muda com o pé-direito 2,80 → 3,00 | 27,28 m² → 29,04 m²
+PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Eletroduto" muda com o pé-direito 2,80 → 3,00 | 32,87 m+ 114,28 m pend. → 34,27 m+ 116,68 m pend.
+PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Tubo de água fria" muda com o pé-direito 2,80 → 3,00 | 11,88 m+ 13,20 m pend. → 12,48 m+ 13,60 m pend.
+PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Bloco cerâmico" muda com o pé-direito 2,80 → 3,00 | 1.702,40 un → 1.827,00 un
+PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Tinta acrílica" muda com o pé-direito 2,80 → 3,00 | 39,38 L → 41,16 L
+PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Cimento" muda com o pé-direito 2,80 → 3,00 | 3.352,50 kg → 3.383,37 kg
+PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Fio / cabo de cobre (1.5" muda com o pé-direito 2,80 → 3,00 | 26,80 m+ 61,27 m pend. → 28,00 m+ 62,07 m pend.
+PASSOU | Parede 1 (9 m) — alvenaria = 27,00 m² com pé-direito 3,00 | 27,00 m²
+PASSOU | pé-direito vazio: alvenaria, concreto de pilares, eletroduto e tubo de água somem (nada assumido) | {"Parede 1 — alvenaria":null,"Sala — pintura de parede":null,"Concreto — pilares":null,"Forma — pilares":null,"Eletroduto":null,"Tubo de água fria":null,"Bloco cerâmico":null,"Tinta acrílica":"15,35 L","Cimento":"2.874,02 kg","Fio / cabo de cobre (1.5":null}
+PASSOU | pé-direito vazio: alertas "Dado faltante" nas 4 disciplinas | 4 blocos de alerta
+PASSOU | voltar a 2,80 restaura exatamente as quantidades
+PASSOU | botões de camada por disciplina | Arquitetura, Estrutura, Elétrica, Hidráulica
+PASSOU | liga/desliga de camadas altera o estado | {"arquitetura":true,"estrutura":false,"eletrica":false,"hidraulica":false,"materiais":true}
+PASSOU | ocultar camadas muda o desenho da planta | 60751 → 20314 bytes de PNG
+PASSOU | clicar numa linha da árvore seleciona o elemento na planta
+PASSOU | clicar num pilar na planta (ferramenta Selecionar) seleciona 1 elemento | ["est-1-F4"]
+PASSOU | selo fixo de materiais presente
+PASSOU | botão "Recortes IA" desabilitado
+PASSOU | botão "Recortes IA" com a dica "em breve" | em breve
+PASSOU | vista 3D: canvas renderizado | {"x":340,"y":43.84375,"width":820,"height":856}
+PASSOU | vista 3D: contexto WebGL ativo
+PASSOU | vista 3D: clicar num sólido seleciona o elemento | ["est-1-L1"]
+INFO   | avisos na vista 3D: []
+PASSOU | no navegador: ids de linha únicos e nenhuma quantidade inválida | {"duplicados":[],"ruins":[],"alertas":[]}
+PASSOU | sem avisos do React de chave duplicada
+PASSOU | nenhum erro de console / pageerror em todo o fluxo
+PASSOU | nenhuma requisição de rede fora do localhost
+
+== 01-fluxo: 67 passaram, 0 falharam
+   erros de console/pageerror: 0; requisições externas: 0
+########## tests/e2e/02-persistencia-export-import.cjs
+PASSOU | caso de exemplo montado no navegador | 90 elementos, PDF 9241 bytes, escala 0.02
+PASSOU | CRITÉRIO 10: nome do projeto persiste | Caso de exemplo QA
+PASSOU | CRITÉRIO 10: elementos (tipos e status pendente/confirmado) persistem | {"parede/confirmado":7,"ambiente/confirmado":4,"esquadria/confirmado":5,"quadro/confirmado":1,"reservatorio/confirmado":1,"caixa-inspecao/confirmado":1,"pilar/confirmado":10,"viga-baldrame/confirmado":11,"viga-superior/pendente":11,"laje/pendente":4,"fundacao/pendente":10,"ponto-eletrico/confirmado":6,"ponto-eletrico/pendente":13,"ponto-hidraulico/pendente":2,"ponto-hidraulico/confirmado":4}
+PASSOU | CRITÉRIO 10: escala persiste | 0.02
+PASSOU | CRITÉRIO 10: parâmetros (pé-direito, espessura, pessoas) persistem | {"peDireito":2.8,"espessuraParede":0.15,"numeroPessoas":4}
+PASSOU | CRITÉRIO 10: cadastro de esquadrias persiste | ["P1","J1","J2"]
+PASSOU | CRITÉRIO 10: planta (bytes do PDF, nome, páginas) persiste | planta-caso.pdf, 9241 bytes
+PASSOU | CRITÉRIO 10: camadas ligadas/desligadas persistem | {"arquitetura":true,"estrutura":true,"eletrica":true,"hidraulica":false,"materiais":true}
+PASSOU | CRITÉRIO 10: levantamento recalculado idêntico após o reload | 364 linhas, 81 materiais
+PASSOU | CRITÉRIO 10: a planta é redesenhada após o reload (pixels escuros no canvas do PDF) | 11406 px
+PASSOU | CRITÉRIO 10: árvore (painel) idêntica após o reload | 207 linhas
+PASSOU | após o reload o histórico de desfazer começa vazio
+PASSOU | nova aba do mesmo navegador carrega o mesmo levantamento
+PASSOU | download do Excel | caso-de-exemplo-qa.xlsx
+PASSOU | CRITÉRIO 9: Excel abre sem erro (relido com a lib xlsx) | 124953 bytes
+PASSOU | CRITÉRIO 9: 9 abas na ordem | Resumo, Ambientes, Esquadrias, Paredes, Acabamentos, Estrutura, Elétrica, Hidráulica, Materiais
+PASSOU | CRITÉRIO 9: Resumo tem exatamente as mesmas linhas do painel (DOM da árvore) | painel 207, excel 207; só painel: ; só excel: 
+PASSOU | CRITÉRIO 9: totais do Resumo batem com o painel (confirmado e pendente, a 2 casas)
+PASSOU | Resumo: cabeçalho (nome, pé-direito, pessoas) | {"Levantamento":"Caso de exemplo QA","Data":"15/11/2026","Arquivo da planta":"planta-caso.pdf","Pé-direito (m)":2.8,"Nº de pessoas":4}
+INFO   | formato da 1ª célula de quantidade: t=n z=undefined w=12.00
+PASSOU | JSON exportado: envelope com o projeto completo | 90 elementos
+PASSOU | "Novo levantamento" zera elementos, planta e dados essenciais | {"n":0,"pdf":0,"gerais":{"peDireito":null,"espessuraParede":null,"numeroPessoas":null}}
+PASSOU | JSON do próprio app é reimportável: mesmos elementos e mesmo levantamento | 90 elementos, 364 linhas
+PASSOU | JSON reimportado: escala, parâmetros e esquadrias | {"e":0.02,"g":{"peDireito":2.8,"espessuraParede":0.15,"numeroPessoas":4},"q":["P1","J1","J2"]}
+PASSOU | importação avisa que a planta (PDF) não faz parte do JSON | A planta não faz parte do JSON: carregue novamente o arquivo "planta-caso.pdf".
+INFO   | após reimportar o JSON sem planta: {"pdf":0,"arquivo":"planta-caso.pdf","paginas":1}; canvas do PDF visível: 0
+INFO   | texto da área da planta após reimportar: Nenhuma planta aberta / Clique em “Abrir planta (PDF)” para começar. Depois, calibre a escala da página para medir.
+PASSOU | recarregar o PDF depois do JSON mantém elementos e escala | 90 elementos, escala 0.02
+PASSOU | DXF: sem escolher a unidade, o botão fica desabilitado (unidade não é presumida)
+INFO   | DXF: unidades disponíveis [["","— escolha —"],["m","metros (m)"],["cm","centímetros (cm)"],["mm","milímetros (mm)"]]; usada metros (m)
+INFO   | DXF: Importado: 1 ambiente e 1 parede numa planta em branco. Tudo o que foi importado está pendente: aceite ou descarte na árvore do levantamento.
+PASSOU | DXF mínimo: polilinha fechada vira ambiente pendente (origem "importado") | ["ambiente/pendente/importado","parede/pendente/importado"]
+PASSOU | DXF: tudo o que foi importado nasce pendente | ["ambiente/pendente/importado","parede/pendente/importado"]
+PASSOU | DXF mínimo: par de linhas paralelas vira parede | ["ambiente/pendente/importado","parede/pendente/importado"]
+PASSOU | DXF mínimo: ambiente "Sala" de 4 × 3 m = 12,00 m² (texto vira nome, escala do DXF) | Sala — área=12.00 m² (pendente) | Sala — perímetro=14.00 m (pendente) | Sala — teto=12.00 m² (pendente) | Sala — piso=12.00 m² (pendente)
+PASSOU | DXF sem planta: cria planta em branco calibrada | pdf 352 bytes, escala 0.004058329077036984
+PASSOU | nenhum erro de console / pageerror
+PASSOU | nenhuma requisição de rede fora do localhost
+
+== 02-persistencia-export-import: 33 passaram, 0 falharam
+   erros de console/pageerror: 0; requisições externas: 0
+########## tests/e2e/03-desenho-pela-interface.cjs
+PASSOU | calibração (Enter aplica) | 0.02003970596944262
+PASSOU | etapa 1 mostra a escala com vírgula decimal | Escala: 1 un = 0,0200 m
+PASSOU | entradas inválidas ("abc", pessoas "2,5") são recusadas e o valor anterior fica | {"peDireito":2.8,"espessuraParede":0.15,"numeroPessoas":4}
+PASSOU | 7 paredes desenhadas com o mouse, espessura padrão 0,15 | 7 paredes
+PASSOU | comprimento total das paredes desenhadas ≈ 35,60 m (snap nos vértices) | 35.641
+PASSOU | snap a vértice: paredes consecutivas compartilham exatamente o mesmo ponto
+PASSOU | 4 ambientes desenhados (retângulo, 2 cliques) | Ambiente 1, Ambiente 2, Ambiente 3, Ambiente 4
+INFO   | painel Arquitetura após desenhar: Arquitetura | Estrutura | Elétrica | Hidráulica | Materiais | Importar | DESENHAR | Ambiente (polígono) | Ambiente (retângulo) | Parede | ESQUADRIAS | Nenhum tipo cadastrado. Adicione portas e janelas para posicioná-las nas paredes. | + Porta | + Janela | AMBIENTES | Ambiente 1 | 12,03 m² · 14,02 m | Ambiente 2 | 14,09 m² · 15,05 m | Ambiente 3 | 10,03 m² · 13,02 m | Ambiente 4 | 10,23 m² · 12,79 m
+PASSOU | clicar no ambiente na lista do painel seleciona-o | ["c4aa2c72-59b6-4cf4-9f1b-ba394a795781"]
+PASSOU | trocar o tipo para "banheiro" no painel marca área molhada automaticamente | {"nome":"Ambiente 3","tipoAmbiente":"banheiro","areaMolhada":true,"coberto":true}
+PASSOU | Sala desenhada com o mouse (snap nos vértices das paredes): 12 m² / 14 m ±1% | {"Sala — área":12.03,"Sala — perímetro":14.02,"Cozinha — área":14.09,"Cozinha — perímetro":15.05,"Banheiro — área":10.03,"Banheiro — perímetro":13.02,"Quarto — área":10.23,"Quarto — perímetro":12.79}
+INFO   | Quarto (cliques a 6–10 cm dos vértices das paredes): o snap puxou os cantos para os vértices → 10.23 m² / 12.79 m (esperado sem snap: 9,15 / 12,10)
+PASSOU | cadastro: "+ Porta" cria P1 0,80 × 2,10 e "+ Janela" cria J1 1,20 × 1,00 | [["P1",0.8,2.1],["J1",1.2,1]]
+PASSOU | esquadrias posicionadas com clique na parede (clique longe de parede não cria) | 3 esquadrias
+PASSOU | esquadria clicada a 20 cm do eixo é projetada no eixo da parede e vinculada a ela | {"p":{"x":99.75544404145077,"y":49.50045475712437},"v":{"paredeId":"cd95b6ed-6ff2-420a-88ad-d5d952c786a0","ambienteId":"4a2eefbb-95dd-4f69-9723-e211d6a659f0"}}
+PASSOU | cadastro mostra a divergência "posicionadas 2 de 1" | posicionadas 2 de 1 | posicionadas 1 de 1
+PASSOU | quadro, reservatório e caixa de inspeção posicionados com clique (confirmados) | [["quadro","confirmado","em-ambiente"],["reservatorio","confirmado","em-ambiente"],["caixa-inspecao","confirmado","fora"]]
+PASSOU | ponto dentro de ambiente ganha vinculos.ambienteId; fora, não | [["quadro","confirmado","em-ambiente"],["reservatorio","confirmado","em-ambiente"],["caixa-inspecao","confirmado","fora"]]
+PASSOU | CRITÉRIOS 3 e 4 com paredes desenhadas pelo mouse: pilares nos cantos/T/intermediários e baldrame = 100% das paredes | 12 pilares; baldrame 35.64 m × paredes 35.64 m
+FALHOU | [ACHADO-S2] paredes nominais de 4,00 m desenhadas/calibradas com o mouse (erro de clique ≈ 1 px ≈ 0,2%) NÃO deveriam ganhar pilar intermediário — esperado 10 pilares | 12 pilares; trechos de baldrame (m): 3.003, 3.003, 3.003, 2.006, 2.006, 2.006, 2.006, 3.199, 2.906, 2.906, 3.199, 3.199, 3.199
+PASSOU | sugestões elétricas e hidráulicas geradas sobre os ambientes desenhados | {"pilar/pendente":12,"viga-baldrame/pendente":13,"viga-superior/pendente":13,"laje/pendente":4,"fundacao/pendente":12,"ponto-eletrico/pendente":19,"ponto-hidraulico/pendente":6}
+PASSOU | painel Estrutura: "Aceitar" confirma 1 pilar e "Descartar" remove 1 pilar | ["confirmado","pendente","pendente","pendente","pendente","pendente","pendente","pendente","pendente","pendente","pendente"]
+PASSOU | árvore: Pilares = 1 confirmado + (n − 2) pendentes | 1,00 un+ 10,00 un pend.
+PASSOU | tecla Delete remove o selecionado e Ctrl+Z desfaz | 10 → 11
+PASSOU | arrastar um ponto sugerido na planta move o elemento | {"x":166.49658636442143,"y":54.49054793276698} → {"x":180.74736408462874,"y":75.86671451307787}
+PASSOU | "Aceitar todas" (árvore) confirma tudo e o aviso de pendentes some | 0 pendentes
+PASSOU | capturarPlantaComCamadas devolve PNG da planta com as camadas | data:image/png;base64,iVBORw0K…174806
+PASSOU | "Exportar PDF da planta" monta o documento de impressão (iframe) | 1 iframe(s)
+PASSOU | nenhum erro de console / pageerror
+PASSOU | nenhuma requisição de rede fora do localhost
+
+== 03-desenho-pela-interface: 27 passaram, 1 falharam
+   erros de console/pageerror: 0; requisições externas: 0
+########## tests/e2e/04-selecao-pilar-fundacao.cjs
+INFO   | 225 cliques numa grade de ±14 px em volta do pilar P7 (zoom ampliado) selecionaram: {"laje":23,"fundacao":158,"viga-superior":18,"(nada)":26}
+FALHOU | [ACHADO-V1] é possível selecionar com o mouse um pilar que tem sapata sugerida no mesmo ponto | {"laje":23,"fundacao":158,"viga-superior":18,"(nada)":26}
+PASSOU | nenhum erro de console / pageerror
+
+== 04-selecao-pilar-fundacao: 1 passaram, 1 falharam
+   erros de console/pageerror: 0; requisições externas: 0

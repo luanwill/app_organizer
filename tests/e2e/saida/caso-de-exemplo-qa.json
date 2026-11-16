@@ -1,0 +1,2503 @@
+{
+  "formato": "bim-leve",
+  "versao": 1,
+  "exportadoEm": "2026-11-15T23:25:02.490Z",
+  "projeto": {
+    "id": "824442d8-c2dd-4ec5-a330-81a840a35543",
+    "nome": "Caso de exemplo QA",
+    "versao": 1,
+    "criadoEm": "2026-11-15T23:24:55.708Z",
+    "atualizadoEm": "2026-11-15T23:25:00.155Z",
+    "arquivoNome": "planta-caso.pdf",
+    "totalPaginas": 1,
+    "paginas": {
+      "1": {
+        "escala": 0.02,
+        "largura": 550.08002,
+        "altura": 460.07999
+      }
+    },
+    "elementos": [
+      {
+        "id": "par-topo",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "parede",
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 50
+            },
+            {
+              "x": 500,
+              "y": 50
+            }
+          ]
+        },
+        "props": {
+          "espessura": 0.15
+        }
+      },
+      {
+        "id": "par-direita",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "parede",
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 500,
+              "y": 50
+            },
+            {
+              "x": 500,
+              "y": 250
+            }
+          ]
+        },
+        "props": {
+          "espessura": 0.15
+        }
+      },
+      {
+        "id": "par-meio",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "parede",
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 500,
+              "y": 250
+            },
+            {
+              "x": 210,
+              "y": 250
+            }
+          ]
+        },
+        "props": {
+          "espessura": 0.15
+        }
+      },
+      {
+        "id": "par-dentro",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "parede",
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 210,
+              "y": 250
+            },
+            {
+              "x": 210,
+              "y": 409.99999999999994
+            }
+          ]
+        },
+        "props": {
+          "espessura": 0.15
+        }
+      },
+      {
+        "id": "par-base",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "parede",
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 210,
+              "y": 409.99999999999994
+            },
+            {
+              "x": 50,
+              "y": 409.99999999999994
+            }
+          ]
+        },
+        "props": {
+          "espessura": 0.15
+        }
+      },
+      {
+        "id": "par-esquerda",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "parede",
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 409.99999999999994
+            },
+            {
+              "x": 50,
+              "y": 50
+            }
+          ]
+        },
+        "props": {
+          "espessura": 0.15
+        }
+      },
+      {
+        "id": "par-interna",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "parede",
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 250
+            },
+            {
+              "x": 210,
+              "y": 250
+            }
+          ]
+        },
+        "props": {
+          "espessura": 0.15
+        }
+      },
+      {
+        "id": "amb-sala",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "ambiente",
+        "geometria": {
+          "tipo": "poligono",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 50
+            },
+            {
+              "x": 200,
+              "y": 50
+            },
+            {
+              "x": 200,
+              "y": 250
+            },
+            {
+              "x": 50,
+              "y": 250
+            }
+          ]
+        },
+        "props": {
+          "nome": "Sala",
+          "tipoAmbiente": "sala",
+          "areaMolhada": false,
+          "coberto": true
+        },
+        "rotulo": "Sala"
+      },
+      {
+        "id": "amb-cozinha",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "ambiente",
+        "geometria": {
+          "tipo": "poligono",
+          "pontos": [
+            {
+              "x": 200,
+              "y": 50
+            },
+            {
+              "x": 375,
+              "y": 50
+            },
+            {
+              "x": 375,
+              "y": 250
+            },
+            {
+              "x": 200,
+              "y": 250
+            }
+          ]
+        },
+        "props": {
+          "nome": "Cozinha",
+          "tipoAmbiente": "cozinha",
+          "areaMolhada": true,
+          "coberto": true
+        },
+        "rotulo": "Cozinha"
+      },
+      {
+        "id": "amb-banheiro",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "ambiente",
+        "geometria": {
+          "tipo": "poligono",
+          "pontos": [
+            {
+              "x": 375,
+              "y": 50
+            },
+            {
+              "x": 500,
+              "y": 50
+            },
+            {
+              "x": 500,
+              "y": 250
+            },
+            {
+              "x": 375,
+              "y": 250
+            }
+          ]
+        },
+        "props": {
+          "nome": "Banheiro",
+          "tipoAmbiente": "banheiro",
+          "areaMolhada": true,
+          "coberto": true
+        },
+        "rotulo": "Banheiro"
+      },
+      {
+        "id": "amb-quarto",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "ambiente",
+        "geometria": {
+          "tipo": "poligono",
+          "pontos": [
+            {
+              "x": 53,
+              "y": 254.99999999999997
+            },
+            {
+              "x": 206.5,
+              "y": 254.99999999999997
+            },
+            {
+              "x": 206.5,
+              "y": 404
+            },
+            {
+              "x": 53,
+              "y": 404
+            }
+          ]
+        },
+        "props": {
+          "nome": "Quarto",
+          "tipoAmbiente": "quarto",
+          "areaMolhada": false,
+          "coberto": true
+        },
+        "rotulo": "Quarto"
+      },
+      {
+        "id": "esq-p1-a",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {
+          "paredeId": "par-topo"
+        },
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "esquadria",
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 100,
+            "y": 50
+          }
+        },
+        "props": {
+          "tipoEsquadriaId": "tp-P1"
+        }
+      },
+      {
+        "id": "esq-p1-b",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {
+          "paredeId": "par-interna"
+        },
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "esquadria",
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 130,
+            "y": 250
+          }
+        },
+        "props": {
+          "tipoEsquadriaId": "tp-P1"
+        }
+      },
+      {
+        "id": "esq-j1-a",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {
+          "paredeId": "par-topo"
+        },
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "esquadria",
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 287.5,
+            "y": 50
+          }
+        },
+        "props": {
+          "tipoEsquadriaId": "tp-J1"
+        }
+      },
+      {
+        "id": "esq-j1-b",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {
+          "paredeId": "par-base"
+        },
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "esquadria",
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 130,
+            "y": 409.99999999999994
+          }
+        },
+        "props": {
+          "tipoEsquadriaId": "tp-J1"
+        }
+      },
+      {
+        "id": "esq-j2-a",
+        "disciplina": "arquitetura",
+        "pagina": 1,
+        "vinculos": {
+          "paredeId": "par-esquerda"
+        },
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "esquadria",
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 50,
+            "y": 150
+          }
+        },
+        "props": {
+          "tipoEsquadriaId": "tp-J2"
+        }
+      },
+      {
+        "id": "quadro-1",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "vinculos": {
+          "ambienteId": "amb-sala"
+        },
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "quadro",
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 65,
+            "y": 65
+          }
+        },
+        "props": {},
+        "rotulo": "QD"
+      },
+      {
+        "id": "res-1",
+        "disciplina": "hidraulica",
+        "pagina": 1,
+        "vinculos": {
+          "ambienteId": "amb-banheiro"
+        },
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "reservatorio",
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 437.5,
+            "y": 150
+          }
+        },
+        "props": {}
+      },
+      {
+        "id": "ci-1",
+        "disciplina": "hidraulica",
+        "pagina": 1,
+        "vinculos": {},
+        "origem": "desenhado",
+        "status": "confirmado",
+        "tipo": "caixa-inspecao",
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 475,
+            "y": 300
+          }
+        },
+        "props": {}
+      },
+      {
+        "id": "est-1-P1",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 50,
+            "y": 50
+          }
+        },
+        "vinculos": {},
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "P1",
+        "tipo": "pilar",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3,
+          "noTipo": "L"
+        }
+      },
+      {
+        "id": "est-1-P2",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 200,
+            "y": 50
+          }
+        },
+        "vinculos": {},
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "P2",
+        "tipo": "pilar",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3,
+          "noTipo": "intermediario"
+        }
+      },
+      {
+        "id": "est-1-P3",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 350,
+            "y": 50
+          }
+        },
+        "vinculos": {},
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "P3",
+        "tipo": "pilar",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3,
+          "noTipo": "intermediario"
+        }
+      },
+      {
+        "id": "est-1-P4",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 500,
+            "y": 50
+          }
+        },
+        "vinculos": {},
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "P4",
+        "tipo": "pilar",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3,
+          "noTipo": "L"
+        }
+      },
+      {
+        "id": "est-1-P5",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 50,
+            "y": 250
+          }
+        },
+        "vinculos": {},
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "P5",
+        "tipo": "pilar",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3,
+          "noTipo": "T"
+        }
+      },
+      {
+        "id": "est-1-P6",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 210,
+            "y": 250
+          }
+        },
+        "vinculos": {},
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "P6",
+        "tipo": "pilar",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3,
+          "noTipo": "T"
+        }
+      },
+      {
+        "id": "est-1-P7",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 355,
+            "y": 250
+          }
+        },
+        "vinculos": {},
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "P7",
+        "tipo": "pilar",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3,
+          "noTipo": "intermediario"
+        }
+      },
+      {
+        "id": "est-1-P8",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 500,
+            "y": 250
+          }
+        },
+        "vinculos": {},
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "P8",
+        "tipo": "pilar",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3,
+          "noTipo": "L"
+        }
+      },
+      {
+        "id": "est-1-P9",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 50,
+            "y": 409.99999999999994
+          }
+        },
+        "vinculos": {},
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "P9",
+        "tipo": "pilar",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3,
+          "noTipo": "L"
+        }
+      },
+      {
+        "id": "est-1-P10",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 210,
+            "y": 409.99999999999994
+          }
+        },
+        "vinculos": {},
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "P10",
+        "tipo": "pilar",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3,
+          "noTipo": "L"
+        }
+      },
+      {
+        "id": "est-1-VB1",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 50
+            },
+            {
+              "x": 200,
+              "y": 50
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-topo"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "VB1",
+        "tipo": "viga-baldrame",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VB2",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 200,
+              "y": 50
+            },
+            {
+              "x": 350,
+              "y": 50
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-topo"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "VB2",
+        "tipo": "viga-baldrame",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VB3",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 350,
+              "y": 50
+            },
+            {
+              "x": 500,
+              "y": 50
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-topo"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "VB3",
+        "tipo": "viga-baldrame",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VB4",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 50
+            },
+            {
+              "x": 50,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-esquerda"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "VB4",
+        "tipo": "viga-baldrame",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VB5",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 500,
+              "y": 50
+            },
+            {
+              "x": 500,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-direita"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "VB5",
+        "tipo": "viga-baldrame",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VB6",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 250
+            },
+            {
+              "x": 210,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-interna"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "VB6",
+        "tipo": "viga-baldrame",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VB7",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 210,
+              "y": 250
+            },
+            {
+              "x": 355,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-meio"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "VB7",
+        "tipo": "viga-baldrame",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VB8",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 355,
+              "y": 250
+            },
+            {
+              "x": 500,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-meio"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "VB8",
+        "tipo": "viga-baldrame",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VB9",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 250
+            },
+            {
+              "x": 50,
+              "y": 409.99999999999994
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-esquerda"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "VB9",
+        "tipo": "viga-baldrame",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VB10",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 210,
+              "y": 250
+            },
+            {
+              "x": 210,
+              "y": 409.99999999999994
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-dentro"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "VB10",
+        "tipo": "viga-baldrame",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VB11",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 409.99999999999994
+            },
+            {
+              "x": 210,
+              "y": 409.99999999999994
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-base"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "VB11",
+        "tipo": "viga-baldrame",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VS1",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 50
+            },
+            {
+              "x": 200,
+              "y": 50
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-topo"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "VS1",
+        "tipo": "viga-superior",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VS2",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 200,
+              "y": 50
+            },
+            {
+              "x": 350,
+              "y": 50
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-topo"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "VS2",
+        "tipo": "viga-superior",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VS3",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 350,
+              "y": 50
+            },
+            {
+              "x": 500,
+              "y": 50
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-topo"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "VS3",
+        "tipo": "viga-superior",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VS4",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 50
+            },
+            {
+              "x": 50,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-esquerda"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "VS4",
+        "tipo": "viga-superior",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VS5",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 500,
+              "y": 50
+            },
+            {
+              "x": 500,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-direita"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "VS5",
+        "tipo": "viga-superior",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VS6",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 250
+            },
+            {
+              "x": 210,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-interna"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "VS6",
+        "tipo": "viga-superior",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VS7",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 210,
+              "y": 250
+            },
+            {
+              "x": 355,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-meio"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "VS7",
+        "tipo": "viga-superior",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VS8",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 355,
+              "y": 250
+            },
+            {
+              "x": 500,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-meio"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "VS8",
+        "tipo": "viga-superior",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VS9",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 250
+            },
+            {
+              "x": 50,
+              "y": 409.99999999999994
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-esquerda"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "VS9",
+        "tipo": "viga-superior",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VS10",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 210,
+              "y": 250
+            },
+            {
+              "x": 210,
+              "y": 409.99999999999994
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-dentro"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "VS10",
+        "tipo": "viga-superior",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-VS11",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "polilinha",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 409.99999999999994
+            },
+            {
+              "x": 210,
+              "y": 409.99999999999994
+            }
+          ]
+        },
+        "vinculos": {
+          "paredeId": "par-base"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "VS11",
+        "tipo": "viga-superior",
+        "props": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        }
+      },
+      {
+        "id": "est-1-L1",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "poligono",
+          "pontos": [
+            {
+              "x": 50,
+              "y": 50
+            },
+            {
+              "x": 200,
+              "y": 50
+            },
+            {
+              "x": 200,
+              "y": 250
+            },
+            {
+              "x": 50,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "ambienteIds": [
+            "amb-sala"
+          ]
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "L1",
+        "tipo": "laje",
+        "props": {
+          "tipoLaje": "trelicada-eps",
+          "espessura": 0.12
+        }
+      },
+      {
+        "id": "est-1-L2",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "poligono",
+          "pontos": [
+            {
+              "x": 200,
+              "y": 50
+            },
+            {
+              "x": 375,
+              "y": 50
+            },
+            {
+              "x": 375,
+              "y": 250
+            },
+            {
+              "x": 200,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "ambienteIds": [
+            "amb-cozinha"
+          ]
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "L2",
+        "tipo": "laje",
+        "props": {
+          "tipoLaje": "trelicada-eps",
+          "espessura": 0.12
+        }
+      },
+      {
+        "id": "est-1-L3",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "poligono",
+          "pontos": [
+            {
+              "x": 375,
+              "y": 50
+            },
+            {
+              "x": 500,
+              "y": 50
+            },
+            {
+              "x": 500,
+              "y": 250
+            },
+            {
+              "x": 375,
+              "y": 250
+            }
+          ]
+        },
+        "vinculos": {
+          "ambienteIds": [
+            "amb-banheiro"
+          ]
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "L3",
+        "tipo": "laje",
+        "props": {
+          "tipoLaje": "trelicada-eps",
+          "espessura": 0.12
+        }
+      },
+      {
+        "id": "est-1-L4",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "poligono",
+          "pontos": [
+            {
+              "x": 53,
+              "y": 254.99999999999997
+            },
+            {
+              "x": 206.5,
+              "y": 254.99999999999997
+            },
+            {
+              "x": 206.5,
+              "y": 404
+            },
+            {
+              "x": 53,
+              "y": 404
+            }
+          ]
+        },
+        "vinculos": {
+          "ambienteIds": [
+            "amb-quarto"
+          ]
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "L4",
+        "tipo": "laje",
+        "props": {
+          "tipoLaje": "trelicada-eps",
+          "espessura": 0.12
+        }
+      },
+      {
+        "id": "est-1-F1",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 50,
+            "y": 50
+          }
+        },
+        "vinculos": {
+          "pilarId": "est-1-P1"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "F1",
+        "tipo": "fundacao",
+        "props": {
+          "tipoFundacao": "sapata"
+        }
+      },
+      {
+        "id": "est-1-F2",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 200,
+            "y": 50
+          }
+        },
+        "vinculos": {
+          "pilarId": "est-1-P2"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "F2",
+        "tipo": "fundacao",
+        "props": {
+          "tipoFundacao": "sapata"
+        }
+      },
+      {
+        "id": "est-1-F3",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 350,
+            "y": 50
+          }
+        },
+        "vinculos": {
+          "pilarId": "est-1-P3"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "F3",
+        "tipo": "fundacao",
+        "props": {
+          "tipoFundacao": "sapata"
+        }
+      },
+      {
+        "id": "est-1-F4",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 500,
+            "y": 50
+          }
+        },
+        "vinculos": {
+          "pilarId": "est-1-P4"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "F4",
+        "tipo": "fundacao",
+        "props": {
+          "tipoFundacao": "sapata"
+        }
+      },
+      {
+        "id": "est-1-F5",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 50,
+            "y": 250
+          }
+        },
+        "vinculos": {
+          "pilarId": "est-1-P5"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "F5",
+        "tipo": "fundacao",
+        "props": {
+          "tipoFundacao": "sapata"
+        }
+      },
+      {
+        "id": "est-1-F6",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 210,
+            "y": 250
+          }
+        },
+        "vinculos": {
+          "pilarId": "est-1-P6"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "F6",
+        "tipo": "fundacao",
+        "props": {
+          "tipoFundacao": "sapata"
+        }
+      },
+      {
+        "id": "est-1-F7",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 355,
+            "y": 250
+          }
+        },
+        "vinculos": {
+          "pilarId": "est-1-P7"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "F7",
+        "tipo": "fundacao",
+        "props": {
+          "tipoFundacao": "sapata"
+        }
+      },
+      {
+        "id": "est-1-F8",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 500,
+            "y": 250
+          }
+        },
+        "vinculos": {
+          "pilarId": "est-1-P8"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "F8",
+        "tipo": "fundacao",
+        "props": {
+          "tipoFundacao": "sapata"
+        }
+      },
+      {
+        "id": "est-1-F9",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 50,
+            "y": 409.99999999999994
+          }
+        },
+        "vinculos": {
+          "pilarId": "est-1-P9"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "F9",
+        "tipo": "fundacao",
+        "props": {
+          "tipoFundacao": "sapata"
+        }
+      },
+      {
+        "id": "est-1-F10",
+        "disciplina": "estrutura",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 210,
+            "y": 409.99999999999994
+          }
+        },
+        "vinculos": {
+          "pilarId": "est-1-P10"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "F10",
+        "tipo": "fundacao",
+        "props": {
+          "tipoFundacao": "sapata"
+        }
+      },
+      {
+        "id": "sug-el:amb-sala:luz",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 125,
+            "y": 150
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-sala"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "props": {
+          "tipoPonto": "luz",
+          "potenciaVA": 160,
+          "altura": "teto"
+        }
+      },
+      {
+        "id": "sug-el:amb-sala:interruptor:esq-p1-a",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 127.5,
+            "y": 55
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-sala"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "props": {
+          "tipoPonto": "interruptor",
+          "potenciaVA": 0,
+          "altura": "interruptor"
+        }
+      },
+      {
+        "id": "sug-el:amb-sala:interruptor:esq-p1-b",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 102.5,
+            "y": 245
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-sala"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "props": {
+          "tipoPonto": "interruptor",
+          "potenciaVA": 0,
+          "altura": "interruptor"
+        }
+      },
+      {
+        "id": "sug-el:amb-sala:tug:1",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 166.66666666666663,
+            "y": 55
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-sala"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "baixa"
+        }
+      },
+      {
+        "id": "sug-el:amb-sala:tug:2",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 195,
+            "y": 245
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-sala"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "baixa"
+        }
+      },
+      {
+        "id": "sug-el:amb-sala:tug:3",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 55,
+            "y": 166.66666666666652
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-sala"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "baixa"
+        }
+      },
+      {
+        "id": "sug-el:amb-cozinha:luz",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 287.5,
+            "y": 150
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-cozinha"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "luz",
+          "potenciaVA": 220,
+          "altura": "teto"
+        }
+      },
+      {
+        "id": "sug-el:amb-cozinha:tug:1",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 275,
+            "y": 55
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-cozinha"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "media"
+        }
+      },
+      {
+        "id": "sug-el:amb-cozinha:tug:2",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 370,
+            "y": 100
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-cozinha"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "media"
+        }
+      },
+      {
+        "id": "sug-el:amb-cozinha:tug:3",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 370,
+            "y": 245
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-cozinha"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "media"
+        }
+      },
+      {
+        "id": "sug-el:amb-cozinha:tug:4",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 225,
+            "y": 245
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-cozinha"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "media"
+        }
+      },
+      {
+        "id": "sug-el:amb-cozinha:tug:5",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 205,
+            "y": 125
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-cozinha"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "media"
+        }
+      },
+      {
+        "id": "sug-el:amb-banheiro:luz",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 437.5,
+            "y": 150
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-banheiro"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "luz",
+          "potenciaVA": 160,
+          "altura": "teto"
+        }
+      },
+      {
+        "id": "sug-el:amb-banheiro:tug:1",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 495,
+            "y": 245
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-banheiro"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "media"
+        }
+      },
+      {
+        "id": "sug-el:amb-quarto:luz",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 129.75,
+            "y": 329.49999999999994
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-quarto"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "luz",
+          "potenciaVA": 100,
+          "altura": "teto"
+        }
+      },
+      {
+        "id": "sug-el:amb-quarto:interruptor:esq-p1-b",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 157.5,
+            "y": 260
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-quarto"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "interruptor",
+          "potenciaVA": 0,
+          "altura": "interruptor"
+        }
+      },
+      {
+        "id": "sug-el:amb-quarto:tug:1",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 138.83333333333337,
+            "y": 260
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-quarto"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "baixa"
+        }
+      },
+      {
+        "id": "sug-el:amb-quarto:tug:2",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 201.5,
+            "y": 399
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-quarto"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "baixa"
+        }
+      },
+      {
+        "id": "sug-el:amb-quarto:tug:3",
+        "tipo": "ponto-eletrico",
+        "disciplina": "eletrica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 58,
+            "y": 355.83333333333326
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-quarto"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "props": {
+          "tipoPonto": "tug",
+          "potenciaVA": 100,
+          "altura": "baixa"
+        }
+      },
+      {
+        "id": "hid-sug:amb-cozinha:pia",
+        "tipo": "ponto-hidraulico",
+        "disciplina": "hidraulica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 360,
+            "y": 65
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-cozinha"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "Pia",
+        "props": {
+          "aparelho": "pia",
+          "aguaFria": true,
+          "aguaQuente": false,
+          "esgoto": true
+        }
+      },
+      {
+        "id": "hid-sug:amb-cozinha:filtro",
+        "tipo": "ponto-hidraulico",
+        "disciplina": "hidraulica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 215,
+            "y": 235
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-cozinha"
+        },
+        "origem": "sugerido-auto",
+        "status": "pendente",
+        "rotulo": "Filtro",
+        "props": {
+          "aparelho": "filtro",
+          "aguaFria": true,
+          "aguaQuente": false,
+          "esgoto": false
+        }
+      },
+      {
+        "id": "hid-sug:amb-banheiro:vaso",
+        "tipo": "ponto-hidraulico",
+        "disciplina": "hidraulica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 483.3333333333333,
+            "y": 65
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-banheiro"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "Vaso",
+        "props": {
+          "aparelho": "vaso",
+          "aguaFria": true,
+          "aguaQuente": false,
+          "esgoto": true
+        }
+      },
+      {
+        "id": "hid-sug:amb-banheiro:lavatorio",
+        "tipo": "ponto-hidraulico",
+        "disciplina": "hidraulica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 485,
+            "y": 235
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-banheiro"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "Lav.",
+        "props": {
+          "aparelho": "lavatorio",
+          "aguaFria": true,
+          "aguaQuente": false,
+          "esgoto": true
+        }
+      },
+      {
+        "id": "hid-sug:amb-banheiro:chuveiro",
+        "tipo": "ponto-hidraulico",
+        "disciplina": "hidraulica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 390,
+            "y": 158.33333333333326
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-banheiro"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "Chuv.",
+        "props": {
+          "aparelho": "chuveiro",
+          "aguaFria": true,
+          "aguaQuente": false,
+          "esgoto": false
+        }
+      },
+      {
+        "id": "hid-sug:amb-banheiro:ralo",
+        "tipo": "ponto-hidraulico",
+        "disciplina": "hidraulica",
+        "pagina": 1,
+        "geometria": {
+          "tipo": "ponto",
+          "ponto": {
+            "x": 437.5,
+            "y": 150
+          }
+        },
+        "vinculos": {
+          "ambienteId": "amb-banheiro"
+        },
+        "origem": "sugerido-auto",
+        "status": "confirmado",
+        "rotulo": "Ralo",
+        "props": {
+          "aparelho": "ralo",
+          "aguaFria": false,
+          "aguaQuente": false,
+          "esgoto": true
+        }
+      }
+    ],
+    "esquadrias": [
+      {
+        "id": "tp-P1",
+        "codigo": "P1",
+        "categoria": "porta",
+        "largura": 0.8,
+        "altura": 2.1,
+        "peitoril": 0,
+        "quantidade": 2
+      },
+      {
+        "id": "tp-J1",
+        "codigo": "J1",
+        "categoria": "janela",
+        "largura": 1.2,
+        "altura": 1,
+        "peitoril": 1.1,
+        "quantidade": 2
+      },
+      {
+        "id": "tp-J2",
+        "codigo": "J2",
+        "categoria": "janela",
+        "largura": 2,
+        "altura": 1.2,
+        "peitoril": 1,
+        "quantidade": 1
+      }
+    ],
+    "parametros": {
+      "gerais": {
+        "peDireito": 2.8,
+        "espessuraParede": 0.15,
+        "numeroPessoas": 4
+      },
+      "arquitetura": {
+        "modoDescontoVao": "acima-do-limite",
+        "limiteDescontoVaoM2": 2,
+        "subidaImpermeabilizacao": 0.3,
+        "demaosPintura": 2
+      },
+      "estrutura": {
+        "vaoMaximo": 4,
+        "distanciaFusao": 0.5,
+        "pilar": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        },
+        "baldrame": {
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        },
+        "vigaSuperior": {
+          "ativa": true,
+          "secaoB": 0.14,
+          "secaoH": 0.3
+        },
+        "fck": 25,
+        "cobrimento": 0.025,
+        "aco": {
+          "modo": "taxa",
+          "taxaPilar": 100,
+          "taxaViga": 90,
+          "taxaLaje": 60,
+          "taxaFundacao": 70,
+          "detalhado": {
+            "barrasLongitudinais": 4,
+            "bitolaLongitudinalMm": 10,
+            "bitolaEstriboMm": 5,
+            "espacamentoEstribo": 0.15
+          }
+        },
+        "laje": {
+          "tipo": "trelicada-eps",
+          "modo": "por-ambiente",
+          "espessura": 0.12,
+          "intereixo": 0.42
+        },
+        "fundacao": {
+          "tipo": "sapata",
+          "sapata": {
+            "ladoA": 0.8,
+            "ladoB": 0.8,
+            "altura": 0.3,
+            "profundidade": 1
+          },
+          "bloco": {
+            "ladoA": 0.6,
+            "ladoB": 0.6,
+            "altura": 0.4,
+            "estacasPorBloco": 1,
+            "diametroEstaca": 0.25,
+            "comprimentoEstaca": 4
+          },
+          "radier": {
+            "espessura": 0.12
+          },
+          "espessuraLastro": 0.05
+        }
+      },
+      "eletrica": {
+        "limiteVAPorCircuito": 1270,
+        "tensao": 127,
+        "alturas": {
+          "baixa": 0.3,
+          "media": 1.1,
+          "alta": 2.2,
+          "interruptor": 1.1
+        },
+        "potenciaTUG": 100,
+        "potenciaTUE": {
+          "chuveiro": 5500,
+          "micro-ondas": 1500,
+          "ar-condicionado": 1400,
+          "forno-eletrico": 2500,
+          "maquina-lavar": 1000,
+          "torneira-eletrica": 5000
+        },
+        "secoes": {
+          "iluminacao": 1.5,
+          "tug": 2.5,
+          "tue": {
+            "chuveiro": 6,
+            "micro-ondas": 2.5,
+            "ar-condicionado": 2.5,
+            "forno-eletrico": 2.5,
+            "maquina-lavar": 2.5,
+            "torneira-eletrica": 6
+          }
+        },
+        "condutores": {
+          "iluminacao": 2,
+          "tug": 3,
+          "tue": 3
+        },
+        "diametroEletrodutoMm": 25
+      },
+      "hidraulica": {
+        "diametroAFmm": 25,
+        "diametroAQmm": 22,
+        "diametroEsgotoMm": {
+          "vaso": 100,
+          "lavatorio": 40,
+          "chuveiro": 40,
+          "ralo": 40,
+          "pia": 50,
+          "filtro": 40,
+          "tanque": 50,
+          "maquina-lavar": 50
+        },
+        "alturaPontoM": {
+          "vaso": 0.2,
+          "lavatorio": 0.6,
+          "chuveiro": 2.1,
+          "ralo": 0,
+          "pia": 0.6,
+          "filtro": 1.1,
+          "tanque": 0.9,
+          "maquina-lavar": 0.9
+        },
+        "consumoPerCapitaL": 200,
+        "diasReserva": 2,
+        "percentualConexoesDiversas": 10,
+        "pluvial": false,
+        "comprimentoBarraM": 6
+      }
+    },
+    "composicoes": null,
+    "camadas": {
+      "arquitetura": true,
+      "estrutura": true,
+      "eletrica": true,
+      "hidraulica": true,
+      "materiais": true
+    }
+  }
+}
