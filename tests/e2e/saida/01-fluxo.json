@@ -237,7 +237,7 @@
     },
     {
       "ok": true,
-      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Fio / cabo de cobre (1.5\" muda com o pé-direito 2,80 → 3,00",
+      "descricao": "CRITÉRIO 7 (árvore ao vivo, sem recarregar): \"Fio / cabo de cobre (1,5\" muda com o pé-direito 2,80 → 3,00",
       "detalhe": "26,80 m+ 61,27 m pend. → 28,00 m+ 62,07 m pend."
     },
     {
@@ -248,7 +248,7 @@
     {
       "ok": true,
       "descricao": "pé-direito vazio: alvenaria, concreto de pilares, eletroduto e tubo de água somem (nada assumido)",
-      "detalhe": "{\"Parede 1 — alvenaria\":null,\"Sala — pintura de parede\":null,\"Concreto — pilares\":null,\"Forma — pilares\":null,\"Eletroduto\":null,\"Tubo de água fria\":null,\"Bloco cerâmico\":null,\"Tinta acrílica\":\"15,35 L\",\"Cimento\":\"2.874,02 kg\",\"Fio / cabo de cobre (1.5\":null}"
+      "detalhe": "{\"Parede 1 — alvenaria\":null,\"Sala — pintura de parede\":null,\"Concreto — pilares\":null,\"Forma — pilares\":null,\"Eletroduto\":null,\"Tubo de água fria\":null,\"Bloco cerâmico\":null,\"Tinta acrílica\":\"15,35 L\",\"Cimento\":\"2.874,02 kg\",\"Fio / cabo de cobre (1,5\":null}"
     },
     {
       "ok": true,
@@ -273,7 +273,7 @@
     {
       "ok": true,
       "descricao": "ocultar camadas muda o desenho da planta",
-      "detalhe": "60751 → 20314 bytes de PNG"
+      "detalhe": "60773 → 20314 bytes de PNG"
     },
     {
       "ok": true,
@@ -283,7 +283,7 @@
     {
       "ok": true,
       "descricao": "clicar num pilar na planta (ferramenta Selecionar) seleciona 1 elemento",
-      "detalhe": "[\"est-1-F4\"]"
+      "detalhe": "[\"est-1-P4\"]"
     },
     {
       "ok": true,
@@ -339,9 +339,9 @@
   "registro": {
     "erros": [],
     "avisos": [
-      "[.WebGL-0x3ca4001a2a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-      "[.WebGL-0x3ca4001a2a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-      "[.WebGL-0x3ca4001a2a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      "[.WebGL-0x2ad400921000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "[.WebGL-0x2ad400921000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "[.WebGL-0x2ad400921000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
     ],
     "externas": []
   }

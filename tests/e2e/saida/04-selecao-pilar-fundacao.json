@@ -1,9 +1,9 @@
 {
   "itens": [
     {
-      "ok": false,
+      "ok": true,
       "descricao": "[ACHADO-V1] é possível selecionar com o mouse um pilar que tem sapata sugerida no mesmo ponto",
-      "detalhe": "{\"laje\":23,\"fundacao\":158,\"viga-superior\":18,\"(nada)\":26}"
+      "detalhe": "{\"laje\":23,\"fundacao\":128,\"viga-superior\":18,\"pilar\":30,\"(nada)\":26}"
     },
     {
       "ok": true,

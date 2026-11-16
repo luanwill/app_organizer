@@ -48,16 +48,16 @@ PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Tubo de água fria" mud
 PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Bloco cerâmico" muda com o pé-direito 2,80 → 3,00 | 1.702,40 un → 1.827,00 un
 PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Tinta acrílica" muda com o pé-direito 2,80 → 3,00 | 39,38 L → 41,16 L
 PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Cimento" muda com o pé-direito 2,80 → 3,00 | 3.352,50 kg → 3.383,37 kg
-PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Fio / cabo de cobre (1.5" muda com o pé-direito 2,80 → 3,00 | 26,80 m+ 61,27 m pend. → 28,00 m+ 62,07 m pend.
+PASSOU | CRITÉRIO 7 (árvore ao vivo, sem recarregar): "Fio / cabo de cobre (1,5" muda com o pé-direito 2,80 → 3,00 | 26,80 m+ 61,27 m pend. → 28,00 m+ 62,07 m pend.
 PASSOU | Parede 1 (9 m) — alvenaria = 27,00 m² com pé-direito 3,00 | 27,00 m²
-PASSOU | pé-direito vazio: alvenaria, concreto de pilares, eletroduto e tubo de água somem (nada assumido) | {"Parede 1 — alvenaria":null,"Sala — pintura de parede":null,"Concreto — pilares":null,"Forma — pilares":null,"Eletroduto":null,"Tubo de água fria":null,"Bloco cerâmico":null,"Tinta acrílica":"15,35 L","Cimento":"2.874,02 kg","Fio / cabo de cobre (1.5":null}
+PASSOU | pé-direito vazio: alvenaria, concreto de pilares, eletroduto e tubo de água somem (nada assumido) | {"Parede 1 — alvenaria":null,"Sala — pintura de parede":null,"Concreto — pilares":null,"Forma — pilares":null,"Eletroduto":null,"Tubo de água fria":null,"Bloco cerâmico":null,"Tinta acrílica":"15,35 L","Cimento":"2.874,02 kg","Fio / cabo de cobre (1,5":null}
 PASSOU | pé-direito vazio: alertas "Dado faltante" nas 4 disciplinas | 4 blocos de alerta
 PASSOU | voltar a 2,80 restaura exatamente as quantidades
 PASSOU | botões de camada por disciplina | Arquitetura, Estrutura, Elétrica, Hidráulica
 PASSOU | liga/desliga de camadas altera o estado | {"arquitetura":true,"estrutura":false,"eletrica":false,"hidraulica":false,"materiais":true}
-PASSOU | ocultar camadas muda o desenho da planta | 60751 → 20314 bytes de PNG
+PASSOU | ocultar camadas muda o desenho da planta | 60773 → 20314 bytes de PNG
 PASSOU | clicar numa linha da árvore seleciona o elemento na planta
-PASSOU | clicar num pilar na planta (ferramenta Selecionar) seleciona 1 elemento | ["est-1-F4"]
+PASSOU | clicar num pilar na planta (ferramenta Selecionar) seleciona 1 elemento | ["est-1-P4"]
 PASSOU | selo fixo de materiais presente
 PASSOU | botão "Recortes IA" desabilitado
 PASSOU | botão "Recortes IA" com a dica "em breve" | em breve
@@ -123,35 +123,35 @@ PASSOU | comprimento total das paredes desenhadas ≈ 35,60 m (snap nos vértice
 PASSOU | snap a vértice: paredes consecutivas compartilham exatamente o mesmo ponto
 PASSOU | 4 ambientes desenhados (retângulo, 2 cliques) | Ambiente 1, Ambiente 2, Ambiente 3, Ambiente 4
 INFO   | painel Arquitetura após desenhar: Arquitetura | Estrutura | Elétrica | Hidráulica | Materiais | Importar | DESENHAR | Ambiente (polígono) | Ambiente (retângulo) | Parede | ESQUADRIAS | Nenhum tipo cadastrado. Adicione portas e janelas para posicioná-las nas paredes. | + Porta | + Janela | AMBIENTES | Ambiente 1 | 12,03 m² · 14,02 m | Ambiente 2 | 14,09 m² · 15,05 m | Ambiente 3 | 10,03 m² · 13,02 m | Ambiente 4 | 10,23 m² · 12,79 m
-PASSOU | clicar no ambiente na lista do painel seleciona-o | ["db3134a7-3ab0-4847-b4d1-6f1c14752f45"]
+PASSOU | clicar no ambiente na lista do painel seleciona-o | ["71eac87b-7434-45bd-a240-bbff6fb11022"]
 PASSOU | trocar o tipo para "banheiro" no painel marca área molhada automaticamente | {"nome":"Ambiente 3","tipoAmbiente":"banheiro","areaMolhada":true,"coberto":true}
 PASSOU | Sala desenhada com o mouse (snap nos vértices das paredes): 12 m² / 14 m ±1% | {"Sala — área":12.03,"Sala — perímetro":14.02,"Cozinha — área":14.09,"Cozinha — perímetro":15.05,"Banheiro — área":10.03,"Banheiro — perímetro":13.02,"Quarto — área":10.23,"Quarto — perímetro":12.79}
 INFO   | Quarto (cliques a 6–10 cm dos vértices das paredes): o snap puxou os cantos para os vértices → 10.23 m² / 12.79 m (esperado sem snap: 9,15 / 12,10)
 PASSOU | cadastro: "+ Porta" cria P1 0,80 × 2,10 e "+ Janela" cria J1 1,20 × 1,00 | [["P1",0.8,2.1],["J1",1.2,1]]
 PASSOU | esquadrias posicionadas com clique na parede (clique longe de parede não cria) | 3 esquadrias
-PASSOU | esquadria clicada a 20 cm do eixo é projetada no eixo da parede e vinculada a ela | {"p":{"x":99.75544404145077,"y":49.50045475712437},"v":{"paredeId":"954833c7-a8f2-45db-934a-0e2246500bb9","ambienteId":"42809418-e915-417e-8c59-fb5f985cb106"}}
+PASSOU | esquadria clicada a 20 cm do eixo é projetada no eixo da parede e vinculada a ela | {"p":{"x":99.75544404145077,"y":49.50045475712437},"v":{"paredeId":"906f5e76-5063-4d80-9d4d-14bb625407e8","ambienteId":"3f3d4cbe-ec3c-4d1e-9eb9-562e08bd1e44"}}
 PASSOU | cadastro mostra a divergência "posicionadas 2 de 1" | posicionadas 2 de 1 | posicionadas 1 de 1
 PASSOU | quadro, reservatório e caixa de inspeção posicionados com clique (confirmados) | [["quadro","confirmado","em-ambiente"],["reservatorio","confirmado","em-ambiente"],["caixa-inspecao","confirmado","fora"]]
 PASSOU | ponto dentro de ambiente ganha vinculos.ambienteId; fora, não | [["quadro","confirmado","em-ambiente"],["reservatorio","confirmado","em-ambiente"],["caixa-inspecao","confirmado","fora"]]
 PASSOU | CRITÉRIOS 3 e 4 com paredes desenhadas pelo mouse: pilares nos cantos/T/intermediários e baldrame = 100% das paredes | 12 pilares; baldrame 35.64 m × paredes 35.64 m
-FALHOU | [ACHADO-S2] paredes nominais de 4,00 m desenhadas/calibradas com o mouse (erro de clique ≈ 1 px ≈ 0,2%) NÃO deveriam ganhar pilar intermediário — esperado 10 pilares | 12 pilares; trechos de baldrame (m): 3.003, 3.003, 3.003, 2.006, 2.006, 2.006, 2.006, 3.199, 2.906, 2.906, 3.199, 3.199, 3.199
+INFO   | [ACHADO-S2, aceito por decisão] 12 pilares com paredes/calibração feitas pelo mouse (10 com medidas exatas); trechos de baldrame (m): 3.003, 3.003, 3.003, 2.006, 2.006, 2.006, 2.006, 3.199, 2.906, 2.906, 3.199, 3.199, 3.199
 PASSOU | sugestões elétricas e hidráulicas geradas sobre os ambientes desenhados | {"pilar/pendente":12,"viga-baldrame/pendente":13,"viga-superior/pendente":13,"laje/pendente":4,"fundacao/pendente":12,"ponto-eletrico/pendente":19,"ponto-hidraulico/pendente":6}
 PASSOU | painel Estrutura: "Aceitar" confirma 1 pilar e "Descartar" remove 1 pilar | ["confirmado","pendente","pendente","pendente","pendente","pendente","pendente","pendente","pendente","pendente","pendente"]
 PASSOU | árvore: Pilares = 1 confirmado + (n − 2) pendentes | 1,00 un+ 10,00 un pend.
 PASSOU | tecla Delete remove o selecionado e Ctrl+Z desfaz | 10 → 11
 PASSOU | arrastar um ponto sugerido na planta move o elemento | {"x":166.49658636442143,"y":54.49054793276698} → {"x":180.74736408462874,"y":75.86671451307787}
 PASSOU | "Aceitar todas" (árvore) confirma tudo e o aviso de pendentes some | 0 pendentes
-PASSOU | capturarPlantaComCamadas devolve PNG da planta com as camadas | data:image/png;base64,iVBORw0K…174806
+PASSOU | capturarPlantaComCamadas devolve PNG da planta com as camadas | data:image/png;base64,iVBORw0K…175166
 PASSOU | "Exportar PDF da planta" monta o documento de impressão (iframe) | 1 iframe(s)
 PASSOU | nenhum erro de console / pageerror
 PASSOU | nenhuma requisição de rede fora do localhost
 
-== 03-desenho-pela-interface: 27 passaram, 1 falharam
+== 03-desenho-pela-interface: 27 passaram, 0 falharam
    erros de console/pageerror: 0; requisições externas: 0
 ########## tests/e2e/04-selecao-pilar-fundacao.cjs
-INFO   | 225 cliques numa grade de ±14 px em volta do pilar P7 (zoom ampliado) selecionaram: {"laje":23,"fundacao":158,"viga-superior":18,"(nada)":26}
-FALHOU | [ACHADO-V1] é possível selecionar com o mouse um pilar que tem sapata sugerida no mesmo ponto | {"laje":23,"fundacao":158,"viga-superior":18,"(nada)":26}
+INFO   | 225 cliques numa grade de ±14 px em volta do pilar P7 (zoom ampliado) selecionaram: {"laje":23,"fundacao":128,"viga-superior":18,"pilar":30,"(nada)":26}
+PASSOU | [ACHADO-V1] é possível selecionar com o mouse um pilar que tem sapata sugerida no mesmo ponto | {"laje":23,"fundacao":128,"viga-superior":18,"pilar":30,"(nada)":26}
 PASSOU | nenhum erro de console / pageerror
 
-== 04-selecao-pilar-fundacao: 1 passaram, 1 falharam
+== 04-selecao-pilar-fundacao: 2 passaram, 0 falharam
    erros de console/pageerror: 0; requisições externas: 0

@@ -211,7 +211,7 @@ const L = require('./_lib.cjs');
   await L.foto(page, '12-parcial-aceito.png');
 
   // ------------------------------------------------------------ critério 7: pé-direito ao vivo
-  const chaves = ['Parede 1 — alvenaria', 'Sala — pintura de parede', 'Concreto — pilares', 'Forma — pilares', 'Eletroduto', 'Tubo de água fria', 'Bloco cerâmico', 'Tinta acrílica', 'Cimento', 'Fio / cabo de cobre (1.5'];
+  const chaves = ['Parede 1 — alvenaria', 'Sala — pintura de parede', 'Concreto — pilares', 'Forma — pilares', 'Eletroduto', 'Tubo de água fria', 'Bloco cerâmico', 'Tinta acrílica', 'Cimento', 'Fio / cabo de cobre (1,5'];
   const ler = async () => Object.fromEntries(await Promise.all(chaves.map(async (c) => [c, await L.linhaDaArvore(page, c)])));
   const a280 = await ler();
   await page.locator('.etapas button', { hasText: 'Dados essenciais' }).click();

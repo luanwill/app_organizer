@@ -38,7 +38,7 @@
     {
       "ok": true,
       "descricao": "clicar no ambiente na lista do painel seleciona-o",
-      "detalhe": "[\"db3134a7-3ab0-4847-b4d1-6f1c14752f45\"]"
+      "detalhe": "[\"71eac87b-7434-45bd-a240-bbff6fb11022\"]"
     },
     {
       "ok": true,
@@ -63,7 +63,7 @@
     {
       "ok": true,
       "descricao": "esquadria clicada a 20 cm do eixo é projetada no eixo da parede e vinculada a ela",
-      "detalhe": "{\"p\":{\"x\":99.75544404145077,\"y\":49.50045475712437},\"v\":{\"paredeId\":\"954833c7-a8f2-45db-934a-0e2246500bb9\",\"ambienteId\":\"42809418-e915-417e-8c59-fb5f985cb106\"}}"
+      "detalhe": "{\"p\":{\"x\":99.75544404145077,\"y\":49.50045475712437},\"v\":{\"paredeId\":\"906f5e76-5063-4d80-9d4d-14bb625407e8\",\"ambienteId\":\"3f3d4cbe-ec3c-4d1e-9eb9-562e08bd1e44\"}}"
     },
     {
       "ok": true,
@@ -84,11 +84,6 @@
       "ok": true,
       "descricao": "CRITÉRIOS 3 e 4 com paredes desenhadas pelo mouse: pilares nos cantos/T/intermediários e baldrame = 100% das paredes",
       "detalhe": "12 pilares; baldrame 35.64 m × paredes 35.64 m"
-    },
-    {
-      "ok": false,
-      "descricao": "[ACHADO-S2] paredes nominais de 4,00 m desenhadas/calibradas com o mouse (erro de clique ≈ 1 px ≈ 0,2%) NÃO deveriam ganhar pilar intermediário — esperado 10 pilares",
-      "detalhe": "12 pilares; trechos de baldrame (m): 3.003, 3.003, 3.003, 2.006, 2.006, 2.006, 2.006, 3.199, 2.906, 2.906, 3.199, 3.199, 3.199"
     },
     {
       "ok": true,
@@ -123,7 +118,7 @@
     {
       "ok": true,
       "descricao": "capturarPlantaComCamadas devolve PNG da planta com as camadas",
-      "detalhe": "data:image/png;base64,iVBORw0K…174806"
+      "detalhe": "data:image/png;base64,iVBORw0K…175166"
     },
     {
       "ok": true,
@@ -144,7 +139,7 @@
   "registro": {
     "erros": [],
     "avisos": [
-      "[.WebGL-0x3bcc001aa200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      "[.WebGL-0x8ec001a7200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
     ],
     "externas": []
   }

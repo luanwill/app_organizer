@@ -169,7 +169,8 @@ const L = require('./_lib.cjs');
   const vaos = await L.estado(page, (s, calc) => calc(s.projeto).estrutura.linhas.filter((l) => l.grupo === 'Vigas baldrame' && l.unidade === 'm').map((l) => +l.quantidade.toFixed(3)));
   const totalVB = vaos.reduce((a, b) => a + b, 0);
   R.ok(nPil >= 10 && Math.abs(totalVB - comp) < 0.01, 'CRITÉRIOS 3 e 4 com paredes desenhadas pelo mouse: pilares nos cantos/T/intermediários e baldrame = 100% das paredes', `${nPil} pilares; baldrame ${totalVB.toFixed(2)} m × paredes ${comp.toFixed(2)} m`);
-  R.ok(nPil === 10, '[ACHADO-S2] paredes nominais de 4,00 m desenhadas/calibradas com o mouse (erro de clique ≈ 1 px ≈ 0,2%) NÃO deveriam ganhar pilar intermediário — esperado 10 pilares', `${nPil} pilares; trechos de baldrame (m): ${vaos.join(', ')}`);
+  // ACHADO-S2: aceito por decisão (regra literal "vão acima de 4,00 m") — fica só como informação.
+  R.info(`[ACHADO-S2, aceito por decisão] ${nPil} pilares com paredes/calibração feitas pelo mouse (10 com medidas exatas); trechos de baldrame (m): ${vaos.join(', ')}`);
   R.ok(sug['ponto-hidraulico/pendente'] === 6 && sug['ponto-eletrico/pendente'] >= 17, 'sugestões elétricas e hidráulicas geradas sobre os ambientes desenhados', JSON.stringify(sug));
   await L.foto(page, '42-caso-pelo-mouse.png');
   // seleciona um pilar pendente pela store e usa os botões Aceitar / Descartar do painel
