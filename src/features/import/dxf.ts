@@ -4,14 +4,15 @@
  */
 import DxfParserPadrao from 'dxf-parser';
 import type { Elemento, ElementoDe, Ponto, ResultadoImportacao } from '@/core/model';
-import { areaPoligono, arredondar, distancia, formatarNumero, pontoEmPoligono } from '@/core/calc';
+import { arredondar, distancia, formatarNumero } from '@/core/calc';
 import { novoId } from '@/core/store';
-import { classificarAmbiente } from './ambientes';
+import { atribuirTextos, classificarAmbiente, escolherNome } from './ambientes';
 import {
   MARGEM_PAGINA_FRACAO,
   METROS_POR_UNIDADE_DXF,
   MINIMO_VERTICES_POLIGONO,
   PAREDE_DXF,
+  type ConfigParede,
   TOLERANCIA_FECHAMENTO_FRACAO,
   type UnidadeDxf,
 } from './config';
@@ -192,6 +193,7 @@ interface Seg {
   meio: Ponto;
   /** Trechos já usados em algum par (parâmetro ao longo do próprio segmento). */
   usados: [number, number][];
+  peso: number;
 }
 
 interface Par {
@@ -202,6 +204,8 @@ interface Par {
   lado: number;
   inicio: number;
   fim: number;
+  /** Menor peso (largura do traço) entre os dois segmentos. */
+  peso: number;
 }
 
 export interface ParedeDetectada {
@@ -209,19 +213,27 @@ export interface ParedeDetectada {
   eixo: [Ponto, Ponto];
   /** Espessura (m), arredondada ao centímetro. */
   espessura: number;
+  /** Menor peso entre as duas faces (0 quando os pesos não são informados). */
+  peso: number;
 }
 
 /**
  * Pares de segmentos paralelos com sobreposição longitudinal e distância de parede.
  * `escala` = metros por unidade dos segmentos. Cada trecho de segmento entra em no máximo um par.
+ * `pesos` (opcional, um por segmento; ex.: largura do traço no PDF): pares de traços mais pesados são
+ * formados primeiro — em planta baixa, o que é cortado (parede) sai com a pena mais grossa.
  */
-export function detectarParedes(segmentos: [Ponto, Ponto][], escala: number): ParedeDetectada[] {
-  const cfg = PAREDE_DXF;
+export function detectarParedes(
+  segmentos: [Ponto, Ponto][],
+  escala: number,
+  cfg: ConfigParede = PAREDE_DXF,
+  pesos?: number[],
+): ParedeDetectada[] {
   const senoMax = Math.sin((cfg.toleranciaAngularGraus * Math.PI) / 180);
   const folga = cfg.folgaDistanciaM / escala;
 
   const segs: Seg[] = [];
-  for (const [a, b] of segmentos) {
+  for (const [indice, [a, b]] of segmentos.entries()) {
     const comprimento = distancia(a, b);
     if (!(comprimento > 0)) continue;
     segs.push({
@@ -231,6 +243,7 @@ export function detectarParedes(segmentos: [Ponto, Ponto][], escala: number): Pa
       uy: (b.y - a.y) / comprimento,
       meio: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 },
       usados: [],
+      peso: pesos?.[indice] ?? 0,
     });
   }
 
@@ -253,11 +266,11 @@ export function detectarParedes(segmentos: [Ponto, Ponto][], escala: number): Pa
       const inicio = Math.max(0, Math.min(t1, t2));
       const fim = Math.min(si.comprimento, Math.max(t1, t2));
       if ((fim - inicio) * escala < cfg.sobreposicaoMinM) continue;
-      pares.push({ i, j, distancia: d, lado, inicio, fim });
+      pares.push({ i, j, distancia: d, lado, inicio, fim, peso: Math.min(si.peso, sj.peso) });
     }
   }
-  // faces mais próximas primeiro; em empate, a maior sobreposição
-  pares.sort((p, q) => p.distancia - q.distancia || q.fim - q.inicio - (p.fim - p.inicio));
+  // traços mais pesados primeiro; depois as faces mais próximas; em empate, a maior sobreposição
+  pares.sort((p, q) => q.peso - p.peso || p.distancia - q.distancia || q.fim - q.inicio - (p.fim - p.inicio));
 
   const livre = (s: Seg, ini: number, fim: number): boolean =>
     s.usados.every(([u0, u1]) => fim <= u0 + folga || ini >= u1 - folga);
@@ -282,6 +295,7 @@ export function detectarParedes(segmentos: [Ponto, Ponto][], escala: number): Pa
         { x: p1.x + nx, y: p1.y + ny },
       ],
       espessura: arredondar(par.distancia * escala, cfg.casasEspessura),
+      peso: par.peso,
     });
   }
   return paredes;
@@ -314,23 +328,14 @@ export function importarDXF(textoDxf: string, opcoes: OpcoesDXF): ResultadoDXF {
 
   // --- ambientes: polígonos + textos internos (o texto vai para o menor polígono que o contém)
   const poligonos = desenho.poligonos.map((pts) => pts.map(mapear));
-  const textosPorPoligono: string[][] = poligonos.map(() => []);
-  let textosSoltos = 0;
-  for (const t of desenho.textos) {
-    const p = mapear(t.ponto);
-    let alvo = -1;
-    poligonos.forEach((pol, i) => {
-      if (!pontoEmPoligono(p, pol)) return;
-      if (alvo === -1 || areaPoligono(pol) < areaPoligono(poligonos[alvo]!)) alvo = i;
-    });
-    if (alvo === -1) textosSoltos++;
-    else textosPorPoligono[alvo]!.push(t.texto);
-  }
+  const { porPoligono: textosPorPoligono, soltos: textosSoltos } = atribuirTextos(
+    poligonos,
+    desenho.textos.map((t) => ({ texto: t.texto, ponto: mapear(t.ponto) })),
+  );
 
   poligonos.forEach((pontos, i) => {
     const textos = textosPorPoligono[i]!;
-    // preferência: texto que indica o tipo; depois o primeiro com letras (ignora cotas/áreas)
-    const nomeLido = textos.find((t) => classificarAmbiente(t) !== null) ?? textos.find((t) => /\p{L}/u.test(t));
+    const nomeLido = escolherNome(textos);
     const nome = nomeLido ?? `Ambiente ${i + 1}`;
     const classe = nomeLido === undefined ? null : classificarAmbiente(nomeLido);
     if (nomeLido === undefined) pendencias.push(`${nome} sem nome`);

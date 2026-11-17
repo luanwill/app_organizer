@@ -7,3 +7,7 @@ export type { ContextoJSON, ResultadoJSON } from './json';
 export { gerarPdfEmBranco } from './pdfEmBranco';
 export { aiAnalyzer } from './ia';
 export { PainelImportacao } from './PainelImportacao';
+export { extrairVetores, paraEntradaDoReconhecimento } from './pdfVetores';
+export type { PaginaPdf, TracoVetorial, VetoresDaPagina } from './pdfVetores';
+export { reconhecerVetores, ehDoReconhecimentoPdf } from './reconhecimento';
+export type { EntradaVetores, OpcoesReconhecimento, ResultadoReconhecimento } from './reconhecimento';

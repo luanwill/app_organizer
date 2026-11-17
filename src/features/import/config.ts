@@ -19,8 +19,17 @@ export const MARGEM_PAGINA_FRACAO = 0.05;
 export const PAGINA_EM_BRANCO = { largura: 1190.55, altura: 841.89 };
 export const NOME_PDF_EM_BRANCO = 'importado.pdf';
 
+export interface ConfigParede {
+  distanciaMinM: number;
+  distanciaMaxM: number;
+  folgaDistanciaM: number;
+  toleranciaAngularGraus: number;
+  sobreposicaoMinM: number;
+  casasEspessura: number;
+}
+
 /** Detecção de paredes por pares de linhas paralelas. */
-export const PAREDE_DXF = {
+export const PAREDE_DXF: ConfigParede = {
   /** Distância mínima/máxima entre as duas faces (m). */
   distanciaMinM: 0.05,
   distanciaMaxM: 0.4,
@@ -81,3 +90,46 @@ export const VERSAO_PROJETO = 1;
 export const CASAS_PDF = 2;
 
 export const TEXTO_EM_BREVE = 'em breve';
+
+/** Reconhecimento de paredes e ambientes nos traços de um PDF vetorial. */
+export const RECONHECIMENTO_PDF = {
+  /** Prefixo dos ids gerados: permite trocar o resultado anterior ao reconhecer de novo. */
+  prefixoId: 'pdfvet-',
+  /** Traços mais curtos que isto (m) são ruído (hachuras, símbolos, letras em curvas). */
+  comprimentoMinSegmentoM: 0.1,
+  /** Faixa de espessura mais estreita que a do DXF: no PDF há hachuras e mobiliário entre os traços. */
+  parede: {
+    distanciaMinM: 0.08,
+    distanciaMaxM: 0.26,
+    folgaDistanciaM: 1e-6,
+    toleranciaAngularGraus: 2,
+    sobreposicaoMinM: 0.1,
+    casasEspessura: 2,
+  } satisfies ConfigParede,
+  /** Trechos colineares de mesma espessura separados por até isto (m) viram uma parede só (vão de porta/passagem). */
+  vaoMaximoM: 1.6,
+  /** Vão livre máximo (m) fechado a partir da PONTA de uma parede até a parede perpendicular seguinte (porta de canto). */
+  vaoMaximoNaPontaM: 1.2,
+  /** Diferença máxima de espessura (m) entre trechos da mesma parede. */
+  toleranciaEspessuraM: 0.011,
+  /** Desalinhamento lateral máximo (m) entre trechos da mesma parede. */
+  toleranciaColinearM: 0.02,
+  /** Traços com as mesmas extremidades dentro desta malha (m) são o mesmo traço repetido. */
+  toleranciaRepetidoM: 0.005,
+  /** Uma candidata é descartada quando mais que esta fração do seu comprimento cai dentro do corpo de outra parede. */
+  fracaoSobreposicaoCorpo: 0.5,
+  /** Folga (m), além da meia espessura das duas paredes, para estender um eixo até o encontro com outro. */
+  folgaJuncaoM: 0.05,
+  /** Vértices de eixos mais próximos que isto (m) são o mesmo nó. */
+  toleranciaNoM: 0.02,
+  /** Faces menores que isto (m²) não são ambientes (shafts, pilares, sobras entre traços). */
+  areaMinAmbienteM2: 1,
+  /** Uma espessura é "de parede" quando responde por ao menos esta fração do contorno dos cômodos nomeados. */
+  fracaoEspessuraReferencia: 0.15,
+  /** Diferença relativa aceita entre a área reconhecida e a área escrita na planta ("11,06 m²"). */
+  toleranciaAreaEscrita: 0.03,
+  /** Acima disto o reconhecimento não roda (a comparação par a par travaria o navegador). */
+  maxSegmentos: 8000,
+  /** Com menos traços que isto a página é tratada como não vetorial (imagem/escaneado). */
+  minSegmentosVetorial: 4,
+};
