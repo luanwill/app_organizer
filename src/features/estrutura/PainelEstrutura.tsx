@@ -1,16 +1,33 @@
 /** Etapa 3, aba Estrutura: aviso fixo, sugestão automática, pendentes, elemento selecionado e parâmetros. */
 import { useEffect, useState } from 'react';
-import type { Elemento, PatchParametros, TipoFundacao, TipoLaje } from '@/core/model';
+import type { AlvoDesenho, Elemento, FuncaoCalha, ModoFerramenta, PatchParametros, PropsTelhado, TipoFundacao, TipoLaje, TipoTelha } from '@/core/model';
 import { AVISO_ESTRUTURA } from '@/core/model';
 import { arredondar, escalaValida, formatarNumero, lerNumero } from '@/core/calc';
 import { useLevantamento } from '@/core/store';
-import { alturaDoPilar } from './calcular';
-import { ROTULO_TIPO_LAJE } from './config';
-import { sugerirEstrutura } from './sugerir';
+import { alturaDoCondutor, alturaDoPilar } from './calcular';
+import { PREFIXO_CALHA, PREFIXO_TELHADO, ROTULO_FUNCAO_CALHA, ROTULO_TIPO_LAJE, ROTULO_TIPO_TELHA } from './config';
+import { proximoRotulo, sugerirEstrutura } from './sugerir';
 
 const CM = 100; // fator de exibição: metros → centímetros
 const CASAS_GRAVACAO = 6;
 const TIPOS_LAJE = Object.keys(ROTULO_TIPO_LAJE) as TipoLaje[];
+const TIPOS_TELHA = Object.keys(ROTULO_TIPO_TELHA) as TipoTelha[];
+
+/** Ferramentas de desenho da cobertura: o que cada botão cria. */
+type Desenho = 'telhado' | FuncaoCalha;
+const MODO_DESENHO: Record<Desenho, ModoFerramenta> = { telhado: 'poligono', calha: 'polilinha', rufo: 'polilinha', condutor: 'ponto' };
+const TEXTO_DESENHO: Record<Desenho, string> = { telhado: 'Telhado', calha: 'Calha', rufo: 'Rufo', condutor: 'Condutor' };
+
+function alvoDesenho(desenho: Desenho, elementos: Elemento[], beiral: number): AlvoDesenho {
+  if (desenho === 'telhado') {
+    const props: PropsTelhado = { tipoTelha: null, inclinacaoPct: null, aguas: 2, direcao: 'horizontal', beiral };
+    return { tipo: 'telhado', props, rotulo: proximoRotulo(elementos, 'telhado', PREFIXO_TELHADO) };
+  }
+  return { tipo: 'calha', props: { funcao: desenho }, rotulo: proximoRotulo(elementos, 'calha', PREFIXO_CALHA[desenho]) };
+}
+
+const desenhoDoAlvo = (alvo: AlvoDesenho | undefined): Desenho | null =>
+  alvo?.tipo === 'telhado' ? 'telhado' : alvo?.tipo === 'calha' ? (alvo.props as { funcao: FuncaoCalha }).funcao : null;
 const ROTULO_FUNDACAO: Record<TipoFundacao, string> = {
   sapata: 'Sapata',
   'bloco-estaca': 'Bloco + estaca(s)',
@@ -115,6 +132,89 @@ function ElementoSelecionado({ elemento }: { elemento: Elemento }) {
           <CampoNumero rotulo="Espessura (cm)" valor={elemento.props.espessura} fator={CM} casas={1} aoMudar={(espessura) => props({ espessura })} />
         </>
       )}
+      {elemento.tipo === 'telhado' && (
+        <>
+          <label className="campo">
+            <span>Tipo de telha</span>
+            <select
+              className={elemento.props.tipoTelha === null ? 'alerta-faltante' : ''}
+              value={elemento.props.tipoTelha ?? ''}
+              onChange={(e) => props({ tipoTelha: e.target.value === '' ? null : e.target.value })}
+            >
+              <option value="">— informe —</option>
+              {TIPOS_TELHA.map((t) => (
+                <option key={t} value={t}>
+                  {ROTULO_TIPO_TELHA[t]}
+                </option>
+              ))}
+            </select>
+          </label>
+          {elemento.props.tipoTelha === null && (
+            <p className="alerta-faltante">Dado faltante: tipo de telha (telhamento, madeiramento e cumeeira ficam fora).</p>
+          )}
+          <CampoNumero
+            rotulo="Inclinação própria (%)"
+            valor={elemento.props.inclinacaoPct}
+            casas={0}
+            dica={
+              elemento.props.tipoTelha === null
+                ? 'do tipo'
+                : formatarNumero(projeto.parametros.estrutura.cobertura.inclinacaoPct[elemento.props.tipoTelha], 0)
+            }
+            aoMudar={(inclinacaoPct) => props({ inclinacaoPct })}
+            aoLimpar={() => props({ inclinacaoPct: null })}
+          />
+          <label className="campo">
+            <span>Águas</span>
+            <select value={elemento.props.aguas} onChange={(e) => props({ aguas: Number(e.target.value) })}>
+              <option value={1}>1 água</option>
+              <option value={2}>2 águas</option>
+              <option value={4}>4 águas</option>
+            </select>
+          </label>
+          {elemento.props.aguas !== 4 && (
+            <label className="campo">
+              <span>{elemento.props.aguas === 1 ? 'Caimento' : 'Cumeeira'}</span>
+              <select value={elemento.props.direcao} onChange={(e) => props({ direcao: e.target.value })}>
+                <option value="horizontal">Horizontal na planta</option>
+                <option value="vertical">Vertical na planta</option>
+              </select>
+            </label>
+          )}
+        </>
+      )}
+      {elemento.tipo === 'calha' &&
+        (elemento.props.funcao === 'condutor' ? (
+          <>
+            <CampoNumero
+              rotulo="Diâmetro (mm)"
+              valor={elemento.props.diametroMm ?? null}
+              casas={0}
+              dica={formatarNumero(projeto.parametros.estrutura.cobertura.diametroCondutorMm, 0)}
+              aoMudar={(diametroMm) => props({ diametroMm })}
+              aoLimpar={() => props({ diametroMm: null })}
+            />
+            {alturaDoCondutor(elemento, projeto) === null ? (
+              <p className="alerta-faltante">Dado faltante: pé-direito ou altura do condutor.</p>
+            ) : (
+              <p className="suave">Comprimento: {formatarNumero(alturaDoCondutor(elemento, projeto)!)} m.</p>
+            )}
+          </>
+        ) : (
+          <CampoNumero
+            rotulo={`${ROTULO_FUNCAO_CALHA[elemento.props.funcao]} — desenvolvimento (cm)`}
+            valor={elemento.props.desenvolvimentoCm ?? null}
+            casas={0}
+            dica={formatarNumero(
+              elemento.props.funcao === 'calha'
+                ? projeto.parametros.estrutura.cobertura.desenvolvimentoCalhaCm
+                : projeto.parametros.estrutura.cobertura.desenvolvimentoRufoCm,
+              0,
+            )}
+            aoMudar={(desenvolvimentoCm) => props({ desenvolvimentoCm })}
+            aoLimpar={() => props({ desenvolvimentoCm: null })}
+          />
+        ))}
       {elemento.tipo === 'fundacao' && <p className="suave">{ROTULO_FUNDACAO[elemento.props.tipoFundacao]} — dimensões nos parâmetros abaixo.</p>}
       <div className="linha">
         {pendente && (
@@ -139,12 +239,30 @@ export function PainelEstrutura() {
   const mudar = (patch: NonNullable<PatchParametros['estrutura']>) => estado().atualizarParametros({ estrutura: patch });
 
   const temEscala = escalaValida(projeto.paginas[pagina]?.escala);
-  const temParedes = projeto.elementos.some((e) => e.tipo === 'parede' && e.pagina === pagina);
+  const temParedes = projeto.elementos.some(
+    (e) => e.pagina === pagina && (e.tipo === 'parede' || (e.tipo === 'ambiente' && e.props.coberto === true)),
+  );
   const motivo = !temEscala
     ? 'Calibre a escala desta página (etapa 1) para sugerir a estrutura.'
     : !temParedes
       ? 'Desenhe as paredes desta página (aba Arquitetura) para sugerir a estrutura.'
       : null;
+  const cob = est.cobertura;
+  const ferramenta = useLevantamento((s) => s.ferramenta);
+  const desenhoAtivo = desenhoDoAlvo(ferramenta.alvo);
+
+  // A ferramenta continua ativa depois de cada desenho: o próximo elemento recebe o próximo rótulo.
+  useEffect(() => {
+    if (desenhoAtivo === null) return;
+    const alvo = alvoDesenho(desenhoAtivo, projeto.elementos, cob.beiral);
+    if (alvo.rotulo !== ferramenta.alvo?.rotulo) estado().definirFerramenta({ modo: ferramenta.modo, alvo });
+  }, [projeto.elementos, desenhoAtivo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const desenhar = (d: Desenho) =>
+    estado().definirFerramenta(
+      desenhoAtivo === d ? { modo: 'selecionar' } : { modo: MODO_DESENHO[d], alvo: alvoDesenho(d, estado().projeto.elementos, cob.beiral) },
+    );
+  const funcaoCalha = (e: Elemento) => (e.tipo === 'calha' ? e.props.funcao : null);
 
   const pendentes = projeto.elementos.filter((e) => e.disciplina === 'estrutura' && e.status === 'pendente');
   const conta = (...tipos: Elemento['tipo'][]) => pendentes.filter((e) => tipos.includes(e.tipo)).length;
@@ -162,7 +280,7 @@ export function PainelEstrutura() {
           type="button"
           className="primario"
           disabled={motivo !== null}
-          title={motivo ?? 'Pilares, vigas, lajes e fundações a partir das paredes e ambientes desta página'}
+          title={motivo ?? 'Pilares, vigas, lajes, fundações e cobertura a partir das paredes e ambientes desta página'}
           onClick={() => estado().substituirSugestoes('estrutura', sugerirEstrutura(estado().projeto, pagina), pagina)}
         >
           Sugerir estrutura
@@ -174,7 +292,9 @@ export function PainelEstrutura() {
         <div className="secao">
           <p className="pendente">
             Sugestões pendentes: {conta('pilar')} pilares, {conta('viga-baldrame', 'viga-superior')} vigas, {conta('laje')} lajes,{' '}
-            {conta('fundacao')} fundações.
+            {conta('fundacao')} fundações, {conta('telhado')} telhados,{' '}
+            {pendentes.filter((e) => funcaoCalha(e) === 'calha' || funcaoCalha(e) === 'rufo').length} calhas/rufos,{' '}
+            {pendentes.filter((e) => funcaoCalha(e) === 'condutor').length} condutores.
           </p>
           <div className="linha">
             <button type="button" className="primario" onClick={() => estado().confirmarPendentes('estrutura')}>
@@ -352,6 +472,65 @@ export function PainelEstrutura() {
           fator={CM}
           casas={1}
           aoMudar={(espessuraLastro) => mudar({ fundacao: { espessuraLastro } })}
+        />
+      </div>
+
+      <div className="secao">
+        <h3>Cobertura</h3>
+        <p className="suave">Telhado sugerido sem tipo de telha: informe no telhado selecionado. Estimativa, não é projeto de cobertura.</p>
+        <div className="linha">
+          {(Object.keys(MODO_DESENHO) as Desenho[]).map((d) => (
+            <button
+              key={d}
+              type="button"
+              disabled={!temEscala}
+              className={desenhoAtivo === d ? 'ativo' : ''}
+              title={!temEscala ? 'Calibre a escala desta página primeiro' : `Desenhar ${TEXTO_DESENHO[d].toLowerCase()} na planta`}
+              onClick={() => desenhar(d)}
+            >
+              {TEXTO_DESENHO[d]}
+            </button>
+          ))}
+        </div>
+        <CampoNumero rotulo="Beiral (m)" valor={cob.beiral} aoMudar={(beiral) => mudar({ cobertura: { beiral } })} />
+        {TIPOS_TELHA.map((t) => (
+          <CampoNumero
+            key={t}
+            rotulo={`Inclinação — ${ROTULO_TIPO_TELHA[t].toLowerCase()} (%)`}
+            valor={cob.inclinacaoPct[t]}
+            casas={0}
+            aoMudar={(v) => mudar({ cobertura: { inclinacaoPct: { [t]: v } } })}
+          />
+        ))}
+        <CampoNumero
+          rotulo="Calha por condutor (m)"
+          valor={cob.calhaPorCondutorM}
+          aoMudar={(calhaPorCondutorM) => mudar({ cobertura: { calhaPorCondutorM } })}
+        />
+        <CampoNumero
+          rotulo="Altura do condutor (m)"
+          valor={cob.alturaCondutor}
+          dica="pé-direito"
+          aoMudar={(alturaCondutor) => mudar({ cobertura: { alturaCondutor } })}
+          aoLimpar={() => mudar({ cobertura: { alturaCondutor: null } })}
+        />
+        <CampoNumero
+          rotulo="Desenvolvimento da calha (cm)"
+          valor={cob.desenvolvimentoCalhaCm}
+          casas={0}
+          aoMudar={(desenvolvimentoCalhaCm) => mudar({ cobertura: { desenvolvimentoCalhaCm } })}
+        />
+        <CampoNumero
+          rotulo="Desenvolvimento do rufo (cm)"
+          valor={cob.desenvolvimentoRufoCm}
+          casas={0}
+          aoMudar={(desenvolvimentoRufoCm) => mudar({ cobertura: { desenvolvimentoRufoCm } })}
+        />
+        <CampoNumero
+          rotulo="Diâmetro do condutor (mm)"
+          valor={cob.diametroCondutorMm}
+          casas={0}
+          aoMudar={(diametroCondutorMm) => mudar({ cobertura: { diametroCondutorMm } })}
         />
         <p className="suave">Mudanças de parâmetros valem para a próxima sugestão; seções de elementos já criados são editadas no elemento.</p>
       </div>

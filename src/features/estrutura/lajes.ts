@@ -8,7 +8,7 @@ import { COMPRIMENTO_ENCHIMENTO_M, EPSILON_GRADE, FATOR_CONCRETO_LAJE, FATOR_TRA
 
 // ---------------------------------------------------------------- união ortogonal
 
-interface Retangulo {
+export interface Retangulo {
   x0: number;
   y0: number;
   x1: number;
@@ -16,7 +16,7 @@ interface Retangulo {
 }
 
 /** Valores ordenados, sem repetição (dentro de EPSILON_GRADE). */
-function coordenadasUnicas(valores: number[]): number[] {
+export function coordenadasUnicas(valores: number[]): number[] {
   const unicas: number[] = [];
   for (const v of [...valores].sort((a, b) => a - b)) {
     if (unicas.length === 0 || v - unicas[unicas.length - 1]! > EPSILON_GRADE) unicas.push(v);
@@ -34,7 +34,7 @@ export function ehOrtogonal(pontos: Ponto[], tolerancia: number): boolean {
 }
 
 /** Decompõe um polígono ortogonal nos retângulos da grade formada pelos seus próprios vértices. */
-function retangulosDoPoligono(pontos: Ponto[]): Retangulo[] {
+export function retangulosDoPoligono(pontos: Ponto[]): Retangulo[] {
   const xs = coordenadasUnicas(pontos.map((p) => p.x));
   const ys = coordenadasUnicas(pontos.map((p) => p.y));
   const retangulos: Retangulo[] = [];
@@ -48,7 +48,7 @@ function retangulosDoPoligono(pontos: Ponto[]): Retangulo[] {
 }
 
 /** Ponto garantidamente interno de um polígono ortogonal (centro do 1º retângulo da decomposição). */
-function pontoInterno(pontos: Ponto[]): Ponto | null {
+export function pontoInterno(pontos: Ponto[]): Ponto | null {
   const r = retangulosDoPoligono(pontos)[0];
   return r ? { x: (r.x0 + r.x1) / 2, y: (r.y0 + r.y1) / 2 } : null;
 }
@@ -124,13 +124,16 @@ function contornoExterno(xs: number[], ys: number[], dentro: (i: number, j: numb
  * União de polígonos ORTOGONAIS com fechamento dos vãos de até 2 × `meiaTolerancia` (unidades):
  * cada polígono é expandido em `meiaTolerancia`, a união é feita numa grade e o resultado é
  * recuado na mesma medida — as faces externas voltam ao lugar e só os vãos (paredes) ficam
- * preenchidos. Devolve o contorno externo de cada parte conexa.
+ * preenchidos. Com `afastamento` > 0, o resultado fica afastado para fora nessa medida (offset
+ * ortogonal, cantos em esquadro — usado no beiral do telhado). Devolve o contorno externo de cada
+ * parte conexa.
  */
-export function uniaoOrtogonal(poligonos: Ponto[][], meiaTolerancia: number): Ponto[][] {
+export function uniaoOrtogonal(poligonos: Ponto[][], meiaTolerancia: number, afastamento = 0): Ponto[][] {
   const d = Math.max(0, meiaTolerancia);
+  const e = d + Math.max(0, afastamento);
   const expandidos = poligonos
     .flatMap(retangulosDoPoligono)
-    .map((r) => ({ x0: r.x0 - d, y0: r.y0 - d, x1: r.x1 + d, y1: r.y1 + d }));
+    .map((r) => ({ x0: r.x0 - e, y0: r.y0 - e, x1: r.x1 + e, y1: r.y1 + e }));
   if (expandidos.length === 0) return [];
 
   // 1) grade da união expandida
@@ -230,6 +233,25 @@ export function distanciaEntrePoligonos(a: Ponto[], b: Ponto[]): number {
   return menor;
 }
 
+/** Grupos de ambientes adjacentes (bordas a até `tolerancia` unidades), por união-busca, na ordem de entrada. */
+export function agruparAdjacentes(ambientes: AmbienteCoberto[], tolerancia: number): AmbienteCoberto[][] {
+  const pai = ambientes.map((_, i) => i);
+  const raiz = (i: number): number => (pai[i]! === i ? i : (pai[i] = raiz(pai[i]!)));
+  for (let i = 0; i < ambientes.length; i++) {
+    for (let j = i + 1; j < ambientes.length; j++) {
+      if (distanciaEntrePoligonos(ambientes[i]!.pontos, ambientes[j]!.pontos) <= tolerancia) pai[raiz(j)] = raiz(i);
+    }
+  }
+  const grupos = new Map<number, AmbienteCoberto[]>();
+  ambientes.forEach((a, i) => {
+    const r = raiz(i);
+    const grupo = grupos.get(r);
+    if (grupo) grupo.push(a);
+    else grupos.set(r, [a]);
+  });
+  return [...grupos.values()];
+}
+
 /**
  * Lajes a partir dos ambientes cobertos.
  * 'por-ambiente' → uma por ambiente. 'uniao' → uma por grupo de ambientes adjacentes (bordas a
@@ -245,24 +267,8 @@ export function montarLajes(
   const individual = (a: AmbienteCoberto): LajeSugerida => ({ pontos: a.pontos.map((p) => ({ ...p })), ambienteIds: [a.id] });
   if (modo === 'por-ambiente') return validos.map(individual);
 
-  // grupos de adjacência (união-busca)
-  const pai = validos.map((_, i) => i);
-  const raiz = (i: number): number => (pai[i]! === i ? i : (pai[i] = raiz(pai[i]!)));
-  for (let i = 0; i < validos.length; i++) {
-    for (let j = i + 1; j < validos.length; j++) {
-      if (distanciaEntrePoligonos(validos[i]!.pontos, validos[j]!.pontos) <= tolerancia) pai[raiz(j)] = raiz(i);
-    }
-  }
-  const grupos = new Map<number, AmbienteCoberto[]>();
-  validos.forEach((a, i) => {
-    const r = raiz(i);
-    const grupo = grupos.get(r);
-    if (grupo) grupo.push(a);
-    else grupos.set(r, [a]);
-  });
-
   const lajes: LajeSugerida[] = [];
-  for (const grupo of grupos.values()) {
+  for (const grupo of agruparAdjacentes(validos, tolerancia)) {
     if (grupo.length === 1 || !grupo.every((a) => ehOrtogonal(a.pontos, toleranciaOrtogonal))) {
       lajes.push(...grupo.map(individual));
       continue;

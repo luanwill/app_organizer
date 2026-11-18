@@ -179,13 +179,14 @@ describe('status, escala e integração com as sugestões', () => {
     const base = projetoCom([...plantaEmL(), ambiente('sala', 0.1, 0.1, 8.9, 3.9)]);
     const projeto = projetoCom([...base.elementos, ...sugerirEstrutura(base, 1)]);
     const r = calcularEstrutura(projeto);
-    expect(r.alertas).toEqual([]);
+    // o telhado sugerido nasce sem tipo de telha: único alerta é esse dado faltante
+    expect(r.alertas.map((a) => a.campo)).toEqual(['tipoTelha']);
     expect(r.linhas.length).toBeGreaterThan(0);
     expect(r.linhas.every((l) => l.status === 'pendente' && l.disciplina === 'estrutura')).toBe(true);
     expect(new Set(r.linhas.map((l) => l.id)).size).toBe(r.linhas.length);
     expect(calcularEstrutura(projeto).linhas.map((l) => l.id)).toEqual(r.linhas.map((l) => l.id));
     expect(new Set(r.linhas.map((l) => l.grupo))).toEqual(
-      new Set(['Pilares', 'Vigas baldrame', 'Vigas superiores', 'Lajes', 'Fundações']),
+      new Set(['Pilares', 'Vigas baldrame', 'Vigas superiores', 'Lajes', 'Fundações', 'Cobertura', 'Calhas e condutores']),
     );
     const soma = (descricao: string) => r.linhas.filter((l) => l.descricao === descricao).reduce((s, l) => s + l.quantidade, 0);
     expect(soma('Pilares (un)')).toBe(10);

@@ -540,7 +540,24 @@ describe('10. Persistência — ida e volta do projeto (JSON); o reload real com
 
 // ---------------------------------------------------------------- verificações adicionais
 
+/** Informa o tipo de telha nos telhados (que nascem sem tipo, gerando "dado faltante"). */
+function comTipoTelha(projeto: Projeto): Projeto {
+  return {
+    ...projeto,
+    elementos: projeto.elementos.map((e) =>
+      e.tipo === 'telhado' ? ({ ...e, props: { ...e.props, tipoTelha: 'ceramica' } } as Elemento) : e,
+    ),
+  };
+}
+
 describe('A. Dado faltante: alertas e nenhum valor assumido', () => {
+  it('telhado sugerido sem tipo de telha → alerta tipoTelha e sem telhamento', () => {
+    const lev = calcularLevantamento(casoTudoConfirmado());
+    if (!casoTudoConfirmado().elementos.some((e) => e.tipo === 'telhado')) return;
+    expect(lev.estrutura.alertas.some((a) => a.campo === 'tipoTelha')).toBe(true);
+    expect(lev.estrutura.linhas.some((l) => l.servico === 'telhamento')).toBe(false);
+  });
+
   const semDados = (): Projeto => {
     const p = casoTudoConfirmado();
     return { ...p, parametros: { ...p.parametros, gerais: { peDireito: null, espessuraParede: null, numeroPessoas: null } } };
@@ -606,7 +623,9 @@ describe('C. Coerência entre módulos (caso de exemplo)', () => {
     ['tudo pendente', casoTudoPendente],
     ['tudo confirmado', casoTudoConfirmado],
   ];
-  for (const [nome, fabrica] of casos) {
+  for (const [nome, fabricaBase] of casos) {
+    // o caso tem todos os dados: o tipo de telha (sem padrão, decisão do usuário) é informado aqui
+    const fabrica = () => comTipoTelha(fabricaBase());
     const projeto = fabrica();
     const lev = calcularLevantamento(projeto);
     it(`${nome}: ids de linhas únicos em todo o levantamento`, () => {

@@ -3,7 +3,7 @@
  * Nenhum número mágico deve ficar espalhado nos outros arquivos.
  * (Seções, taxas, vão máximo etc. são PARÂMETROS do projeto — ficam em parametros.estrutura.)
  */
-import type { TipoLaje, TipoNo } from '@/core/model';
+import type { FuncaoCalha, TipoLaje, TipoNo, TipoTelha } from '@/core/model';
 
 // ---------------------------------------------------------------- tolerâncias
 
@@ -101,4 +101,39 @@ export const GRUPO = {
   superiores: 'Vigas superiores',
   lajes: 'Lajes',
   fundacoes: 'Fundações',
+  cobertura: 'Cobertura',
+  calhas: 'Calhas e condutores',
 } as const;
+
+// ---------------------------------------------------------------- cobertura
+
+/** Rótulos das sugestões de cobertura: T1 (telhado), CH1 (calha), RF1 (rufo), CD1 (condutor). */
+export const PREFIXO_TELHADO = 'T';
+export const PREFIXO_CALHA: Record<FuncaoCalha, string> = { calha: 'CH', rufo: 'RF', condutor: 'CD' };
+
+/** Inclinação em % → fração (30 % → 0,30). */
+export const PERCENTUAL = 100;
+
+/** Nº de águas sugerido: contorno retangular → 2 águas; contorno recortado (L, T, U…) → 4 águas. */
+export const AGUAS_CONTORNO_RETANGULAR = 2;
+export const AGUAS_CONTORNO_RECORTADO = 4;
+
+/**
+ * Parede "mais alta" que o telhado (recebe rufo): altura própria maior que o pé-direito geral
+ * por mais que esta folga (m).
+ */
+export const FOLGA_PAREDE_MAIS_ALTA_M = 0.05;
+
+export const ROTULO_TIPO_TELHA: Record<TipoTelha, string> = {
+  ceramica: 'Cerâmica',
+  concreto: 'Concreto',
+  fibrocimento: 'Fibrocimento',
+  metalica: 'Metálica',
+  sanduiche: 'Sanduíche',
+};
+
+export const ROTULO_FUNCAO_CALHA: Record<FuncaoCalha, string> = {
+  calha: 'Calha',
+  rufo: 'Rufo',
+  condutor: 'Condutor vertical',
+};

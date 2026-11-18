@@ -20,7 +20,8 @@ import {
   paraMetros,
   perimetroPoligono,
 } from '@/core/calc';
-import { DETALHE_ACO_TAXA, GRUPO } from './config';
+import { comprimentoCumeeira, fatorInclinacao, inclinacaoDoTelhado } from './cobertura';
+import { DETALHE_ACO_TAXA, GRUPO, ROTULO_FUNCAO_CALHA } from './config';
 import { quantitativosBloco, quantitativosRadier, quantitativosSapata, type QuantitativosFundacao } from './fundacoes';
 import { quantitativosLaje } from './lajes';
 import { quantitativosPilar, quantitativosViga, type ParcelaAco } from './vigas';
@@ -36,6 +37,14 @@ export function alturaDoPilar(pilar: ElementoDe<'pilar'>, projeto: Projeto): num
   if (peDireito === null) return null;
   const vigaSuperior = projeto.parametros.estrutura.vigaSuperior;
   return peDireito + (vigaSuperior.ativa ? vigaSuperior.secaoH : 0);
+}
+
+/** Número com vírgula decimal para textos de detalhe (50 → "50"; 33.5 → "33,5"). */
+const numeroTexto = (n: number): string => String(n).replace('.', ',');
+
+/** Altura do condutor vertical (m): manual > parâmetro de cobertura > pé-direito. null = dado faltante. */
+export function alturaDoCondutor(condutor: ElementoDe<'calha'>, projeto: Projeto): number | null {
+  return condutor.manuais?.comprimento ?? projeto.parametros.estrutura.cobertura.alturaCondutor ?? projeto.parametros.gerais.peDireito;
 }
 
 export function calcularEstrutura(projeto: Projeto): ResultadoDisciplina {
@@ -192,6 +201,71 @@ export function calcularEstrutura(projeto: Projeto): ResultadoDisciplina {
           });
           linha(el, GRUPO.fundacoes, 'perfuracao', 'Perfuração de estacas', 'm', q.perfuracao);
         }
+        break;
+      }
+
+      case 'telhado': {
+        if (el.geometria.tipo !== 'poligono') break;
+        const manual = el.manuais?.area;
+        const areaProjetada = manual ?? paraM2(areaPoligono(el.geometria.pontos), escala);
+        const extra = manualSe(manual !== undefined);
+        linha(el, GRUPO.cobertura, 'area-projetada', 'Telhado — área projetada', 'm²', areaProjetada, extra);
+        const tipo = el.props.tipoTelha;
+        const inclinacao = inclinacaoDoTelhado(el.props, estrutura.cobertura);
+        if (tipo === null || inclinacao === null) {
+          alertar(
+            'tipoTelha',
+            `Dado faltante: tipo de telha${el.rotulo ? ` (${el.rotulo})` : ''}. Telhamento, madeiramento e cumeeira ficam fora até informar.`,
+            el.id,
+          );
+          break;
+        }
+        // detalhe = código do tipo de telha (as composições filtram por ele)
+        const area = areaProjetada * fatorInclinacao(inclinacao);
+        linha(el, GRUPO.cobertura, 'telhamento', 'Telhamento', 'm²', area, { servico: 'telhamento', detalhe: tipo, ...extra });
+        linha(el, GRUPO.cobertura, 'madeiramento', 'Madeiramento (estrutura do telhado)', 'm²', area, {
+          servico: 'madeiramento',
+          detalhe: tipo,
+          ...extra,
+        });
+        const cumeeira = paraMetros(comprimentoCumeeira(el.geometria.pontos, el.props.aguas, el.props.direcao, inclinacao), escala);
+        if (cumeeira > 0) {
+          const descricao = el.props.aguas === 4 ? 'Cumeeira e espigões' : 'Cumeeira';
+          linha(el, GRUPO.cobertura, 'cumeeira', descricao, 'm', cumeeira, { servico: 'cumeeira', detalhe: tipo });
+        }
+        break;
+      }
+
+      case 'calha': {
+        const funcao = el.props.funcao;
+        const manual = el.manuais?.comprimento;
+        const extra = manualSe(manual !== undefined);
+        if (funcao === 'condutor') {
+          const altura = alturaDoCondutor(el, projeto);
+          if (altura === null) {
+            alertar('peDireito', 'Informe o pé-direito (ou a altura do condutor) para calcular os condutores verticais.');
+            break;
+          }
+          const diametro = el.props.diametroMm ?? estrutura.cobertura.diametroCondutorMm;
+          linha(el, GRUPO.calhas, 'comprimento', ROTULO_FUNCAO_CALHA.condutor, 'm', altura, {
+            servico: 'condutor',
+            detalhe: `Ø${numeroTexto(diametro)} mm`,
+            ...extra,
+          });
+          break;
+        }
+        if (el.geometria.tipo !== 'polilinha' && manual === undefined) break;
+        const comprimento =
+          manual ?? (el.geometria.tipo === 'polilinha' ? paraMetros(comprimentoPolilinha(el.geometria.pontos), escala) : 0);
+        const desenvolvimento =
+          el.props.desenvolvimentoCm ??
+          (funcao === 'calha' ? estrutura.cobertura.desenvolvimentoCalhaCm : estrutura.cobertura.desenvolvimentoRufoCm);
+        // detalhe só descritivo: o coeficiente da composição não muda com o desenvolvimento
+        linha(el, GRUPO.calhas, 'comprimento', ROTULO_FUNCAO_CALHA[funcao], 'm', comprimento, {
+          servico: funcao,
+          detalhe: `desenvolvimento ${numeroTexto(desenvolvimento)} cm`,
+          ...extra,
+        });
         break;
       }
 

@@ -97,3 +97,17 @@ export function trechoDaCadeia(pontos: Ponto[], acum: number[], de: number, ate:
   trecho.push(pontoNaEstaca(pontos, acum, ate));
   return trecho;
 }
+
+/**
+ * true se o trecho a–b já existe entre as polilinhas `existentes`: extremidades coincidentes
+ * (em qualquer sentido) ou ponto médio sobre uma delas (sobreposição). Tolerância em unidades.
+ */
+export function trechoJaExiste([a, b]: [Ponto, Ponto], existentes: Ponto[][], tolerancia: number): boolean {
+  const perto = (p: Ponto, q: Ponto | undefined): boolean => q !== undefined && distancia(p, q) <= tolerancia;
+  const meio = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  return existentes.some((v) => {
+    const [c, d] = [v[0], v[v.length - 1]];
+    if ((perto(a, c) && perto(b, d)) || (perto(a, d) && perto(b, c))) return true;
+    return v.length >= 2 && projetarNaPolilinha(meio, v).distancia <= tolerancia;
+  });
+}
