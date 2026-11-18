@@ -11,7 +11,7 @@ import {
   paraMetros,
   pontoEmPoligono,
 } from '@/core/calc';
-import { CASAS_ESCALA, CASAS_MEDIDA, ESTILO_TIPO, LETRA_PONTO_ELETRICO, TIPOS_PONTO_COM_ROTULO_FIXO } from './config';
+import { CASAS_ESCALA, CASAS_MEDIDA, ESTILO_TIPO, LETRA_PONTO_ELETRICO } from './config';
 
 /**
  * Medida formatada em pt-BR: comprimento (m) para polilinha, área (m²) para polígono.
@@ -53,8 +53,13 @@ export interface RotuloElemento {
 export function rotuloDoElemento(el: Elemento, ctx: ContextoRotulo): RotuloElemento {
   const rotulo = el.rotulo ?? null;
   switch (el.tipo) {
-    case 'ambiente':
-      return { simbolo: '', texto: rotulo ?? (el.props.nome || null) };
+    case 'ambiente': {
+      // nome + área (m²) quando a página tem escala
+      const nome = rotulo ?? (el.props.nome || null);
+      const area = rotuloMedida('poligono', el.geometria.tipo === 'poligono' ? el.geometria.pontos : [], ctx.escala);
+      if (!area || (nome && nome.includes('m²'))) return { simbolo: '', texto: nome };
+      return { simbolo: '', texto: nome ? `${nome}\n${area}` : area };
+    }
     case 'medicao': {
       if (el.geometria.tipo === 'ponto') {
         return { simbolo: String(ctx.contagens.get(el.id) ?? ''), texto: el.props.descricao || rotulo };
@@ -96,15 +101,6 @@ export function ancoraRotuloAmbiente(pontos: Ponto[], margem: number): Ponto {
   }
   const candidato = { x: canto.x + margem, y: canto.y + margem };
   return pontoEmPoligono(candidato, pontos) ? candidato : centroidePoligono(pontos);
-}
-
-/**
- * Decide se o rótulo de texto de um elemento aparece. Linhas e polígonos: sempre. Pontos: só os
- * de rótulo fixo (pilar, esquadria) ou quando destacados (selecionados ou sob o mouse).
- */
-export function rotuloVisivel(el: Elemento, destacado: boolean): boolean {
-  if (el.geometria.tipo !== 'ponto') return true;
-  return destacado || TIPOS_PONTO_COM_ROTULO_FIXO.includes(el.tipo);
 }
 
 /** Rótulo de uma rota derivada: só com a rota sob o mouse ou o elemento associado destacado. */

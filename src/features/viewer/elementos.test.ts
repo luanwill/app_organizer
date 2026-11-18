@@ -11,7 +11,7 @@ import {
   verticesDeSnap,
   vincularElemento,
 } from './elementos';
-import { ancoraRotuloAmbiente, numerosContagem, rotuloDerivadoVisivel, rotuloDoElemento, rotuloVisivel } from './rotulos';
+import { ancoraRotuloAmbiente, numerosContagem, rotuloDerivadoVisivel, rotuloDoElemento } from './rotulos';
 
 const base = { pagina: 2, vinculos: {}, origem: 'desenhado', status: 'confirmado' } as const;
 
@@ -195,23 +195,14 @@ describe('aparência', () => {
     expect(rotuloDoElemento(area, ctx).texto).toBe('9,15 m²');
     expect(rotuloDoElemento(dist, { ...ctx, escala: null }).texto).toBeNull();
     expect(rotuloDoElemento(esq, ctx).texto).toBe('J1');
-    expect(rotuloDoElemento(ambiente, ctx).texto).toBe('Sala');
+    expect(rotuloDoElemento(ambiente, ctx).texto).toBe('Sala\n12,00 m²');
+    expect(rotuloDoElemento(ambiente, { ...ctx, escala: null }).texto).toBe('Sala');
   });
 });
 
 describe('legibilidade dos rótulos', () => {
   const ponto = (tipo: 'pilar' | 'quadro', id: string): Elemento =>
     ({ ...base, id, disciplina: 'estrutura', tipo, props: tipo === 'pilar' ? { secaoB: 0.14, secaoH: 0.3 } : {}, geometria: { tipo: 'ponto', ponto: { x: 1, y: 1 } } }) as Elemento;
-
-  it('rótulo de ponto só aparece destacado (selecionado/hover); pilar e esquadria ficam sempre', () => {
-    expect(rotuloVisivel(ponto('quadro', 'q'), false)).toBe(false);
-    expect(rotuloVisivel(ponto('quadro', 'q'), true)).toBe(true);
-    expect(rotuloVisivel(ponto('pilar', 'p'), false)).toBe(true);
-    const contagem = novo({ modo: 'contagem' }, [{ x: 1, y: 1 }]) as Elemento;
-    expect(rotuloVisivel(contagem, false)).toBe(false);
-    expect(rotuloVisivel(ambiente, false)).toBe(true);
-    expect(rotuloVisivel(parede, false)).toBe(true);
-  });
 
   it('rótulo de rota derivada só no hover da rota ou no hover/seleção do elemento associado', () => {
     const rota = { id: 'r1', elementoId: 'tom1' };

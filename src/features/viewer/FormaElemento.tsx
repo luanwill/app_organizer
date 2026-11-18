@@ -4,30 +4,26 @@ import type Konva from 'konva';
 import type { KonvaEventObject } from 'konva/lib/Node';
 import { Circle, Group, Label, Line, Rect, RegularPolygon, Shape, Tag, Text } from 'react-konva';
 import { COR_DISCIPLINA, COR_PENDENTE, type Elemento, type GeometriaDerivada, type Ponto } from '@/core/model';
-import { centroidePoligono } from '@/core/calc';
 import {
   comAlfa,
   COR_FUNDO_ETIQUETA,
   COR_SELECAO,
   COR_TEXTO_ETIQUETA,
   COR_TEXTO_SIMBOLO,
-  DESLOCAMENTO_ETIQUETA_PX,
   ESPESSURA_MIN_PAREDE_PX,
   ESTILO_TIPO,
   LARGURA_DERIVADO_PX,
   LARGURA_EXTRA_SELECAO_PX,
   LARGURA_CUMEEIRA_PX,
   LARGURA_TOQUE_PX,
-  MARGEM_ROTULO_AMBIENTE_PX,
   OPACIDADE_FUNDO_ETIQUETA,
   OPACIDADE_HACHURA,
   OPACIDADE_PAREDE,
   PADDING_ETIQUETA_PX,
   PASSO_HACHURA_PX,
-  TAMANHO_FONTE_PEQUENA_PX,
+  FONTE_MIN_LETRA_PX,
   TAMANHO_FONTE_PX,
   TIPOS_HACHURADOS,
-  TIPOS_PONTO_COM_ROTULO_FIXO,
   TRACEJADO_CUMEEIRA,
   TRACEJADO_DERIVADO,
   TRACEJADO_PENDENTE,
@@ -36,7 +32,7 @@ import {
 } from './config';
 import { linhasCumeeira, linhasHachura, tracejadoCalha, type Segmento } from './cobertura';
 import { larguraParedeUnidades } from './elementos';
-import { ancoraRotuloAmbiente, ancoraRotuloTelhado, rotuloVisivel } from './rotulos';
+import { ancoraEtiqueta, fonteEtiqueta } from './etiquetas';
 
 function achatar(pontos: Ponto[]): number[] {
   return pontos.flatMap((p) => [p.x, p.y]);
@@ -167,8 +163,10 @@ export interface FormaElementoProps {
   interativo: boolean;
   /** Letra/número dentro do símbolo. */
   simbolo: string;
-  /** Etiqueta do elemento. */
+  /** Etiqueta a exibir (null = oculta; quem decide é o AreaPlanta, pela legibilidade). */
   texto: string | null;
+  /** Tamanho relativo (0..1) dos símbolos de ponto: menores quando há muitos. */
+  fatorSimbolo: number;
   /** Pontos provisórios enquanto um vértice é arrastado. */
   pontosProvisorios?: Ponto[];
   aoPressionar(id: string, adicionar: boolean): void;
@@ -178,8 +176,7 @@ export interface FormaElementoProps {
 }
 
 export const FormaElemento = memo(function FormaElemento(props: FormaElementoProps) {
-  const { elemento: el, zoom, escala, selecionado, sobre, interativo, simbolo, pontosProvisorios } = props;
-  const texto = props.texto && rotuloVisivel(el, selecionado || sobre) ? props.texto : null;
+  const { elemento: el, zoom, escala, selecionado, sobre, interativo, simbolo, texto, fatorSimbolo, pontosProvisorios } = props;
   const entrar = () => props.aoPassar(el.id, true);
   const sair = () => props.aoPassar(el.id, false);
   const estilo = ESTILO_TIPO[el.tipo];
@@ -197,8 +194,9 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
   if (el.geometria.tipo === 'ponto') {
     const p = el.geometria.ponto;
     const t = estilo.tamanhoPx;
-    // rótulo fixo (pilar, esquadria) em fonte pequena; ao destacar, fonte normal
-    const fonte = TIPOS_PONTO_COM_ROTULO_FIXO.includes(el.tipo) && !selecionado && !sobre ? TAMANHO_FONTE_PEQUENA_PX : TAMANHO_FONTE_PX;
+    const fonte = fonteEtiqueta(el, selecionado || sobre);
+    const deslocamento = ancoraEtiqueta(el, [], zoom, fatorSimbolo).deslocamentoPx;
+    const comLetra = simbolo !== '' && TAMANHO_FONTE_PX * fatorSimbolo >= FONTE_MIN_LETRA_PX;
     return (
       <Group
         x={p.x}
@@ -212,10 +210,11 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
         onDragEnd={(e) => props.aoMoverPonto(el.id, { x: e.target.x(), y: e.target.y() }, e.target)}
       >
         {selecionado && (
-          <Circle radius={t / 2 + LARGURA_EXTRA_SELECAO_PX} stroke={COR_SELECAO} strokeWidth={2} listening={false} />
+          <Circle radius={(t / 2) * fatorSimbolo + LARGURA_EXTRA_SELECAO_PX} stroke={COR_SELECAO} strokeWidth={2} listening={false} />
         )}
+        <Group scaleX={fatorSimbolo} scaleY={fatorSimbolo}>
         <Simbolo estilo={estilo} cor={cor} tracejado={tracejado} />
-        {simbolo !== '' && (
+        {comLetra && (
           <Text
             text={simbolo}
             x={-t}
@@ -230,8 +229,9 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
             listening={false}
           />
         )}
+        </Group>
         {texto && (
-          <Label x={t / 2 + DESLOCAMENTO_ETIQUETA_PX} y={-fonte / 2 - PADDING_ETIQUETA_PX} listening={false}>
+          <Label x={deslocamento} y={-fonte / 2 - PADDING_ETIQUETA_PX} listening={false}>
             <Tag fill={COR_FUNDO_ETIQUETA} opacity={OPACIDADE_FUNDO_ETIQUETA} cornerRadius={3} />
             <Text text={texto} fontSize={fonte} padding={PADDING_ETIQUETA_PX} fill={COR_TEXTO_ETIQUETA} />
           </Label>
@@ -249,20 +249,14 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
   const largura = ehParede
     ? larguraParedeUnidades(el.props.espessura, escala, zoom, ESPESSURA_MIN_PAREDE_PX)
     : estilo.larguraPx;
-  // nome do ambiente: no canto superior esquerdo interno (o centro costuma ter o ponto de luz)
-  const noCanto = el.tipo === 'ambiente' && fechado;
   const hachurado = fechado && TIPOS_HACHURADOS.includes(el.tipo);
   // telhado: fica por baixo e só recebe o clique pelo contorno (não cobre ambientes/pilares/paredes)
   const soContorno = el.tipo === 'telhado';
   const preenchimento = fechado && estilo.preenchimento > 0 ? comAlfa(cor, estilo.preenchimento) : undefined;
   const cumeeira = el.tipo === 'telhado' ? linhasCumeeira(pontos, el.props.aguas, el.props.direcao) : [];
-  const centro = noCanto
-    ? ancoraRotuloAmbiente(pontos, MARGEM_ROTULO_AMBIENTE_PX / zoom)
-    : el.tipo === 'telhado'
-      ? ancoraRotuloTelhado(pontos, MARGEM_ROTULO_AMBIENTE_PX / zoom, (TAMANHO_FONTE_PX / 2 + PADDING_ETIQUETA_PX) / zoom)
-      : fechado
-      ? centroidePoligono(pontos)
-      : pontoMedio(pontos);
+  const ancora = ancoraEtiqueta(el, pontos, zoom);
+  const noCanto = ancora.modo === 'canto';
+  const centro = ancora.ponto;
   return (
     <Group onMouseDown={pressionar} onMouseEnter={entrar} onMouseLeave={sair}>
       {selecionado && (

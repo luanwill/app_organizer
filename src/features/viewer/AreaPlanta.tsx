@@ -15,6 +15,8 @@ import {
   LARGURA_PREVIA_PX,
   MAX_PIXELS_CANVAS,
   OPACIDADE_PREVIA,
+  PRIORIDADE_ETIQUETA,
+  PRIORIDADE_POR_CIMA,
   PIXEL_RATIO_CAPTURA,
   RAIO_ALCA_PX,
   RAIO_VERTICE_PREVIA_PX,
@@ -37,6 +39,17 @@ import {
 } from './animacao';
 import { CamadaAnimacao, useReduzirMovimento, type ItemAnimado } from './CamadaAnimacao';
 import { escalaRenderizacao, telaParaPdf, zoomNoPonto, type Vista } from './coordenadas';
+import {
+  ancoraEtiqueta,
+  caixaEtiqueta,
+  distanciaTipicaEntrePontos,
+  escolherEtiquetas,
+  fatorSimbolo,
+  fonteEtiqueta,
+  liberadaPeloZoom,
+  pixelsPorMetro,
+  type CandidatoEtiqueta,
+} from './etiquetas';
 import {
   cliquesParaConcluir,
   escalaDaCalibracao,
@@ -81,6 +94,11 @@ function focoEmCampo(): boolean {
   const el = document.activeElement;
   if (!(el instanceof HTMLElement)) return false;
   return el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA' || el.isContentEditable;
+}
+
+/** Etiquetas de linhas/polígonos de alta prioridade são desenhadas numa passada final, acima dos símbolos. */
+function etiquetaPorCima(el: Elemento): boolean {
+  return el.geometria.tipo !== 'ponto' && PRIORIDADE_ETIQUETA[el.tipo] >= PRIORIDADE_POR_CIMA;
 }
 
 function achatar(pontos: Ponto[]): number[] {
@@ -430,11 +448,41 @@ export function AreaPlanta(props: AreaPlantaProps) {
     return sobrePonto ? [...visiveisAgora.filter((e) => e !== sobrePonto), sobrePonto] : visiveisAgora;
   }, [visiveisAgora, sobreId]);
 
+  // ---------------------------------------------------------------- legibilidade das etiquetas
+  const rotulos = useMemo(() => new Map(emOrdem.map((el) => [el.id, rotuloDoElemento(el, contextoRotulo)])), [emOrdem, contextoRotulo]);
+  // conta todos os pontos visíveis da página (também os ainda ocultos pela animação), para o
+  // tamanho dos símbolos não mudar de uma fase para outra
+  const distanciaTipica = useMemo(
+    () => distanciaTipicaEntrePontos(visiveis.flatMap((el) => (el.geometria.tipo === 'ponto' ? [el.geometria.ponto] : []))),
+    [visiveis],
+  );
+  const fator = fatorSimbolo(distanciaTipica, zoom);
+  /**
+   * Etiquetas visíveis: hover/seleção e sempre visíveis (ambientes, medições) entram sempre; as
+   * demais só com zoom suficiente e sem colidir com outra de prioridade maior. Depende do zoom,
+   * não do pan.
+   */
+  const etiquetasVisiveis = useMemo(() => {
+    const ppm = pixelsPorMetro(zoom, escala);
+    const candidatos: CandidatoEtiqueta[] = [];
+    for (const el of emOrdem) {
+      const texto = rotulos.get(el.id)?.texto;
+      if (!texto) continue;
+      const destacado = selecaoIds.includes(el.id) || sobreId === el.id;
+      const prioridade = PRIORIDADE_ETIQUETA[el.tipo];
+      if (!destacado && !liberadaPeloZoom(prioridade, ppm)) continue;
+      const pontosEl = pontosDaGeometria(el.geometria);
+      const ancora = ancoraEtiqueta(el, pontosEl, zoom, fator);
+      candidatos.push({ id: el.id, prioridade, destacado, caixa: caixaEtiqueta(ancora, texto, fonteEtiqueta(el, destacado), zoom) });
+    }
+    return escolherEtiquetas(candidatos);
+  }, [emOrdem, rotulos, zoom, escala, selecaoIds, sobreId, fator]);
+
   // Conteúdo da camada principal memoizado: durante a análise o componente re-renderiza a cada
   // quadro, mas estes nós só mudam com a fase, a seleção, o hover ou a vista.
   const conteudoPrincipal = useMemo(() => {
     const desenharElemento = (el: Elemento) => {
-      const r = rotuloDoElemento(el, contextoRotulo);
+      const r = rotulos.get(el.id) ?? rotuloDoElemento(el, contextoRotulo);
       const provisorio =
         edicao && edicao.id === el.id ? pontosDaGeometria(moverVertice(el.geometria, edicao.indice, edicao.ponto)) : undefined;
       return (
@@ -447,7 +495,8 @@ export function AreaPlanta(props: AreaPlantaProps) {
           sobre={sobreId === el.id}
           interativo={selecionando}
           simbolo={r.simbolo}
-          texto={r.texto}
+          texto={etiquetasVisiveis.has(el.id) && !etiquetaPorCima(el) ? r.texto : null}
+          fatorSimbolo={fator}
           pontosProvisorios={provisorio}
           aoPressionar={aoPressionarElemento}
           aoMoverPonto={aoMoverPonto}
@@ -477,9 +526,28 @@ export function AreaPlanta(props: AreaPlantaProps) {
         {emOrdem.filter((el) => el.geometria.tipo === 'polilinha').map(desenharElemento)}
         {emOrdem.filter((el) => el.geometria.tipo === 'ponto' && el.tipo === 'fundacao').map(desenharElemento)}
         {emOrdem.filter((el) => el.geometria.tipo === 'ponto' && el.tipo !== 'fundacao').map(desenharElemento)}
+        {/* etiquetas prioritárias (ambientes, medições, telhado, laje) por cima dos símbolos */}
+        {emOrdem.filter((el) => etiquetaPorCima(el) && etiquetasVisiveis.has(el.id)).map((el) => {
+          const texto = rotulos.get(el.id)?.texto;
+          if (!texto) return null;
+          const pts =
+            edicao && edicao.id === el.id ? pontosDaGeometria(moverVertice(el.geometria, edicao.indice, edicao.ponto)) : pontosDaGeometria(el.geometria);
+          const a = ancoraEtiqueta(el, pts, zoom, fator);
+          return (
+            <Etiqueta
+              key={`rotulo:${el.id}`}
+              x={a.ponto.x}
+              y={a.ponto.y}
+              zoom={zoom}
+              texto={texto}
+              centralizada={a.modo === 'centro'}
+              cantoSuperiorEsquerdo={a.modo === 'canto'}
+            />
+          );
+        })}
       </>
     );
-  }, [emOrdem, derivadosAgora, contextoRotulo, edicao, zoom, escala, selecaoIds, sobreId, selecionando, aoPressionarElemento, aoMoverPonto, aoPassar]);
+  }, [emOrdem, rotulos, etiquetasVisiveis, fator, derivadosAgora, contextoRotulo, edicao, zoom, escala, selecaoIds, sobreId, selecionando, aoPressionarElemento, aoMoverPonto, aoPassar]);
 
   return (
     <div className={`vz-planta ${classeCursor}`}>
@@ -522,6 +590,7 @@ export function AreaPlanta(props: AreaPlantaProps) {
             escala={escala}
             itens={itensAnimados}
             contextoRotulo={contextoRotulo}
+            fatorSimbolo={fator}
           />
         )}
         <Layer listening={selecionando && !espaco && !analisando}>

@@ -14,6 +14,7 @@ import {
   ESPESSURA_MIN_PAREDE_PX,
   ESTILO_TIPO,
   BRILHO_TRACO_PX,
+  FONTE_MIN_LETRA_PX,
   FRACAO_BRILHO_FINAL,
   FRACAO_POP,
   GRADE_PRINCIPAL_A_CADA,
@@ -69,6 +70,8 @@ export interface CamadaAnimacaoProps {
   /** Elementos da fase atual que já começaram a aparecer (t = 1: já apareceram). */
   itens: ItemAnimado[];
   contextoRotulo: ContextoRotulo;
+  /** Tamanho relativo dos símbolos de ponto (o mesmo da camada principal). */
+  fatorSimbolo: number;
 }
 
 const achatar = (pontos: Ponto[]) => pontos.flatMap((p) => [p.x, p.y]);
@@ -186,13 +189,13 @@ const TracoAnimado = memo(function TracoAnimado(props: { el: Elemento; t: number
   );
 });
 
-const PontoAnimado = memo(function PontoAnimado(props: { el: Elemento; t: number; zoom: number; simbolo: string }) {
-  const { el, t, zoom, simbolo } = props;
+const PontoAnimado = memo(function PontoAnimado(props: { el: Elemento; t: number; zoom: number; simbolo: string; fator: number }) {
+  const { el, t, zoom, simbolo, fator } = props;
   if (el.geometria.tipo !== 'ponto') return null;
   const p = el.geometria.ponto;
   const estilo = ESTILO_TIPO[el.tipo];
   const cor = el.tipo === 'calha' ? COR_CALHA_ANIMACAO : COR_DISCIPLINA[el.disciplina];
-  const escalaPop = t < FRACAO_POP ? Math.max(0, suavizarPop(t / FRACAO_POP)) : 1;
+  const escalaPop = (t < FRACAO_POP ? Math.max(0, suavizarPop(t / FRACAO_POP)) : 1) * fator;
   const pulso = suavizarSaida(t);
   const tam = estilo.tamanhoPx;
   return (
@@ -200,7 +203,7 @@ const PontoAnimado = memo(function PontoAnimado(props: { el: Elemento; t: number
       {t < 1 && <Circle radius={tam / 2 + RAIO_PULSO_PX * pulso} stroke={cor} strokeWidth={2} opacity={1 - t} />}
       <Group scaleX={escalaPop} scaleY={escalaPop}>
         <Simbolo estilo={estilo} cor={cor} />
-        {simbolo !== '' && (
+        {simbolo !== '' && TAMANHO_FONTE_PX * fator >= FONTE_MIN_LETRA_PX && (
           <Text
             text={simbolo}
             x={-tam}
@@ -237,7 +240,7 @@ function rotuloArea(el: Elemento, t: number, escala: number | null): { centro: P
 }
 
 export function CamadaAnimacao(props: CamadaAnimacaoProps) {
-  const { fase, progresso, largura, altura, zoom, escala, itens, contextoRotulo } = props;
+  const { fase, progresso, largura, altura, zoom, escala, itens, contextoRotulo, fatorSimbolo } = props;
   const fundo = fase !== 'varredura' && fase !== 'materiais' && fase !== 'concluida';
   const brilhoFinal = fase === 'materiais' && progresso < FRACAO_BRILHO_FINAL ? 1 - progresso / FRACAO_BRILHO_FINAL : 0;
   return (
@@ -254,7 +257,7 @@ export function CamadaAnimacao(props: CamadaAnimacaoProps) {
       {itens
         .filter((i) => i.el.geometria.tipo === 'ponto')
         .map(({ el, t }) => (
-          <PontoAnimado key={el.id} el={el} t={t} zoom={zoom} simbolo={rotuloDoElemento(el, contextoRotulo).simbolo} />
+          <PontoAnimado key={el.id} el={el} t={t} zoom={zoom} fator={fatorSimbolo} simbolo={rotuloDoElemento(el, contextoRotulo).simbolo} />
         ))}
       {/* fase 'ambientes': nome + área crescente até o valor */}
       {fase === 'ambientes' &&

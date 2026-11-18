@@ -114,11 +114,53 @@ export const OPACIDADE_HACHURA = 0.35;
 export const LARGURA_CUMEEIRA_PX = 1.5;
 export const TRACEJADO_CUMEEIRA = [8, 4];
 
+// ---------------------------------------------------------------- legibilidade das etiquetas
 /**
- * Elementos de ponto cujo rótulo de texto fica sempre visível (em fonte pequena). Nos demais, o
- * texto só aparece com o elemento selecionado ou sob o mouse — evita rótulos sobrepostos.
+ * Prioridade das etiquetas na disputa por espaço (maior vence). Ambientes e medições do usuário
+ * ficam sempre visíveis; os demais tipos só aparecem com hover/seleção ou com zoom suficiente e
+ * sem colidir com uma etiqueta de prioridade maior.
  */
-export const TIPOS_PONTO_COM_ROTULO_FIXO: readonly TipoElemento[] = ['pilar', 'esquadria'];
+export const PRIORIDADE_ETIQUETA: Record<TipoElemento, number> = {
+  ambiente: 4,
+  medicao: 4,
+  telhado: 3,
+  laje: 3,
+  pilar: 2,
+  esquadria: 2,
+  parede: 1,
+  'viga-baldrame': 1,
+  'viga-superior': 1,
+  fundacao: 1,
+  calha: 1,
+  'ponto-eletrico': 1,
+  quadro: 1,
+  eletroduto: 1,
+  'ponto-hidraulico': 1,
+  reservatorio: 1,
+  'caixa-inspecao': 1,
+  tubo: 1,
+};
+/** Etiquetas desta prioridade ou acima aparecem sempre (sem limiar de zoom nem colisão). */
+export const PRIORIDADE_SEMPRE_VISIVEL = 4;
+/** Etiquetas de linhas/polígonos desta prioridade ou acima ficam por cima dos símbolos de ponto. */
+export const PRIORIDADE_POR_CIMA = 3;
+/**
+ * Zoom mínimo (pixels de tela por metro) para a etiqueta aparecer sem hover/seleção, por prioridade.
+ * Sem escala calibrada, só as sempre visíveis aparecem.
+ */
+export const LIMIAR_PX_POR_METRO: Record<number, number> = { 3: 0, 2: 45, 1: 75 };
+/** Largura média de um caractere (fração do tamanho da fonte), para estimar o tamanho da etiqueta. */
+export const LARGURA_CARACTERE = 0.6;
+/** Folga (px) entre etiquetas na verificação de colisão. */
+export const FOLGA_COLISAO_PX = 2;
+/** Tamanho da célula do índice espacial da colisão (px). */
+export const CELULA_COLISAO_PX = 64;
+/** Distância típica (px de tela) entre símbolos vizinhos a partir da qual eles ficam no tamanho cheio. */
+export const ESPACO_REF_SIMBOLO_PX = 26;
+/** Menor fator de tamanho dos símbolos quando há muitos. */
+export const FATOR_MIN_SIMBOLO = 0.65;
+/** Abaixo deste tamanho (px) a letra dentro do símbolo é omitida. */
+export const FONTE_MIN_LETRA_PX = 7;
 
 /** Letra do símbolo de ponto elétrico, por tipo de ponto. */
 export const LETRA_PONTO_ELETRICO = { luz: 'L', tug: 'T', tue: 'E', interruptor: 'I' } as const;
