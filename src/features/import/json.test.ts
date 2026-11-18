@@ -111,7 +111,7 @@ describe('importarJSON — dados parciais', () => {
 
   it('JSON só com ambientes lista todos os parâmetros ausentes, a espessura e o tipo', () => {
     const r = importarJSON(
-      JSON.stringify({ ambientes: [{ nome: 'Depósito', pontos: [[0, 0], [1, 0], [1, 1]] }], paredes: [{ pontos: [[0, 0], [1, 0]] }] }),
+      JSON.stringify({ ambientes: [{ nome: 'Ateliê', pontos: [[0, 0], [1, 0], [1, 1]] }], paredes: [{ pontos: [[0, 0], [1, 0]] }] }),
       contexto,
     );
     if (r.tipo !== 'parcial') throw new Error('esperado parcial');
@@ -121,7 +121,7 @@ describe('importarJSON — dados parciais', () => {
         'Pé-direito: não informado',
         'Espessura das paredes: não informado',
         'Número de pessoas: não informado',
-        'Depósito: falta o tipo do ambiente',
+        'Ateliê: falta o tipo do ambiente',
         'Parede 1: falta a espessura',
       ]),
     );

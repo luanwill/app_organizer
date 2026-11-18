@@ -122,7 +122,7 @@ describe('reconhecerVetores — vários cômodos e vãos', () => {
     expect(paredes(r)).toHaveLength(4);
     expect(ambientes(r)).toHaveLength(1);
     expect(areaM2(ambientes(r)[0]!)).toBeCloseTo(12, 6);
-    expect(r.pendencias.some((p) => p.startsWith('1 vão (porta/passagem) foi fechado'))).toBe(true);
+    expect(r.pendencias.some((p) => p.startsWith('1 vão (porta/janela/passagem) foi fechado'))).toBe(true);
   });
 
   it('lado aberto: não inventa o fechamento — sem ambiente e com pendência citando o nome', () => {

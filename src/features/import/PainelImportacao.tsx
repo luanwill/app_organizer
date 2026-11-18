@@ -252,8 +252,9 @@ export function PainelImportacao() {
       <div className="secao">
         <h4>PDF vetorial (planta carregada)</h4>
         <p className="suave">
-          Lê os traços da página atual de um PDF exportado de CAD: pares de linhas paralelas viram paredes (no eixo), os
-          contornos fechados por paredes viram ambientes (pela face interna) e os textos dão os nomes. Só fica a planta
+          Lê os vetores da página atual de um PDF exportado de CAD ou de planta humanizada: paredes em traço duplo
+          ou preenchidas (poché) viram paredes (no eixo), os contornos fechados por paredes viram ambientes (pela face
+          interna) e os textos dão os nomes. Portas e janelas só fecham o vão quando estão desenhadas. Só fica a planta
           que tem cômodos com nome; cortes, elevações e carimbo são descartados. Para limitar a região, selecione antes
           uma medição de área desenhada em volta da planta.
         </p>

@@ -1,7 +1,7 @@
 /** Classificação de ambientes por palavras-chave (compartilhada entre DXF e JSON). Função pura. */
 import type { Ponto, TipoAmbiente } from '@/core/model';
 import { areaPoligono, pontoEmPoligono } from '@/core/calc';
-import { PALAVRAS_CHAVE_AMBIENTE } from './config';
+import { PALAVRAS_CHAVE_AMBIENTE, TEXTOS_NAO_AMBIENTE } from './config';
 
 /** Minúsculas e sem acentos. */
 export function normalizarTexto(texto: string): string {
@@ -12,13 +12,34 @@ export function normalizarTexto(texto: string): string {
     .trim();
 }
 
-/** Tipo sugerido pelo texto (nome do ambiente), ou null se nenhuma palavra-chave casar. */
-export function classificarAmbiente(texto: string): { tipo: TipoAmbiente; areaMolhada: boolean } | null {
-  const t = normalizarTexto(texto);
-  for (const regra of PALAVRAS_CHAVE_AMBIENTE) {
-    if (regra.palavras.some((p) => t.includes(p))) return { tipo: regra.tipo, areaMolhada: regra.areaMolhada };
-  }
-  return null;
+export interface Classificacao {
+  tipo: TipoAmbiente;
+  areaMolhada: boolean;
+  /** A área ficou molhada por causa de um termo secundário do nome ("SALA E COZINHA"): vale conferir. */
+  molhadaPorTermoSecundario: boolean;
+}
+
+/**
+ * Tipo sugerido pelo nome do ambiente, ou null se nenhuma palavra-chave casar. Cada palavra-chave casa só no
+ * INÍCIO de uma palavra. Nome composto: o tipo é o do termo que aparece primeiro ("SALA TV/ COZINHA" → sala;
+ * "WC SUÍTE" → banheiro) e a área é molhada se qualquer termo for de área molhada.
+ */
+export function classificarAmbiente(texto: string): Classificacao | null {
+  const palavras = normalizarTexto(texto).split(/[^a-z0-9.]+/).filter((p) => p !== '');
+  if (palavras.length === 0 || TEXTOS_NAO_AMBIENTE.some((n) => palavras[0]!.startsWith(n))) return null;
+  const achados = palavras.flatMap((palavra) =>
+    PALAVRAS_CHAVE_AMBIENTE.filter((regra) => regra.palavras.some((chave) => palavra.startsWith(chave))).slice(0, 1),
+  );
+  const principal = achados[0];
+  if (!principal) return null;
+  const areaMolhada = achados.some((r) => r.areaMolhada);
+  return { tipo: principal.tipo, areaMolhada, molhadaPorTermoSecundario: areaMolhada && !principal.areaMolhada };
+}
+
+/** O texto não pode ser nome de ambiente (título, escala, entorno)? */
+export function naoEhNomeDeAmbiente(texto: string): boolean {
+  const primeira = normalizarTexto(texto).split(/[^a-z0-9.]+/).find((p) => p !== '');
+  return primeira !== undefined && TEXTOS_NAO_AMBIENTE.some((n) => primeira.startsWith(n));
 }
 
 export interface TextoPosicionado {

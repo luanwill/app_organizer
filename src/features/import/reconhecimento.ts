@@ -2,10 +2,14 @@
  * Reconhecimento de paredes e ambientes a partir de traços vetoriais (PDF exportado de CAD). Função PURA,
  * sem pdfjs: recebe segmentos e textos em unidades da página e devolve candidatos 'importado' + 'pendente'.
  *
- * Passos: filtra ruído → pares de paralelas viram paredes no eixo → trechos colineares são unidos (vãos de
- * porta) → eixos são estendidos até os encontros → as faces fechadas do grafo de paredes viram ambientes,
- * recuados para a face interna das paredes → só ficam os conjuntos de paredes que têm um cômodo com nome
- * reconhecido (a mesma folha costuma trazer cortes, elevações e carimbo).
+ * Dois jeitos de achar paredes, comparados a cada página (vence o que fecha mais cômodos com nome):
+ *  - traço duplo: pares de linhas paralelas na distância de parede (AutoCAD, plantas técnicas);
+ *  - poché: áreas preenchidas com a cara de parede, uma cor por vez (plantas humanizadas, SketchUp/Layout,
+ *    Revit, ArchiCAD) — ver poche.ts.
+ * Depois: trechos colineares são unidos (vãos de porta; janelas só com caixilho desenhado) → eixos são
+ * estendidos até os encontros → as faces fechadas do grafo de paredes viram ambientes, recuados para a face
+ * interna das paredes → só ficam os conjuntos de paredes que têm um cômodo com nome reconhecido (a mesma
+ * folha costuma trazer cortes, elevações e carimbo).
  */
 import type { Elemento, ElementoDe, Ponto, ResultadoImportacao } from '@/core/model';
 import {
@@ -19,9 +23,11 @@ import {
   pontoEmPoligono,
 } from '@/core/calc';
 import { novoId } from '@/core/store';
-import { classificarAmbiente, type TextoPosicionado } from './ambientes';
+import { classificarAmbiente, naoEhNomeDeAmbiente, type Classificacao, type TextoPosicionado } from './ambientes';
 import { RECONHECIMENTO_PDF } from './config';
 import { detectarParedes } from './dxf';
+import { indiceDeVaos, SEM_EVIDENCIA, SEM_EVIDENCIAS, type EvidenciasDeVao, type TemEvidencia } from './esquadrias';
+import { paredesDosPreenchimentos } from './poche';
 
 export interface EntradaVetores {
   /** Traços retos, em unidades da página. */
@@ -29,6 +35,10 @@ export interface EntradaVetores {
   textos: TextoPosicionado[];
   /** Largura do traço de cada segmento (opcional): traços mais grossos têm prioridade para formar paredes. */
   larguras?: number[];
+  /** Áreas preenchidas (opcional), em unidades da página: base do método do poché. */
+  preenchimentos?: { contornos: Ponto[][]; cor: string | null; parImpar: boolean }[];
+  /** Cordas de arcos (opcional), em unidades da página: giro das portas, evidência de vão de porta. */
+  arcos?: [Ponto, Ponto][];
 }
 
 export interface OpcoesReconhecimento {
@@ -76,9 +86,10 @@ function direcao(p: Parede): { ux: number; uy: number; comprimento: number } {
 
 /**
  * Une trechos colineares de mesma espessura que se tocam, se sobrepõem (traços duplicados) ou estão
- * separados por um vão de até `vaoMaximoM`. Devolve também quantos vãos de verdade foram fechados.
+ * separados por um vão de até `vaoMaximoM` — ou maior, até `esquadria.vaoMaximoM`, quando há caixilho
+ * desenhado no vão (janela, porta de correr). Devolve também quantos vãos de verdade foram fechados.
  */
-export function unirColineares(entrada: Parede[]): { paredes: Parede[]; vaos: number } {
+export function unirColineares(entrada: Parede[], temEsquadria: TemEvidencia = SEM_EVIDENCIA): { paredes: Parede[]; vaos: number } {
   const paredes = entrada.map((p) => ({ ...p }));
   let vaos = 0;
   // cada união refaz a varredura só para a parede i (que cresceu), não a lista inteira
@@ -94,12 +105,19 @@ export function unirColineares(entrada: Parede[]): { paredes: Parede[]; vaos: nu
       const t0 = Math.min(ao_longo(pj.a), ao_longo(pj.b));
       const t1 = Math.max(ao_longo(pj.a), ao_longo(pj.b));
       const vao = Math.max(t0 - di.comprimento, -t1);
-      const une =
+      const alinhadas =
         Math.abs(pi.espessura - pj.espessura) <= C.toleranciaEspessuraM &&
         Math.abs(di.ux * dj.uy - di.uy * dj.ux) <= SENO_PARALELO &&
         lateral(pj.a) <= C.toleranciaColinearM &&
-        lateral(pj.b) <= C.toleranciaColinearM &&
-        vao <= C.vaoMaximoM;
+        lateral(pj.b) <= C.toleranciaColinearM;
+      const pontoEm = (t: number): Ponto => ({ x: pi.a.x + di.ux * t, y: pi.a.y + di.uy * t });
+      const une =
+        alinhadas &&
+        (vao <= C.vaoMaximoM ||
+          (vao <= C.esquadria.vaoMaximoM &&
+            (t0 > di.comprimento
+              ? temEsquadria(pontoEm(di.comprimento), pontoEm(t0), pi.espessura)
+              : temEsquadria(pontoEm(t1), pontoEm(0), pi.espessura))));
       if (!une) {
         j++;
         continue;
@@ -182,15 +200,28 @@ function semRepetidos(segmentos: [Ponto, Ponto][], larguras: number[]): { segmen
 /**
  * Duas paredes não ocupam o mesmo lugar: entre candidatas paralelas cujos corpos se sobrepõem (um traço de
  * bancada ou de mobiliário junto à face de uma parede), fica a de traço mais pesado e, em empate, a mais longa.
+ * Uma candidata em outra direção que corre quase toda DENTRO do corpo de outra parede (hachura de linhas
+ * dentro da parede, sobra de triangulação do poché) também sai.
  */
 export function semSobrepostas(paredes: Parede[]): Parede[] {
   const ordenadas = [...paredes].sort((p, q) => q.peso - p.peso || distancia(q.a, q.b) - distancia(p.a, p.b));
   const aceitas: Parede[] = [];
+  const amostras = C.amostrasCorpo;
   for (const p of ordenadas) {
     const dp = direcao(p);
     const sobreposta = aceitas.some((q) => {
       const dq = direcao(q);
-      if (Math.abs(dp.ux * dq.uy - dp.uy * dq.ux) > SENO_PARALELO) return false;
+      if (Math.abs(dp.ux * dq.uy - dp.uy * dq.ux) > SENO_PARALELO) {
+        let dentro = 0;
+        for (let k = 0; k < amostras; k++) {
+          const t = (k + 0.5) / amostras;
+          const r = { x: p.a.x + (p.b.x - p.a.x) * t, y: p.a.y + (p.b.y - p.a.y) * t };
+          const lateral = Math.abs(-(r.x - q.a.x) * dq.uy + (r.y - q.a.y) * dq.ux);
+          const ao_longo = (r.x - q.a.x) * dq.ux + (r.y - q.a.y) * dq.uy;
+          if (lateral <= q.espessura / 2 && ao_longo >= 0 && ao_longo <= dq.comprimento) dentro++;
+        }
+        return dentro / amostras > C.fracaoSobreposicaoCorpo;
+      }
       const meio = { x: (p.a.x + p.b.x) / 2, y: (p.a.y + p.b.y) / 2 };
       const lateral = Math.abs(-(meio.x - q.a.x) * dq.uy + (meio.y - q.a.y) * dq.ux);
       if (lateral >= (p.espessura + q.espessura) / 2 - C.toleranciaColinearM) return false;
@@ -206,12 +237,13 @@ export function semSobrepostas(paredes: Parede[]): Parede[] {
 
 /**
  * Vãos junto a um encontro (porta encostada na parede perpendicular): a ponta de uma parede — solta ou em
- * canto — segue em linha reta e, se alcançar o eixo de outra parede com vão livre de até `vaoMaximoNaPontaM`,
- * o trecho é fechado. Pontas que morrem no meio de outra parede (encontro em T) não avançam.
+ * canto — segue em linha reta e, se alcançar o eixo de outra parede com vão livre de até `vaoMaximoNaPontaM`
+ * COM porta desenhada (folha ou giro), ou até `esquadria.vaoMaximoM` com caixilho desenhado no vão, o trecho
+ * é fechado. Sem desenho de abertura, fica aberto: um corredor que se abre para um cômodo não vira porta. Pontas que morrem no meio de outra parede (encontro em T) não avançam.
  * O limite é menor que o dos vãos no meio da parede para não atravessar recuos e corredores.
  * Devolve quantos vãos fechou.
  */
-export function fecharVaosNasPontas(paredes: Parede[]): { paredes: Parede[]; vaos: number } {
+export function fecharVaosNasPontas(paredes: Parede[], evidencias: EvidenciasDeVao = SEM_EVIDENCIAS): { paredes: Parede[]; vaos: number } {
   const dirs = paredes.map(direcao);
   let vaos = 0;
   /** A ponta cai no MEIO do eixo de outra parede (não nas extremidades dela)? */
@@ -237,12 +269,18 @@ export function fecharVaosNasPontas(paredes: Parede[]): { paredes: Parede[]; vao
       const qy = pj.a.y - ponta.y;
       const avanco = ((qx * dj.uy - qy * dj.ux) / cruz) * sentido;
       const s = (qx * di.uy - qy * di.ux) / cruz;
-      if (avanco <= C.toleranciaNoM || avanco > C.vaoMaximoNaPontaM + (paredes[i]!.espessura + pj.espessura) / 2) return;
+      const folga = (paredes[i]!.espessura + pj.espessura) / 2;
+      if (avanco <= C.toleranciaNoM || avanco > C.esquadria.vaoMaximoM + folga || avanco >= melhorAvanco) return;
       if (s < -pj.espessura / 2 || s > dj.comprimento + pj.espessura / 2) return;
-      if (avanco < melhorAvanco) {
-        melhorAvanco = avanco;
-        melhor = { x: ponta.x + di.ux * avanco * sentido, y: ponta.y + di.uy * avanco * sentido };
-      }
+      const alvo = { x: ponta.x + di.ux * avanco * sentido, y: ponta.y + di.uy * avanco * sentido };
+      const e = paredes[i]!.espessura;
+      const aberturaDesenhada =
+        avanco <= C.vaoMaximoNaPontaM + folga
+          ? evidencias.porta(ponta, alvo, e) || evidencias.esquadria(ponta, alvo, e)
+          : evidencias.esquadria(ponta, alvo, e);
+      if (!aberturaDesenhada) return;
+      melhorAvanco = avanco;
+      melhor = alvo;
     });
     if (melhor !== null) vaos++;
     return melhor ?? ponta;
@@ -422,6 +460,7 @@ function lerTextosDoAmbiente(textos: TextoPosicionado[]): Leitura {
       areaEscrita ??= lerNumero(area[1]!);
       continue;
     }
+    if (naoEhNomeDeAmbiente(t.texto)) continue;
     if (/\p{L}/u.test(t.texto)) {
       partes.push(t.texto);
       temPalavra = true;
@@ -445,8 +484,7 @@ interface Candidato {
   /** Paredes (índices) e comprimento de cada aresta do contorno. */
   arestas: { parede: number; comprimento: number }[];
   leitura: Leitura;
-  /** O nome lido indica um tipo de cômodo. */
-  comodo: boolean;
+  classe: Classificacao | null;
 }
 
 interface Analise {
@@ -459,10 +497,12 @@ interface Analise {
   conjuntosComComodo: Set<number>;
 }
 
+const comodos = (a: Analise): number => a.candidatos.filter((c) => c.classe !== null).length;
+
 /** Dos pares de paralelas até os ambientes candidatos com seus textos. */
-function analisar(pares: Parede[], textos: TextoPosicionado[]): Analise {
-  const unidas = unirColineares(semSobrepostas(pares));
-  const fechadas = fecharVaosNasPontas(estenderAosEncontros(semSobrepostas(unidas.paredes)));
+function analisar(pares: Parede[], textos: TextoPosicionado[], evidencias: EvidenciasDeVao): Analise {
+  const unidas = unirColineares(semSobrepostas(pares), evidencias.esquadria);
+  const fechadas = fecharVaosNasPontas(estenderAosEncontros(semSobrepostas(unidas.paredes)), evidencias);
   const paredes = fechadas.paredes;
   const grafo = paredes.length > 0 ? facesDoGrafo(paredes) : { faces: [], conjuntoDaParede: [], conjuntoDaFace: [] };
 
@@ -483,7 +523,7 @@ function analisar(pares: Parede[], textos: TextoPosicionado[]): Analise {
       peloEixo: interno === null,
       arestas: face.paredes.map((parede, k) => ({ parede, comprimento: distancia(face.contorno[k]!, face.contorno[(k + 1) % n]!) })),
       leitura: { nome: undefined, areaEscrita: null },
-      comodo: false,
+      classe: null,
     });
   });
 
@@ -501,8 +541,8 @@ function analisar(pares: Parede[], textos: TextoPosicionado[]): Analise {
   const conjuntosComComodo = new Set<number>();
   candidatos.forEach((c, i) => {
     c.leitura = lerTextosDoAmbiente(textosDoCandidato[i]!);
-    c.comodo = c.leitura.nome !== undefined && classificarAmbiente(c.leitura.nome) !== null;
-    if (c.comodo) conjuntosComComodo.add(c.conjunto);
+    c.classe = c.leitura.nome === undefined ? null : classificarAmbiente(c.leitura.nome);
+    if (c.classe !== null) conjuntosComComodo.add(c.conjunto);
   });
   return { paredes, vaos: unidas.vaos + fechadas.vaos, candidatos, soltos, conjuntoDaParede: grafo.conjuntoDaParede, conjuntosComComodo };
 }
@@ -516,7 +556,7 @@ function referenciaDasParedes(analise: Analise): { peso: number; espessuras: num
   const porEspessura = new Map<number, number>();
   let total = 0;
   for (const c of analise.candidatos) {
-    if (!c.comodo) continue;
+    if (c.classe === null) continue;
     for (const { parede, comprimento } of c.arestas) {
       const p = analise.paredes[parede]!;
       porPeso.set(p.peso, (porPeso.get(p.peso) ?? 0) + comprimento);
@@ -530,6 +570,48 @@ function referenciaDasParedes(analise: Analise): { peso: number; espessuras: num
   return { peso, espessuras };
 }
 
+/** Método de leitura das paredes e o resultado da análise com ele. */
+interface Metodo {
+  descricao: string;
+  analise: Analise;
+  /** Trechos ligados à planta descartados na 2ª passada (traço mais fino / espessura diferente). */
+  foraDoPadrao: number;
+}
+
+/** 1ª passada com todas as candidatas; 2ª só com as que têm a "cara" das paredes dos cômodos nomeados. */
+function analisarMetodo(descricao: string, pares: Parede[], textos: TextoPosicionado[], evidencias: EvidenciasDeVao): Metodo {
+  let analise = analisar(pares, textos, evidencias);
+  let foraDoPadrao = 0;
+  const referencia = referenciaDasParedes(analise);
+  if (referencia !== null) {
+    const noPadrao = pares.filter(
+      (p) => p.peso >= referencia.peso && referencia.espessuras.some((e) => Math.abs(e - p.espessura) <= C.toleranciaEspessuraM),
+    );
+    const refinada = analisar(noPadrao, textos, evidencias);
+    if (comodos(refinada) >= comodos(analise)) {
+      const ligadas = (a: Analise): number => a.paredes.filter((_, i) => a.conjuntosComComodo.has(a.conjuntoDaParede[i]!)).length;
+      foraDoPadrao = Math.max(0, ligadas(analise) - ligadas(refinada));
+      analise = refinada;
+    }
+  }
+  return { descricao, analise, foraDoPadrao };
+}
+
+/** Pontuação para escolher o método: cômodos com nome, depois ambientes fechados, depois comprimento de parede. */
+function pontuacao(m: Metodo): [number, number, number] {
+  const a = m.analise;
+  const conjuntos = a.conjuntosComComodo.size > 0 ? a.conjuntosComComodo : null;
+  const fechados = a.candidatos.filter((c) => conjuntos === null || conjuntos.has(c.conjunto)).length;
+  const comprimento = a.paredes.reduce((s, p, i) => (conjuntos === null || conjuntos.has(a.conjuntoDaParede[i]!) ? s + distancia(p.a, p.b) : s), 0);
+  return [comodos(a), fechados, comprimento];
+}
+
+const melhor = (p: Metodo, q: Metodo): Metodo => {
+  const [a1, a2, a3] = pontuacao(p);
+  const [b1, b2, b3] = pontuacao(q);
+  return b1 > a1 || (b1 === a1 && (b2 > a2 || (b2 === a2 && b3 > a3))) ? q : p;
+};
+
 export function reconhecerVetores(entrada: EntradaVetores, opcoes: OpcoesReconhecimento): ResultadoReconhecimento {
   const vazio = (situacao: SituacaoReconhecimento, mensagem: string): ResultadoReconhecimento => ({
     elementos: [],
@@ -540,7 +622,9 @@ export function reconhecerVetores(entrada: EntradaVetores, opcoes: OpcoesReconhe
 
   if (!escalaValida(opcoes.escala)) return vazio('sem-escala', MENSAGEM_SEM_ESCALA);
   const escala = opcoes.escala;
-  if (entrada.segmentos.length < C.minSegmentosVetorial) return vazio('nao-vetorial', MENSAGEM_NAO_VETORIAL);
+  const preenchimentosBrutos = entrada.preenchimentos ?? [];
+  const ladosPreenchidos = preenchimentosBrutos.reduce((s, f) => s + f.contornos.reduce((t, c) => t + c.length, 0), 0);
+  if (entrada.segmentos.length + ladosPreenchidos < C.minSegmentosVetorial) return vazio('nao-vetorial', MENSAGEM_NAO_VETORIAL);
 
   // --- região e ruído; daqui em diante tudo em METROS
   const regiao = opcoes.regiao && opcoes.regiao.length >= 3 ? opcoes.regiao : null;
@@ -556,8 +640,27 @@ export function reconhecerVetores(entrada: EntradaVetores, opcoes: OpcoesReconhe
   });
   const { segmentos, larguras } = semRepetidos(brutos, largurasBrutas);
   const textos = entrada.textos.filter((t) => naRegiao(t.ponto)).map((t) => ({ texto: t.texto, ponto: emMetros(t.ponto) }));
+  const preenchimentos = preenchimentosBrutos
+    .map((f) => ({ ...f, contornos: f.contornos.filter((c) => c.every(naRegiao)).map((c) => c.map(emMetros)) }))
+    .filter((f) => f.contornos.length > 0);
+  const arcos = (entrada.arcos ?? []).filter(([a, b]) => naRegiao(a) && naRegiao(b)).map(([a, b]): [Ponto, Ponto] => [emMetros(a), emMetros(b)]);
+  const evidencias = indiceDeVaos(segmentos, arcos);
 
-  if (segmentos.length > C.maxSegmentos) {
+  // --- métodos de leitura das paredes
+  const metodos: Metodo[] = [];
+  const tracoDuploCabe = segmentos.length <= C.maxSegmentos;
+  if (tracoDuploCabe) {
+    const pares = detectarParedes(segmentos, 1, C.parede, larguras).map(
+      (p): Parede => ({ a: p.eixo[0], b: p.eixo[1], espessura: p.espessura, peso: p.peso }),
+    );
+    if (pares.length > 0) metodos.push(analisarMetodo('pares de linhas paralelas (traço duplo)', pares, textos, evidencias));
+  }
+  for (const candidato of paredesDosPreenchimentos(preenchimentos)) {
+    const pares = candidato.paredes.map((p): Parede => ({ a: p.eixo[0], b: p.eixo[1], espessura: p.espessura, peso: 0 }));
+    metodos.push(analisarMetodo(`áreas preenchidas (poché, cor ${candidato.cor})`, pares, textos, evidencias));
+  }
+
+  if (metodos.length === 0 && !tracoDuploCabe) {
     return vazio(
       'excesso',
       `A página tem traços demais para o reconhecimento automático (${formatarNumero(segmentos.length, 0)}; o limite é ` +
@@ -565,45 +668,30 @@ export function reconhecerVetores(entrada: EntradaVetores, opcoes: OpcoesReconhe
         'deixe-a selecionada e reconheça de novo.',
     );
   }
-
-  // --- 1ª passada: todas as candidatas
-  const pares = detectarParedes(segmentos, 1, C.parede, larguras).map(
-    (p): Parede => ({ a: p.eixo[0], b: p.eixo[1], espessura: p.espessura, peso: p.peso }),
-  );
-  let analise = analisar(pares, textos);
-  if (analise.paredes.length === 0) {
+  const escolhido = metodos.reduce<Metodo | null>((m, atual) => (m === null ? atual : melhor(m, atual)), null);
+  if (escolhido === null || escolhido.analise.paredes.length === 0) {
     return vazio(
       'nada',
-      'Nenhuma parede foi reconhecida: não há pares de linhas paralelas com distância de parede ' +
+      'Nenhuma parede foi reconhecida: não há pares de linhas paralelas nem áreas preenchidas com espessura de parede ' +
         `(${formatarNumero(C.parede.distanciaMinM)} a ${formatarNumero(C.parede.distanciaMaxM)} m) na escala calibrada. Confira a escala da página.`,
     );
   }
+  const { analise, foraDoPadrao } = escolhido;
 
-  // --- 2ª passada: só candidatas com a "cara" das paredes dos cômodos nomeados (traço e espessura)
-  let foraDoPadrao = 0;
-  const referencia = referenciaDasParedes(analise);
-  if (referencia !== null) {
-    const noPadrao = pares.filter(
-      (p) => p.peso >= referencia.peso && referencia.espessuras.some((e) => Math.abs(e - p.espessura) <= C.toleranciaEspessuraM),
-    );
-    const refinada = analisar(noPadrao, textos);
-    const comodos = (a: Analise): number => a.candidatos.filter((c) => c.comodo).length;
-    if (comodos(refinada) >= comodos(analise)) {
-      // conta só o que estava ligado à planta (o resto é descartado de qualquer modo, por ser outro desenho)
-      foraDoPadrao = analise.paredes.filter((_, i) => analise.conjuntosComComodo.has(analise.conjuntoDaParede[i]!)).length;
-      analise = refinada;
-      foraDoPadrao = Math.max(
-        0,
-        foraDoPadrao - analise.paredes.filter((_, i) => analise.conjuntosComComodo.has(analise.conjuntoDaParede[i]!)).length,
-      );
-    }
+  // --- conjuntos mantidos: os que têm cômodo de nome reconhecido (descarta cortes, elevações, carimbo...);
+  //     sem nenhum nome (textos em curvas), o conjunto com mais ambientes fechados
+  const { paredes, candidatos } = analise;
+  let mantidosConjuntos = analise.conjuntosComComodo;
+  const semNomes = mantidosConjuntos.size === 0;
+  if (semNomes) {
+    const porConjunto = new Map<number, number>();
+    for (const c of candidatos) porConjunto.set(c.conjunto, (porConjunto.get(c.conjunto) ?? 0) + 1);
+    const maior = [...porConjunto.entries()].sort((a, b) => b[1] - a[1])[0];
+    mantidosConjuntos = new Set(maior ? [maior[0]] : []);
   }
-
-  // --- só os conjuntos de paredes com um cômodo de nome reconhecido (descarta cortes, elevações, carimbo...)
-  const { paredes, candidatos, conjuntosComComodo } = analise;
-  const filtrar = conjuntosComComodo.size > 0;
-  const paredeMantida = paredes.map((_, i) => !filtrar || conjuntosComComodo.has(analise.conjuntoDaParede[i]!));
-  const mantidos = candidatos.filter((c) => !filtrar || conjuntosComComodo.has(c.conjunto));
+  const filtrar = mantidosConjuntos.size > 0;
+  const paredeMantida = paredes.map((_, i) => !filtrar || mantidosConjuntos.has(analise.conjuntoDaParede[i]!));
+  const mantidos = candidatos.filter((c) => !filtrar || mantidosConjuntos.has(c.conjunto));
 
   // --- elementos (de volta às unidades da página)
   const paraPagina = (p: Ponto): Ponto => ({ x: p.x / escala, y: p.y / escala });
@@ -612,15 +700,19 @@ export function reconhecerVetores(entrada: EntradaVetores, opcoes: OpcoesReconhe
   const elementos: Elemento[] = [];
   const pendencias: string[] = [
     'O reconhecimento é uma sugestão: confira paredes, espessuras e ambientes na planta antes de aceitar.',
+    `Paredes lidas por ${escolhido.descricao}.`,
   ];
 
   let pelosEixos = 0;
   mantidos.forEach((c, i) => {
     const { nome: nomeLido, areaEscrita } = c.leitura;
     const nome = nomeLido ?? `Ambiente ${i + 1}`;
-    const classe = nomeLido === undefined ? null : classificarAmbiente(nomeLido);
+    const classe = c.classe;
     if (nomeLido === undefined) pendencias.push(`${nome} sem nome (${formatarNumero(c.area)} m²)`);
     else if (classe === null) pendencias.push(`${nome}: tipo de ambiente não reconhecido — escolha o tipo`);
+    else if (classe.molhadaPorTermoSecundario) {
+      pendencias.push(`${nome}: nome composto — tipo pelo 1º termo, marcado como área molhada por causa de outro termo do nome; confira`);
+    }
     if (c.peloEixo) pelosEixos++;
     if (areaEscrita !== null && areaEscrita > 0 && Math.abs(c.area - areaEscrita) / areaEscrita > C.toleranciaAreaEscrita) {
       pendencias.push(
@@ -673,8 +765,10 @@ export function reconhecerVetores(entrada: EntradaVetores, opcoes: OpcoesReconhe
     pendencias.push(`"${nome}": o nome está na planta, mas as paredes em volta não fecham um contorno (lado aberto?) — desenhe este ambiente à mão`);
   }
   if (mantidos.length === 0) pendencias.push('Nenhum ambiente fechado por paredes foi encontrado: desenhe os ambientes à mão.');
-  if (!filtrar) {
-    pendencias.push('Nenhum nome de cômodo foi reconhecido nos textos: o resultado pode incluir outros desenhos da folha (cortes, elevações, hachuras) — descarte o que não for planta baixa.');
+  if (semNomes) {
+    pendencias.push(
+      'Nenhum nome de cômodo foi reconhecido nos textos (nomes desenhados como curvas?): ficou só o conjunto de paredes com mais ambientes fechados — confira se é a planta baixa e dê nome aos ambientes.',
+    );
   }
   if (descartadas > 0) {
     pendencias.push(`${plural(descartadas, 'trecho com cara de parede foi descartado', 'trechos com cara de parede foram descartados')} por não estar ligado à planta com cômodos nomeados (outros desenhos da folha, hachuras, carimbo).`);
@@ -683,12 +777,15 @@ export function reconhecerVetores(entrada: EntradaVetores, opcoes: OpcoesReconhe
     pendencias.push(`${plural(foraDoPadrao, 'trecho dentro da planta foi descartado', 'trechos dentro da planta foram descartados')} por ter traço mais fino ou espessura diferente das paredes dos cômodos (bancadas, louças, mobiliário — e também muros ou paredes desenhados com outra pena): desenhe o que faltar.`);
   }
   if (analise.vaos > 0) {
-    pendencias.push(`${plural(analise.vaos, 'vão (porta/passagem) foi fechado', 'vãos (portas/passagens) foram fechados')} em linha reta para a parede ficar contínua: posicione as esquadrias para descontar as aberturas.`);
+    pendencias.push(`${plural(analise.vaos, 'vão (porta/janela/passagem) foi fechado', 'vãos (portas/janelas/passagens) foram fechados')} em linha reta para a parede ficar contínua: posicione as esquadrias para descontar as aberturas.`);
   }
   if (pelosEixos > 0) {
     pendencias.push(`${plural(pelosEixos, 'ambiente ficou traçado', 'ambientes ficaram traçados')} pelo eixo das paredes (a área inclui meia espessura das paredes): ajuste o contorno.`);
   }
-  pendencias.push('Janelas, portas e paredes curvas não são reconhecidas; os ambientes seguem a face interna das paredes.');
+  if (!tracoDuploCabe && (semContorno.size > 0 || mantidos.length === 0)) {
+    pendencias.push(`A leitura por traço duplo não rodou: a página tem traços demais (${formatarNumero(segmentos.length, 0)}). Se faltar parede, limite a região com uma medição de área selecionada.`);
+  }
+  pendencias.push('Paredes curvas não são reconhecidas; os ambientes seguem a face interna das paredes.');
 
   return { elementos, pendencias, situacao: 'ok' };
 }

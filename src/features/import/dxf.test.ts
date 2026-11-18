@@ -48,7 +48,7 @@ describe('importarDXF — ambientes', () => {
         texto(6, 2, '12,00 m²'),
         texto(6, 1, 'SALA DE ESTAR'),
         lwpolyline([[10, 0], [12, 0], [12, 3], [10, 3]], true),
-        texto(11, 1, 'Depósito'),
+        texto(11, 1, 'Ateliê'),
       ),
       opcoes('m'),
     );
@@ -56,8 +56,8 @@ describe('importarDXF — ambientes', () => {
     expect(banheiro!.props).toMatchObject({ nome: 'Banheiro', tipoAmbiente: 'banheiro', areaMolhada: true });
     expect(banheiro!.rotulo).toBe('Banheiro');
     expect(sala!.props).toMatchObject({ nome: 'SALA DE ESTAR', tipoAmbiente: 'sala', areaMolhada: false });
-    expect(deposito!.props).toMatchObject({ nome: 'Depósito', tipoAmbiente: 'outro' });
-    expect(r.pendencias.some((p) => p.startsWith('Depósito: tipo de ambiente não reconhecido'))).toBe(true);
+    expect(deposito!.props).toMatchObject({ nome: 'Ateliê', tipoAmbiente: 'outro' });
+    expect(r.pendencias.some((p) => p.startsWith('Ateliê: tipo de ambiente não reconhecido'))).toBe(true);
     expect(r.pendencias.some((p) => p.includes('sem nome'))).toBe(false);
   });
 

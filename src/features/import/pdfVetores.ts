@@ -27,8 +27,21 @@ export interface TracoVetorial {
   soPreenchido: boolean;
 }
 
+/** Área preenchida (poché, hachura sólida, mobiliário...): um ou mais contornos fechados. */
+export interface PreenchimentoVetorial {
+  /** Contornos fechados (implicitamente; o 1º ponto não se repete), em unidades da página. */
+  contornos: Ponto[][];
+  /** Cor do preenchimento (#rrggbb) ou null (padrão/sombreamento). */
+  cor: string | null;
+  /** Regra de preenchimento do PDF: par-ímpar (eoFill) ou não nulo (fill). */
+  parImpar: boolean;
+}
+
 export interface VetoresDaPagina {
   tracos: TracoVetorial[];
+  preenchimentos: PreenchimentoVetorial[];
+  /** Cordas dos trechos curvos contornados (início → fim de cada sequência de curvas): giro de portas. */
+  arcos: [Ponto, Ponto][];
   textos: TextoPosicionado[];
   /** Curvas encontradas (ignoradas: só trechos retos viram traços). */
   curvasIgnoradas: number;
@@ -66,6 +79,7 @@ const hex = (n: number): string => Math.max(0, Math.min(255, Math.round(n))).toS
 interface Estado {
   ctm: Matriz;
   cor: string | null;
+  corPreenchimento: string | null;
   largura: number;
   tracejado: boolean;
 }
@@ -73,6 +87,8 @@ interface Estado {
 /** Subcaminho em coordenadas da página (já transformado). */
 interface Subcaminho {
   pontos: Ponto[];
+  /** curva[i]: o trecho que chega em pontos[i] é curvo (vira corda no preenchimento, não vira traço). */
+  curva: boolean[];
   fechado: boolean;
 }
 
@@ -86,24 +102,33 @@ export async function extrairVetores(pagina: PaginaPdf, OPS: Record<string, numb
 
   const tracos: TracoVetorial[] = [];
   let curvasIgnoradas = 0;
-  let estado: Estado = { ctm: viewport, cor: '#000000', largura: 1, tracejado: false };
+  let estado: Estado = { ctm: viewport, cor: '#000000', corPreenchimento: '#000000', largura: 1, tracejado: false };
+  const preenchimentos: PreenchimentoVetorial[] = [];
+  const arcos: [Ponto, Ponto][] = [];
   const pilha: Estado[] = [];
   let pendentes: Subcaminho[] = [];
 
   const CONTORNA = new Set([OPS.stroke, OPS.closeStroke, OPS.fillStroke, OPS.eoFillStroke, OPS.closeFillStroke, OPS.closeEOFillStroke]);
   const PREENCHE = new Set([OPS.fill, OPS.eoFill]);
+  /** Todos os operadores que preenchem (com ou sem contorno). */
+  const COM_PREENCHIMENTO = new Set([OPS.fill, OPS.eoFill, OPS.fillStroke, OPS.eoFillStroke, OPS.closeFillStroke, OPS.closeEOFillStroke]);
+  const PAR_IMPAR = new Set([OPS.eoFill, OPS.eoFillStroke, OPS.closeEOFillStroke]);
   const FECHA = new Set([OPS.closeStroke, OPS.closeFillStroke, OPS.closeEOFillStroke]);
 
   const lerCaminho = (ops: ArrayLike<number>, coords: ArrayLike<number>): void => {
     let atual: Subcaminho | null = null;
     let j = 0;
     const iniciar = (x: number, y: number): void => {
-      atual = { pontos: [aplicar(estado.ctm, x, y)], fechado: false };
+      atual = { pontos: [aplicar(estado.ctm, x, y)], curva: [false], fechado: false };
       pendentes.push(atual);
     };
-    const ate = (x: number, y: number): void => {
-      if (atual === null) iniciar(x, y);
-      else (atual as Subcaminho).pontos.push(aplicar(estado.ctm, x, y));
+    const ate = (x: number, y: number, curvo = false): void => {
+      if (atual === null) {
+        iniciar(x, y);
+        return;
+      }
+      (atual as Subcaminho).pontos.push(aplicar(estado.ctm, x, y));
+      (atual as Subcaminho).curva.push(curvo);
     };
     for (let i = 0; i < ops.length; i++) {
       switch (ops[i]) {
@@ -129,16 +154,16 @@ export async function extrairVetores(pagina: PaginaPdf, OPS: Record<string, numb
           atual = null;
           break;
         }
-        // curvas: só o ponto final interessa (o trecho curvo não vira traço) → começa outro subcaminho
+        // curvas: só o ponto final interessa — o trecho curvo não vira traço, mas fecha o preenchimento pela corda
         case OPS.curveTo:
           curvasIgnoradas++;
-          iniciar(coords[j + 4]!, coords[j + 5]!);
+          ate(coords[j + 4]!, coords[j + 5]!, true);
           j += 6;
           break;
         case OPS.curveTo2:
         case OPS.curveTo3:
           curvasIgnoradas++;
-          iniciar(coords[j + 2]!, coords[j + 3]!);
+          ate(coords[j + 2]!, coords[j + 3]!, true);
           j += 4;
           break;
         case OPS.closePath:
@@ -151,13 +176,31 @@ export async function extrairVetores(pagina: PaginaPdf, OPS: Record<string, numb
     }
   };
 
+  const registrarPreenchimento = (parImpar: boolean): void => {
+    const contornos = pendentes.map((sub) => sub.pontos).filter((pts) => pts.length >= 3);
+    if (contornos.length > 0) preenchimentos.push({ contornos, cor: estado.corPreenchimento, parImpar });
+  };
+
   const emitir = (soPreenchido: boolean, fecharUltimo: boolean): void => {
     const largura = estado.largura * fatorDeEscala(estado.ctm);
     pendentes.forEach((sub, indice) => {
+      if (!soPreenchido) {
+        // sequências de trechos curvos → uma corda cada
+        let inicio = -1;
+        for (let i = 1; i <= sub.pontos.length; i++) {
+          const curvo = i < sub.pontos.length && sub.curva[i];
+          if (curvo && inicio < 0) inicio = i - 1;
+          if (!curvo && inicio >= 0) {
+            arcos.push([sub.pontos[inicio]!, sub.pontos[i - 1]!]);
+            inicio = -1;
+          }
+        }
+      }
       const fechado = sub.fechado || (fecharUltimo && indice === pendentes.length - 1) || soPreenchido;
       const n = sub.pontos.length;
       const total = fechado && n > 2 ? n : n - 1;
       for (let i = 0; i < total; i++) {
+        if (i + 1 < n && sub.curva[i + 1]) continue;
         const a = sub.pontos[i]!;
         const b = sub.pontos[(i + 1) % n]!;
         if (a.x === b.x && a.y === b.y) continue;
@@ -192,6 +235,12 @@ export async function extrairVetores(pagina: PaginaPdf, OPS: Record<string, numb
       const [r, g, b] = (args ?? []) as unknown[];
       if (typeof r === 'number' && typeof g === 'number' && typeof b === 'number') estado.cor = `#${hex(r)}${hex(g)}${hex(b)}`;
       else if (typeof r === 'string') estado.cor = r.toLowerCase();
+    } else if (fn === OPS.setFillRGBColor) {
+      const [r, g, b] = (args ?? []) as unknown[];
+      if (typeof r === 'number' && typeof g === 'number' && typeof b === 'number') estado.corPreenchimento = `#${hex(r)}${hex(g)}${hex(b)}`;
+      else if (typeof r === 'string') estado.corPreenchimento = r.toLowerCase();
+    } else if (fn === OPS.setFillColorN) {
+      estado.corPreenchimento = null; // padrão/sombreamento
     } else if (fn === OPS.setStrokeColorN) {
       estado.cor = null; // padrão/sombreamento
     } else if (fn === OPS.setGState) {
@@ -205,8 +254,10 @@ export async function extrairVetores(pagina: PaginaPdf, OPS: Record<string, numb
       const coords = args?.[1] as ArrayLike<number> | undefined;
       if (ops && coords) lerCaminho(ops, coords);
     } else if (CONTORNA.has(fn)) {
+      if (COM_PREENCHIMENTO.has(fn)) registrarPreenchimento(PAR_IMPAR.has(fn));
       emitir(false, FECHA.has(fn));
     } else if (PREENCHE.has(fn)) {
+      registrarPreenchimento(PAR_IMPAR.has(fn));
       emitir(true, false);
     } else if (fn === OPS.endPath) {
       pendentes = []; // caminho de recorte ou descartado
@@ -230,22 +281,27 @@ export async function extrairVetores(pagina: PaginaPdf, OPS: Record<string, numb
     textos.push({ texto: item.str.trim(), ponto: aplicar(viewport, cx, cy) });
   }
 
-  return { tracos, textos, curvasIgnoradas };
+  return { tracos, preenchimentos, arcos, textos, curvasIgnoradas };
 }
 
 /**
- * Prepara os vetores da página para o reconhecimento: linhas tracejadas saem (projeções, eixos) e os
- * contornos de áreas só preenchidas (hachuras sólidas, setas) ficam sem prioridade de traço.
+ * Prepara os vetores da página para o reconhecimento: linhas tracejadas saem (projeções, eixos), os
+ * contornos de áreas só preenchidas (hachuras sólidas, setas) ficam sem prioridade de traço e as áreas
+ * preenchidas seguem para o método do poché.
  */
 export function paraEntradaDoReconhecimento(vetores: VetoresDaPagina): {
   segmentos: [Ponto, Ponto][];
   larguras: number[];
   textos: TextoPosicionado[];
+  preenchimentos: PreenchimentoVetorial[];
+  arcos: [Ponto, Ponto][];
 } {
   const tracos = vetores.tracos.filter((t) => !t.tracejado);
   return {
     segmentos: tracos.map((t): [Ponto, Ponto] => [t.a, t.b]),
     larguras: tracos.map((t) => (t.soPreenchido ? 0 : t.largura)),
     textos: vetores.textos,
+    preenchimentos: vetores.preenchimentos,
+    arcos: vetores.arcos,
   };
 }

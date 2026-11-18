@@ -84,6 +84,27 @@ describe('extrairVetores (pdfjs, sem canvas)', () => {
     expect(entrada.larguras.filter((l) => l === 0)).toHaveLength(4);
   });
 
+  it('áreas preenchidas vêm com a cor do preenchimento e os contornos; curvas fecham o contorno pela corda', async () => {
+    const { vetores } = await abrir(
+      '0.4 0.4 0.4 rg 0 0 1 RG 100 100 50 10 re B ' + // preenchido + contornado
+        '0 1 0 rg 300 300 m 350 300 l 350 350 300 350 300 300 c f', // com uma curva
+    );
+    expect(vetores.preenchimentos).toHaveLength(2);
+    const [parede, folhagem] = vetores.preenchimentos;
+    expect(parede!.cor).toBe('#666666');
+    expect(parede!.contornos[0]!.map(xy)).toEqual([[100, 400], [150, 400], [150, 390], [100, 390]]);
+    expect(folhagem!.cor).toBe('#00ff00');
+    expect(folhagem!.contornos[0]!.map(xy)).toEqual([[300, 200], [350, 200], [300, 200]]);
+    // o contorno do retângulo saiu como traço azul
+    expect(vetores.tracos.filter((t) => t.cor === '#0000ff' && !t.soPreenchido)).toHaveLength(4);
+  });
+
+  it('arcos contornados (giro de porta) vêm como cordas', async () => {
+    const { vetores } = await abrir('100 100 m 100 155 145 200 200 200 c S');
+    expect(vetores.arcos.map(([a, b]) => [xy(a), xy(b)])).toEqual([[[100, 400], [200, 300]]]);
+    expect(vetores.tracos).toEqual([]);
+  });
+
   it('página girada (/Rotate 90): os traços seguem o viewport que o visualizador usa', async () => {
     const { vetores, viewport } = await abrir('100 50 m 300 50 l S', 600, 500, 90);
     expect([viewport.width, viewport.height]).toEqual([500, 600]);
