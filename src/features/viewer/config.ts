@@ -114,3 +114,32 @@ export function comAlfa(corHex: string, opacidade: number): string {
   const a = Math.round(Math.min(1, Math.max(0, opacidade)) * 255);
   return corHex + a.toString(16).padStart(2, '0');
 }
+
+// ---------------------------------------------------------------- animação "analisando a planta"
+/** Cor de destaque do tema (= --destaque de src/app/tema.css; o Konva precisa do valor literal). */
+export const COR_DESTAQUE = '#4da3ff';
+/** Fração da fase que a animação de UM elemento dura (os elementos entram em sequência). */
+export const DURACAO_ELEMENTO_FRACAO = 0.3;
+/** Escurecimento do PDF na faixa ainda não varrida. */
+export const OPACIDADE_ESCURECIMENTO = 0.25;
+/** Halo do scanner (px de tela, acima da linha). */
+export const HALO_SCANNER_PX = 70;
+export const LARGURA_SCANNER_PX = 2;
+export const BRILHO_SCANNER_PX = 14;
+/** Espaçamento da grade técnica (px de tela) e a cada quantas linhas vem uma principal. */
+export const PASSO_GRADE_PX = 28;
+export const GRADE_PRINCIPAL_A_CADA = 5;
+export const OPACIDADE_GRADE = 0.22;
+/** Opacidade da grade nas fases seguintes à varredura. */
+export const OPACIDADE_GRADE_FUNDO = 0.08;
+/** Brilho que acompanha o traço sendo desenhado: px de tela além da largura do traço. */
+export const BRILHO_TRACO_PX = 9;
+export const OPACIDADE_BRILHO_TRACO = 0.55;
+export const RAIO_CABECA_TRACO_PX = 3.5;
+/** Fração da animação do ponto dedicada ao "pop" (o resto é o pulso). */
+export const FRACAO_POP = 0.45;
+/** Raio máximo do pulso (px de tela) a partir do símbolo. */
+export const RAIO_PULSO_PX = 22;
+/** Brilho final rápido no início da fase 'materiais' (fração da fase) e sua opacidade máxima. */
+export const FRACAO_BRILHO_FINAL = 0.25;
+export const OPACIDADE_BRILHO_FINAL = 0.22;

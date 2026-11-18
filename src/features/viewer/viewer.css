@@ -22,3 +22,12 @@
 .vz-calibracao { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 8px; background: var(--painel); border: 1px solid var(--destaque); box-shadow: 0 4px 18px rgba(0, 0, 0, .5); }
 .vz-calibracao input { width: 90px; }
 .vz-passos { margin: 8px 0; padding-left: 18px; }
+/* apresentação "analisando a planta" */
+.vz-analise { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); min-width: 300px; max-width: calc(100% - 16px); padding: 7px 12px 8px; border-radius: 8px; background: rgba(28, 31, 37, .92); border: 1px solid var(--destaque); box-shadow: 0 4px 22px rgba(0, 0, 0, .55), 0 0 18px rgba(77, 163, 255, .25); pointer-events: none; }
+.vz-analise-texto { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.vz-analise-contador { margin-left: auto; color: var(--texto-suave); font-weight: 400; font-variant-numeric: tabular-nums; }
+.vz-analise-sinal { width: 8px; height: 8px; border-radius: 50%; background: var(--destaque); box-shadow: 0 0 8px var(--destaque); animation: vz-pulsar 1s ease-in-out infinite; }
+.vz-analise-barra { height: 3px; margin-top: 6px; border-radius: 2px; background: var(--borda); overflow: hidden; }
+.vz-analise-barra > div { height: 100%; background: var(--destaque); box-shadow: 0 0 6px var(--destaque); }
+@keyframes vz-pulsar { 50% { opacity: .35; transform: scale(.75); } }
+@media (prefers-reduced-motion: reduce) { .vz-analise-sinal { animation: none; } }

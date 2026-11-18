@@ -75,12 +75,18 @@ export function Etiqueta({ x, y, zoom, texto, centralizada, cantoSuperiorEsquerd
       }}
     >
       <Tag fill={COR_FUNDO_ETIQUETA} opacity={OPACIDADE_FUNDO_ETIQUETA} cornerRadius={3} />
-      <Text text={texto} fontSize={TAMANHO_FONTE_PX} padding={PADDING_ETIQUETA_PX} fill={COR_TEXTO_ETIQUETA} />
+      <Text
+        text={texto}
+        fontSize={TAMANHO_FONTE_PX}
+        padding={PADDING_ETIQUETA_PX}
+        fill={COR_TEXTO_ETIQUETA}
+        align={centralizada ? 'center' : 'left'}
+      />
     </Label>
   );
 }
 
-function Simbolo({ estilo, cor, tracejado }: { estilo: EstiloTipo; cor: string; tracejado?: number[] }) {
+export function Simbolo({ estilo, cor, tracejado }: { estilo: EstiloTipo; cor: string; tracejado?: number[] }) {
   const t = estilo.tamanhoPx;
   const comum = {
     fill: estilo.simboloCheio ? cor : comAlfa(cor, 0.15),

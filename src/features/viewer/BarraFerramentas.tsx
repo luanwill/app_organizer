@@ -17,10 +17,14 @@ const FERRAMENTAS: { modo: ModoFerramenta; rotulo: string; dica: string }[] = [
 
 export interface BarraFerramentasProps {
   temPlanta: boolean;
+  /** Análise em andamento: ferramentas, abrir e desfazer ficam desabilitados. */
+  bloqueada?: boolean;
   aoAbrirArquivo(arquivo: File): void;
 }
 
-export function BarraFerramentas({ temPlanta, aoAbrirArquivo }: BarraFerramentasProps) {
+const DICA_ANALISANDO = 'Aguarde o fim da análise';
+
+export function BarraFerramentas({ temPlanta, bloqueada = false, aoAbrirArquivo }: BarraFerramentasProps) {
   const ferramenta = useLevantamento((s) => s.ferramenta);
   const escala = useLevantamento((s) => s.projeto.paginas[s.paginaAtual]?.escala ?? null);
   const podeDesfazer = useLevantamento((s) => s.podeDesfazer);
@@ -29,7 +33,12 @@ export function BarraFerramentas({ temPlanta, aoAbrirArquivo }: BarraFerramentas
 
   return (
     <div className="vz-barra">
-      <button type="button" className={temPlanta ? '' : 'primario'} onClick={() => entrada.current?.click()}>
+      <button
+        type="button"
+        className={temPlanta ? '' : 'primario'}
+        disabled={bloqueada}
+        title={bloqueada ? DICA_ANALISANDO : undefined}
+        onClick={() => entrada.current?.click()}>
         Abrir planta (PDF)
       </button>
       <input
@@ -45,7 +54,8 @@ export function BarraFerramentas({ temPlanta, aoAbrirArquivo }: BarraFerramentas
       />
       <span className="vz-separador" />
       {FERRAMENTAS.map((f) => {
-        const bloqueio = motivoBloqueio(f.modo, temPlanta, escala);
+        // durante a análise só o pan continua disponível
+        const bloqueio = bloqueada && f.modo !== 'pan' ? DICA_ANALISANDO : motivoBloqueio(f.modo, temPlanta, escala);
         return (
           <button
             key={f.modo}
@@ -66,7 +76,7 @@ export function BarraFerramentas({ temPlanta, aoAbrirArquivo }: BarraFerramentas
       <span className="vz-separador" />
       <button
         type="button"
-        disabled={!podeDesfazer}
+        disabled={!podeDesfazer || bloqueada}
         title="Desfazer (Ctrl+Z)"
         onClick={() => useLevantamento.getState().desfazer()}
       >
@@ -74,7 +84,7 @@ export function BarraFerramentas({ temPlanta, aoAbrirArquivo }: BarraFerramentas
       </button>
       <button
         type="button"
-        disabled={!podeRefazer}
+        disabled={!podeRefazer || bloqueada}
         title="Refazer (Ctrl+Y)"
         onClick={() => useLevantamento.getState().refazer()}
       >

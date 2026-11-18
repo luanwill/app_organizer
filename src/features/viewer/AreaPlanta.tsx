@@ -24,6 +24,18 @@ import {
   TOLERANCIA_SNAP_PX,
   TRACEJADO_PREVIA,
 } from './config';
+import {
+  animacaoEmCurso,
+  derivadoOculto,
+  estadoRevelacao,
+  indexarRevelacao,
+  naCamadaPrincipal,
+  progressoGeral,
+  quantosRevelados,
+  ROTULO_FASE_ANIMACAO,
+  type AnimacaoPlanta,
+} from './animacao';
+import { CamadaAnimacao, useReduzirMovimento, type ItemAnimado } from './CamadaAnimacao';
 import { escalaRenderizacao, telaParaPdf, zoomNoPonto, type Vista } from './coordenadas';
 import {
   cliquesParaConcluir,
@@ -85,9 +97,14 @@ export interface AreaPlantaProps {
   largura: number;
   altura: number;
   derivados?: GeometriaDerivada[];
+  /** Apresentação "analisando a planta" (o app controla fase e progresso). */
+  animacao?: AnimacaoPlanta;
 }
 
-export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, altura, derivados }: AreaPlantaProps) {
+const SEM_FASES: AnimacaoPlanta['porFase'] = {};
+
+export function AreaPlanta(props: AreaPlantaProps) {
+  const { doc, dim, canvasRef, vista, definirVista, largura, altura, derivados, animacao } = props;
   const projeto = useLevantamento((s) => s.projeto);
   const pagina = useLevantamento((s) => s.paginaAtual);
   const ferramenta = useLevantamento((s) => s.ferramenta);
@@ -98,7 +115,20 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
   const escala = projeto.paginas[pagina]?.escala ?? null;
   const bloqueio = motivoBloqueio(modo, true, escala);
   const selecionando = modo === 'selecionar';
-  const desenhando = !selecionando && modo !== 'pan' && bloqueio === null;
+
+  // ---------------------------------------------------------------- apresentação "analisando"
+  const reduzirMovimento = useReduzirMovimento();
+  /** Enquanto a análise acontece, o desenho/seleção fica bloqueado (pan e zoom continuam). */
+  const analisando = animacaoEmCurso(animacao);
+  const faixaAnalise = analisando && animacao.pagina === pagina;
+  /** Efeitos e ocultação: só na página analisada e sem prefers-reduced-motion. */
+  const animando = faixaAnalise && !reduzirMovimento;
+  const porFase = animacao?.porFase ?? SEM_FASES;
+  const indiceRevelacao = useMemo(() => indexarRevelacao(porFase), [porFase]);
+  const faseAnim = animacao?.fase ?? 'concluida';
+  const progressoAnim = animacao?.progresso ?? 1;
+
+  const desenhando = !analisando && !selecionando && modo !== 'pan' && bloqueio === null;
 
   const elementosPagina = useMemo(() => projeto.elementos.filter((e) => e.pagina === pagina), [projeto.elementos, pagina]);
   const visiveis = useMemo(
@@ -109,6 +139,29 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
     () => (derivados ?? []).filter((d) => d.pagina === pagina && projeto.camadas[d.disciplina]),
     [derivados, pagina, projeto.camadas],
   );
+  // Camada principal: elementos fora da análise e de fases passadas — só muda na troca de fase.
+  const visiveisAgora = useMemo(
+    () => (animando ? visiveis.filter((el) => naCamadaPrincipal(el.id, indiceRevelacao, faseAnim)) : visiveis),
+    [animando, visiveis, indiceRevelacao, faseAnim],
+  );
+  const derivadosAgora = useMemo(
+    () => (animando ? derivadosVisiveis.filter((d) => !derivadoOculto(d, indiceRevelacao, faseAnim)) : derivadosVisiveis),
+    [animando, derivadosVisiveis, indiceRevelacao, faseAnim],
+  );
+  // Camada de animação: elementos da fase atual (ocultos até a sua vez; depois animam até t = 1).
+  const daFase = useMemo(
+    () =>
+      animando
+        ? visiveis.filter((el) => indiceRevelacao.get(el.id)?.fase === faseAnim)
+        : [],
+    [animando, visiveis, indiceRevelacao, faseAnim],
+  );
+  const itensAnimados: ItemAnimado[] = [];
+  for (const el of daFase) {
+    const r = estadoRevelacao(el.id, indiceRevelacao, faseAnim, progressoAnim);
+    if (r.tipo === 'oculto') continue;
+    itensAnimados.push({ el, t: r.tipo === 'animando' ? r.t : 1, fase: faseAnim });
+  }
   const candidatosSnap = useMemo(() => verticesDeSnap(visiveis), [visiveis]);
   const contextoRotulo = useMemo(
     () => ({ escala, esquadrias: projeto.esquadrias, contagens: numerosContagem(elementosPagina) }),
@@ -201,13 +254,15 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
   };
 
   // ---------------------------------------------------------------- teclado
-  const teclado = useRef({ pontos, modo, concluir });
-  teclado.current = { pontos, modo, concluir };
+  const teclado = useRef({ pontos, modo, concluir, analisando });
+  teclado.current = { pontos, modo, concluir, analisando };
   useEffect(() => {
     const aoPressionarTecla = (e: KeyboardEvent) => {
       if (focoEmCampo()) return;
       const st = useLevantamento.getState();
-      const { pontos: pts, modo: m, concluir: fim } = teclado.current;
+      const { pontos: pts, modo: m, concluir: fim, analisando: bloqueado } = teclado.current;
+      // durante a análise só a barra de espaço (pan) funciona
+      if (bloqueado && e.code !== 'Space') return;
       const ctrl = e.ctrlKey || e.metaKey;
       const tecla = e.key.toLowerCase();
       if (ctrl && tecla === 'z') {
@@ -289,7 +344,7 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
       iniciarPan(evt);
       return;
     }
-    if (evt.button !== 0) return;
+    if (evt.button !== 0 || analisando) return;
     if (selecionando) {
       if (e.target === e.target.getStage()) useLevantamento.getState().selecionar([]);
       return;
@@ -364,36 +419,65 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
     modo === 'calibrar' ? COR_CALIBRACAO : COR_DISCIPLINA[DISCIPLINA_DO_TIPO[ferramenta.alvo?.tipo ?? 'medicao']];
   const medidaAoVivo = modo === 'calibrar' ? null : rotuloMedida(geomPrevia, previa, escala);
   const pedindoMedida = modo === 'calibrar' && pontos.length >= 2;
-  const selecionados = selecionando ? visiveis.filter((e) => selecaoIds.includes(e.id) && e.geometria.tipo !== 'ponto') : [];
+  const selecionados = selecionando && !analisando ? visiveisAgora.filter((e) => selecaoIds.includes(e.id) && e.geometria.tipo !== 'ponto') : [];
 
   const classeCursor = arrastandoVista ? 'vz-arrastando' : modo === 'pan' || espaco ? 'vz-pan' : desenhando ? 'vz-mira' : '';
-  const mensagem = aviso ?? bloqueio ?? INSTRUCAO_MODO[modo] ?? null;
+  const mensagem = analisando ? null : (aviso ?? bloqueio ?? INSTRUCAO_MODO[modo] ?? null);
 
   // só pontos sobem ao passar o mouse (reordenar polígonos sobrepostos trocaria quem recebe o mouse)
-  const sobrePonto = visiveis.find((e) => e.id === sobreId && e.geometria.tipo === 'ponto');
-  const emOrdem = sobrePonto ? [...visiveis.filter((e) => e !== sobrePonto), sobrePonto] : visiveis;
-  const desenharElemento = (el: Elemento) => {
-    const r = rotuloDoElemento(el, contextoRotulo);
-    const provisorio =
-      edicao && edicao.id === el.id ? pontosDaGeometria(moverVertice(el.geometria, edicao.indice, edicao.ponto)) : undefined;
+  const emOrdem = useMemo(() => {
+    const sobrePonto = visiveisAgora.find((e) => e.id === sobreId && e.geometria.tipo === 'ponto');
+    return sobrePonto ? [...visiveisAgora.filter((e) => e !== sobrePonto), sobrePonto] : visiveisAgora;
+  }, [visiveisAgora, sobreId]);
+
+  // Conteúdo da camada principal memoizado: durante a análise o componente re-renderiza a cada
+  // quadro, mas estes nós só mudam com a fase, a seleção, o hover ou a vista.
+  const conteudoPrincipal = useMemo(() => {
+    const desenharElemento = (el: Elemento) => {
+      const r = rotuloDoElemento(el, contextoRotulo);
+      const provisorio =
+        edicao && edicao.id === el.id ? pontosDaGeometria(moverVertice(el.geometria, edicao.indice, edicao.ponto)) : undefined;
+      return (
+        <FormaElemento
+          key={el.id}
+          elemento={el}
+          zoom={zoom}
+          escala={escala}
+          selecionado={selecaoIds.includes(el.id)}
+          sobre={sobreId === el.id}
+          interativo={selecionando}
+          simbolo={r.simbolo}
+          texto={r.texto}
+          pontosProvisorios={provisorio}
+          aoPressionar={aoPressionarElemento}
+          aoMoverPonto={aoMoverPonto}
+          aoPassar={aoPassar}
+        />
+      );
+    };
     return (
-      <FormaElemento
-        key={el.id}
-        elemento={el}
-        zoom={zoom}
-        escala={escala}
-        selecionado={selecaoIds.includes(el.id)}
-        sobre={sobreId === el.id}
-        interativo={selecionando}
-        simbolo={r.simbolo}
-        texto={r.texto}
-        pontosProvisorios={provisorio}
-        aoPressionar={aoPressionarElemento}
-        aoMoverPonto={aoMoverPonto}
-        aoPassar={aoPassar}
-      />
+      <>
+        {/* polígonos embaixo; rotas derivadas sobre eles (para receberem o mouse); linhas e pontos por cima;
+            o elemento sob o mouse vai por último, para o rótulo não ficar atrás do símbolo vizinho */}
+        {emOrdem.filter((el) => el.geometria.tipo === 'poligono').map(desenharElemento)}
+        {derivadosAgora.map((d) => (
+          <FormaDerivada
+            key={d.id}
+            derivado={d}
+            zoom={zoom}
+            interativo={selecionando}
+            mostrarRotulo={rotuloDerivadoVisivel(d, sobreId, selecaoIds)}
+            aoPressionar={aoPressionarElemento}
+            aoPassar={aoPassar}
+          />
+        ))}
+        {/* linhas, depois pontos; fundação embaixo do pilar, para o pilar receber o clique */}
+        {emOrdem.filter((el) => el.geometria.tipo === 'polilinha').map(desenharElemento)}
+        {emOrdem.filter((el) => el.geometria.tipo === 'ponto' && el.tipo === 'fundacao').map(desenharElemento)}
+        {emOrdem.filter((el) => el.geometria.tipo === 'ponto' && el.tipo !== 'fundacao').map(desenharElemento)}
+      </>
     );
-  };
+  }, [emOrdem, derivadosAgora, contextoRotulo, edicao, zoom, escala, selecaoIds, sobreId, selecionando, aoPressionarElemento, aoMoverPonto, aoPassar]);
 
   return (
     <div className={`vz-planta ${classeCursor}`}>
@@ -423,27 +507,22 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
         onWheel={aoRolar}
       >
         {/* escuta o mouse também fora do modo selecionar, para os rótulos de hover */}
-        <Layer ref={camadaRef} listening={modo !== 'pan' && !espaco && !arrastandoVista}>
-          {/* polígonos embaixo; rotas derivadas sobre eles (para receberem o mouse); linhas e pontos por cima;
-              o elemento sob o mouse vai por último, para o rótulo não ficar atrás do símbolo vizinho */}
-          {emOrdem.filter((el) => el.geometria.tipo === 'poligono').map(desenharElemento)}
-          {derivadosVisiveis.map((d) => (
-            <FormaDerivada
-              key={d.id}
-              derivado={d}
-              zoom={zoom}
-              interativo={selecionando}
-              mostrarRotulo={rotuloDerivadoVisivel(d, sobreId, selecaoIds)}
-              aoPressionar={aoPressionarElemento}
-              aoPassar={aoPassar}
-            />
-          ))}
-          {/* linhas, depois pontos; fundação embaixo do pilar, para o pilar receber o clique */}
-          {emOrdem.filter((el) => el.geometria.tipo === 'polilinha').map(desenharElemento)}
-          {emOrdem.filter((el) => el.geometria.tipo === 'ponto' && el.tipo === 'fundacao').map(desenharElemento)}
-          {emOrdem.filter((el) => el.geometria.tipo === 'ponto' && el.tipo !== 'fundacao').map(desenharElemento)}
+        <Layer ref={camadaRef} listening={modo !== 'pan' && !espaco && !arrastandoVista && !analisando}>
+          {conteudoPrincipal}
         </Layer>
-        <Layer listening={selecionando && !espaco}>
+        {animando && (
+          <CamadaAnimacao
+            fase={faseAnim}
+            progresso={progressoAnim}
+            largura={dim.largura}
+            altura={dim.altura}
+            zoom={zoom}
+            escala={escala}
+            itens={itensAnimados}
+            contextoRotulo={contextoRotulo}
+          />
+        )}
+        <Layer listening={selecionando && !espaco && !analisando}>
           {selecionados.flatMap((el) =>
             pontosDaGeometria(el.geometria).map((p, i) => (
               <Circle
@@ -543,6 +622,22 @@ export function AreaPlanta({ doc, dim, canvasRef, vista, definirVista, largura, 
             Cancelar
           </button>
         </form>
+      )}
+      {faixaAnalise && (
+        <div className="vz-analise" role="status" aria-live="polite">
+          <div className="vz-analise-texto">
+            <span className="vz-analise-sinal" />
+            <span>{ROTULO_FASE_ANIMACAO[faseAnim]}</span>
+            {(porFase[faseAnim]?.length ?? 0) > 0 && (
+              <span className="vz-analise-contador">
+                {quantosRevelados(porFase[faseAnim]?.length ?? 0, progressoAnim)} de {porFase[faseAnim]?.length}
+              </span>
+            )}
+          </div>
+          <div className="vz-analise-barra">
+            <div style={{ width: `${(progressoGeral(animacao) * 100).toFixed(1)}%` }} />
+          </div>
+        </div>
       )}
       {mensagem && <div className={`vz-dica ${aviso || bloqueio ? 'vz-dica-alerta' : ''}`}>{mensagem}</div>}
     </div>

@@ -9,6 +9,7 @@ import {
   type GeometriaDerivada,
 } from '@/core/model';
 import { useLevantamento } from '@/core/store';
+import { animacaoEmCurso, type AnimacaoPlanta } from './animacao';
 import { AreaPlanta } from './AreaPlanta';
 import { BarraFerramentas } from './BarraFerramentas';
 import { FATOR_ZOOM_BOTAO, MARGEM_AJUSTE_PX } from './config';
@@ -22,9 +23,14 @@ const DISCIPLINAS_DA_PLANTA: Disciplina[] = DISCIPLINAS.filter((d) => Object.val
 export interface VisualizadorProps {
   /** Geometria derivada (rotas automáticas etc.) calculada pelo orquestrador. */
   derivados?: GeometriaDerivada[];
+  /**
+   * Apresentação "analisando a planta". O app controla fase e progresso; ausente ou
+   * `ativa: false`, o visualizador funciona normalmente.
+   */
+  animacao?: AnimacaoPlanta;
 }
 
-export function Visualizador({ derivados }: VisualizadorProps) {
+export function Visualizador({ derivados, animacao }: VisualizadorProps) {
   const pagina = useLevantamento((s) => s.paginaAtual);
   const camadas = useLevantamento((s) => s.projeto.camadas);
   const ferramenta = useLevantamento((s) => s.ferramenta);
@@ -67,7 +73,7 @@ export function Visualizador({ derivados }: VisualizadorProps) {
 
   return (
     <div className="vz">
-      <BarraFerramentas temPlanta={doc !== null} aoAbrirArquivo={abrirArquivo} />
+      <BarraFerramentas temPlanta={doc !== null} bloqueada={animacaoEmCurso(animacao)} aoAbrirArquivo={abrirArquivo} />
       <div className="vz-camadas">
         <span className="suave">Camadas:</span>
         {DISCIPLINAS_DA_PLANTA.map((d) => (
@@ -98,6 +104,7 @@ export function Visualizador({ derivados }: VisualizadorProps) {
             largura={tamanho.largura}
             altura={tamanho.altura}
             derivados={derivados}
+            animacao={animacao}
           />
         ) : (
           <div className="carregando">
