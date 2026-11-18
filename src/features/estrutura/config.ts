@@ -124,6 +124,12 @@ export const AGUAS_CONTORNO_RECORTADO = 4;
  */
 export const FOLGA_PAREDE_MAIS_ALTA_M = 0.05;
 
+/** Degraus do contorno do telhado menores que isto (m) são absorvidos (o lado mais curto vai ao alinhamento do outro). */
+export const DEGRAU_MINIMO_TELHADO_M = 0.5;
+
+/** Contorno "quase retangular": área ≥ esta fração da caixa envolvente → telhado retangular de 2 águas. */
+export const FRACAO_QUASE_RETANGULO = 0.9;
+
 export const ROTULO_TIPO_TELHA: Record<TipoTelha, string> = {
   ceramica: 'Cerâmica',
   concreto: 'Concreto',

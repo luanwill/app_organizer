@@ -5,12 +5,15 @@ import { ESCALA, ambiente, parede, projetoCom, pt, u } from './apoio-teste';
 import { calcularEstrutura } from './calcular';
 import {
   bordasBaixas,
+  cadeiasDeBordas,
   comprimentoCumeeira,
   cumeeiraQuatroAguas,
   fatorInclinacao,
   numeroCondutores,
   recortarSegmentoNoPoligono,
+  posicoesCondutores,
   retangulosMaximos,
+  simplificarDegraus,
 } from './cobertura';
 import { sugerirEstrutura } from './sugerir';
 
@@ -205,7 +208,7 @@ describe('sugestão de cobertura — casa retangular 6 × 8 m', () => {
     ]);
     const novas = sugerirEstrutura(soTelhado, 1);
     expect(novas.every((e) => e.tipo === 'calha')).toBe(true);
-    expect(novas.map((e) => e.rotulo)).toEqual(['CH1', 'CD1', 'CH2', 'CD2']);
+    expect(novas.map((e) => e.rotulo)).toEqual(['CH1', 'CH2', 'CD1', 'CD2']);
     // sugestões pendentes anteriores são substituídas: mesma saída, sem acumular
     expect(sugerirEstrutura(projetoCom([...projeto.elementos, ...sugestoes]), 1)).toEqual(sugestoes);
   });
@@ -244,8 +247,8 @@ describe('sugestão de cobertura — casa em L', () => {
     expect(ch).toHaveLength(6);
     const perimetro = 2 * (11.2 + 11.2);
     expect(ch.reduce((s, c) => s + comprimentoM(c), 0)).toBeCloseTo(perimetro, 6);
-    // condutores: ceil(11,2/10)=2 em cada lado de 11,2 m; 1 nos demais
-    expect(calhas(sugestoes, 'condutor')).toHaveLength(2 + 2 + 1 + 1 + 1 + 1);
+    // calha contínua em todo o perímetro (uma cadeia de 44,8 m): ceil(44,8 / 10) = 5 condutores
+    expect(calhas(sugestoes, 'condutor')).toHaveLength(5);
 
     const r = calcularEstrutura(comTipo(projeto, sugestoes));
     const cumeeira = r.linhas.find((l) => l.servico === 'cumeeira')!;
@@ -267,5 +270,65 @@ describe('rufos', () => {
 
     const r = calcularEstrutura(projetoCom([...els, ...rufos]));
     expect(r.linhas.find((l) => l.servico === 'rufo')).toMatchObject({ unidade: 'm', detalhe: 'desenvolvimento 33 cm' });
+  });
+});
+
+describe('contorno do telhado: muro e degraus', () => {
+  it('parede que continua 10 m além da casa (muro) não puxa o telhado', () => {
+    // ambiente 3 × 4 m; a parede leste segue 10 m para baixo como muro do lote
+    const h = 0.075;
+    const els = [
+      parede('n', [h, h], [3 - h, h]),
+      parede('l', [3 - h, h], [3 - h, 14 - h]), // 4 m da casa + 10 m de muro, num único elemento
+      parede('s', [3 - h, 4 - h], [h, 4 - h]),
+      parede('o', [h, 4 - h], [h, h]),
+      ambiente('quarto', 0.15, 0.15, 2.85, 3.85),
+    ];
+    const sug = sugerirEstrutura(projetoCom(els), 1);
+    const [t] = doTipo(sug, 'telhado');
+    expect(pontosDe(t!)).toHaveLength(4);
+    expect(caixaM(t!)).toEqual([-0.6, -0.6, 3.6, 4.6]);
+    expect(t!.props.aguas).toBe(2);
+    expect(calhas(sug, 'calha').reduce((s, c) => s + comprimentoM(c), 0)).toBeCloseTo(2 * 5.2, 6);
+  });
+
+  it('degraus menores que 0,50 m são absorvidos; recortes maiores ficam', () => {
+    // retângulo 10 × 6 com um degrau de 0,20 m no lado de cima e um recorte de 2 m no canto
+    const pontos = [pt(0, 0), pt(5, 0), pt(5, 0.2), pt(10, 0.2), pt(10, 4), pt(8, 4), pt(8, 6), pt(0, 6)];
+    const s = simplificarDegraus(pontos, u(0.5));
+    expect(s).toHaveLength(6);
+    expect(s.map((p) => [m(p.x), m(p.y)])).toEqual([[0, 0.2], [10, 0.2], [10, 4], [8, 4], [8, 6], [0, 6]]);
+  });
+
+  it('contorno quase retangular (≥ 90 % da caixa) vira retângulo de 2 águas', () => {
+    // casa 6 × 8 com um recorte de 1 × 1 m num canto (o ambiente não cobre o canto)
+    const h = 0.075;
+    const els = [
+      parede('a', [h, h], [5 - h, h]),
+      parede('b', [5 - h, h], [5 - h, 1 - h]),
+      parede('c', [5 - h, 1 - h], [6 - h, 1 - h]),
+      parede('d', [6 - h, 1 - h], [6 - h, 8 - h]),
+      parede('e', [6 - h, 8 - h], [h, 8 - h]),
+      parede('f', [h, 8 - h], [h, h]),
+      { ...ambiente('sala', 0.15, 0.15, 5.85, 7.85), geometria: { tipo: 'poligono' as const, pontos: [pt(0.15, 0.15), pt(4.85, 0.15), pt(4.85, 1.15), pt(5.85, 1.15), pt(5.85, 7.85), pt(0.15, 7.85)] } },
+    ];
+    const [t] = doTipo(sugerirEstrutura(projetoCom(els), 1), 'telhado');
+    expect(pontosDe(t!)).toHaveLength(4);
+    expect(t!.props.aguas).toBe(2);
+    expect(caixaM(t!)).toEqual([-0.6, -0.6, 6.6, 8.6]);
+  });
+
+  it('cadeias de bordas contíguas e condutores distribuídos pela cadeia', () => {
+    const r = [pt(0, 0), pt(8, 0), pt(8, 5), pt(0, 5)];
+    const tol = u(0.1);
+    const fechada = cadeiasDeBordas(bordasBaixas(r, 4, 'horizontal', tol), tol);
+    expect(fechada).toHaveLength(1);
+    expect(fechada[0]).toHaveLength(5);
+    expect(cadeiasDeBordas(bordasBaixas(r, 2, 'horizontal', tol), tol)).toHaveLength(2);
+    // cadeia de 26 m com 3 condutores: em 26/3, 52/3 e 26 m do início
+    const pos = posicoesCondutores(fechada[0]!, 3).map((p) => [m(p.x), m(p.y)]);
+    expect(pos[2]).toEqual([0, 0]);
+    expect(pos[0]![0]).toBeCloseTo(8, 6);
+    expect(pos[0]![1]).toBeCloseTo(26 / 3 - 8, 3);
   });
 });

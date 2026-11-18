@@ -6,6 +6,7 @@ import type { Elemento, ElementoDe, Geometria, Ponto, Projeto, TipoElemento, Vin
 import {
   areaPoligono,
   caixaEnvolvente,
+  comprimentoPolilinha,
   construirGrafoParedes,
   distancia,
   escalaValida,
@@ -16,6 +17,7 @@ import {
 import { montarCadeias, trechoJaExiste } from './cadeias';
 import {
   bordasBaixas,
+  cadeiasDeBordas,
   numeroCondutores,
   posicoesCondutores,
   recortarSegmentoNoPoligono,
@@ -29,6 +31,7 @@ import {
   PREFIXO_TELHADO,
   PREFIXO_ROTULO,
   ROTULO_RADIER,
+  DEGRAU_MINIMO_TELHADO_M,
   TOLERANCIA_GRAFO_M,
   TOLERANCIA_LINHA_M,
   TOLERANCIA_ORTOGONAL_M,
@@ -239,6 +242,7 @@ export function sugerirEstrutura(projeto: Projeto, pagina: number): Elemento[] {
           tolerancia: paraUnidades(TOLERANCIA_UNIAO_LAJES_M, escala!),
           toleranciaOrtogonal: paraUnidades(TOLERANCIA_ORTOGONAL_M, escala!),
           beiral: paraUnidades(cobertura.beiral, escala!),
+          degrauMinimo: paraUnidades(DEGRAU_MINIMO_TELHADO_M, escala!),
         },
       ),
       (t) => {
@@ -282,16 +286,20 @@ export function sugerirEstrutura(projeto: Projeto, pagina: number): Elemento[] {
           );
     for (const telhado of telhados) {
       // propriedades de desenvolvimento/diâmetro ficam indefinidas: derivadas ao vivo dos parâmetros
-      for (const [a, b] of bordasBaixas(telhado.pontos, telhado.props.aguas, telhado.props.direcao, tolerancia)) {
-        if (!trechoJaExiste([a, b], existentesCalha, tolerancia)) {
-          novos.push({
-            ...base(proxima.calha(), { tipo: 'polilinha', pontos: [{ ...a }, { ...b }] }, { telhadoId: telhado.id }),
-            tipo: 'calha',
-            props: { funcao: 'calha' },
-          });
-        }
-        const n = numeroCondutores(distancia(a, b) * escala!, cobertura.calhaPorCondutorM);
-        for (const p of posicoesCondutores(a, b, n)) {
+      const bordas = bordasBaixas(telhado.pontos, telhado.props.aguas, telhado.props.direcao, tolerancia);
+      // um elemento calha por aresta…
+      for (const [a, b] of bordas) {
+        if (trechoJaExiste([a, b], existentesCalha, tolerancia)) continue;
+        novos.push({
+          ...base(proxima.calha(), { tipo: 'polilinha', pontos: [{ ...a }, { ...b }] }, { telhadoId: telhado.id }),
+          tipo: 'calha',
+          props: { funcao: 'calha' },
+        });
+      }
+      // …e os condutores distribuídos pela cadeia contínua de calhas (não por aresta)
+      for (const cadeia of cadeiasDeBordas(bordas, tolerancia)) {
+        const n = numeroCondutores(comprimentoPolilinha(cadeia) * escala!, cobertura.calhaPorCondutorM);
+        for (const p of posicoesCondutores(cadeia, n)) {
           if (existentesCondutor.some((q) => distancia(p, q) <= tolerancia)) continue;
           existentesCondutor.push(p);
           novos.push({

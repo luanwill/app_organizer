@@ -14,6 +14,7 @@ export const moduloEstrutura: ModuloDisciplina = {
 export { alturaDoCondutor, alturaDoPilar, calcularEstrutura } from './calcular';
 export {
   bordasBaixas,
+  cadeiasDeBordas,
   comprimentoCumeeira,
   contornoTelhado,
   cumeeiraQuatroAguas,
@@ -23,6 +24,8 @@ export {
   posicoesCondutores,
   recortarSegmentoNoPoligono,
   retangulosMaximos,
+  simplificarDegraus,
+  trechosAdjacentes,
   sugerirTelhados,
 } from './cobertura';
 export { sugerirEstrutura } from './sugerir';

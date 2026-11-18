@@ -4,23 +4,29 @@
  * do PDF salvo indicação.
  *
  * Decisões (documentadas para o usuário ajustar):
- *  - Telhado = contorno externo das paredes do bloco (ambientes cobertos adjacentes + paredes que os
- *    cercam, com a espessura) afastado do beiral. Planta ortogonal → offset ortogonal exato; planta
- *    com ambiente/parede inclinados → retângulo envolvente + beiral.
+ *  - Telhado = contorno externo das paredes do bloco (ambientes cobertos adjacentes + o TRECHO de
+ *    cada parede que fica junto deles, com a espessura — muro que continua a parede não entra)
+ *    afastado do beiral. Planta ortogonal → offset ortogonal exato; planta com ambiente/parede
+ *    inclinados → retângulo envolvente + beiral.
+ *  - O contorno é simplificado: degraus menores que DEGRAU_MINIMO_TELHADO_M são absorvidos e um
+ *    contorno quase retangular (área ≥ FRACAO_QUASE_RETANGULO da caixa) vira o retângulo envolvente.
  *  - Contorno retangular → 2 águas, cumeeira na direção do maior lado. Contorno recortado (L, T, U)
  *    → 4 águas: mantém o polígono (área certa), todos os beirais ficam na mesma cota (calha em todo
  *    o perímetro) e a cumeeira/espigões é estimada decompondo o contorno em retângulos (o maior
  *    primeiro) e somando o telhado de 4 águas de cada um — aproximação: nas junções os espigões
  *    contados fazem as vezes dos rincões.
+ *  - Calhas de bordas baixas contíguas formam uma cadeia (calha contínua que dobra o canto); os
+ *    condutores são distribuídos pela cadeia, não por aresta.
  *  - 1 água: a borda baixa é a do lado de maior y (caimento 'vertical') ou de maior x
  *    ('horizontal') na planta; se a água corre para o outro lado, o usuário ajusta a calha.
  */
 import type { ParametrosCobertura, Ponto, PropsTelhado } from '@/core/model';
-import { caixaEnvolvente, distancia, distanciaPontoPoligono, pontoEmPoligono, retanguloParaPoligono } from '@/core/calc';
+import { areaPoligono, caixaEnvolvente, distancia, distanciaPontoPoligono, pontoEmPoligono, retanguloParaPoligono } from '@/core/calc';
 import {
   AGUAS_CONTORNO_RECORTADO,
   AGUAS_CONTORNO_RETANGULAR,
   EPSILON_GRADE,
+  FRACAO_QUASE_RETANGULO,
   PERCENTUAL,
 } from './config';
 import {
@@ -57,16 +63,105 @@ export interface OpcoesTelhado {
   toleranciaOrtogonal: number;
   /** Beiral (unidades). */
   beiral: number;
+  /** Degraus do contorno menores que isto (unidades) são absorvidos. */
+  degrauMinimo: number;
 }
 
 const meio = (a: Ponto, b: Ponto): Ponto => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
 
-/** Paredes que cercam o bloco: o meio do segmento está dentro de um ambiente ou a até `tolerancia` dele. */
+/**
+ * Trechos da parede junto aos ambientes do bloco: para cada ambiente a até meia espessura +
+ * `tolerancia` do eixo, o intervalo que ele ocupa ao longo da parede, estendido de meia espessura
+ * (com o retângulo da parede, que soma outra meia espessura nas pontas, chega à face externa da
+ * parede perpendicular). Muro que prolonga a parede além dos ambientes fica de fora.
+ */
+export function trechosAdjacentes(s: SegmentoParede, ambientes: AmbienteCoberto[], tolerancia: number): SegmentoParede[] {
+  const comprimento = distancia(s.a, s.b);
+  if (comprimento === 0) return [];
+  const ux = (s.b.x - s.a.x) / comprimento;
+  const uy = (s.b.y - s.a.y) / comprimento;
+  const intervalos: [number, number][] = [];
+  for (const amb of ambientes) {
+    const ts = amb.pontos.map((p) => (p.x - s.a.x) * ux + (p.y - s.a.y) * uy);
+    const ds = amb.pontos.map((p) => (p.x - s.a.x) * uy - (p.y - s.a.y) * ux);
+    const atravessa = Math.min(...ds) < 0 && Math.max(...ds) > 0;
+    const perto = Math.min(...ds.map(Math.abs)) <= s.meiaEspessura + tolerancia;
+    if (!atravessa && !perto) continue;
+    const de = Math.max(0, Math.min(...ts) - s.meiaEspessura);
+    const ate = Math.min(comprimento, Math.max(...ts) + s.meiaEspessura);
+    if (ate > de) intervalos.push([de, ate]);
+  }
+  intervalos.sort((p, q) => p[0] - q[0]);
+  const unidos: [number, number][] = [];
+  for (const iv of intervalos) {
+    const ultimo = unidos[unidos.length - 1];
+    if (ultimo && iv[0] <= ultimo[1]) ultimo[1] = Math.max(ultimo[1], iv[1]);
+    else unidos.push([...iv]);
+  }
+  const ponto = (t: number): Ponto => ({ x: s.a.x + t * ux, y: s.a.y + t * uy });
+  return unidos.map(([de, ate]) => ({ a: ponto(de), b: ponto(ate), meiaEspessura: s.meiaEspessura }));
+}
+
+/** Trechos de parede que cercam o bloco (ver `trechosAdjacentes`). */
 export function paredesDoBloco(ambientes: AmbienteCoberto[], paredes: SegmentoParede[], tolerancia: number): SegmentoParede[] {
-  return paredes.filter((s) => {
-    const m = meio(s.a, s.b);
-    return ambientes.some((amb) => pontoEmPoligono(m, amb.pontos) || distanciaPontoPoligono(m, amb.pontos) <= tolerancia);
-  });
+  return paredes.flatMap((s) => trechosAdjacentes(s, ambientes, tolerancia));
+}
+
+/** Remove vértices repetidos e colineares (polígono ortogonal). */
+function limparContorno(pontos: Ponto[], tolerancia: number): Ponto[] {
+  let atual = pontos;
+  for (let mudou = true; mudou && atual.length > 3; ) {
+    mudou = false;
+    for (let i = 0; i < atual.length; i++) {
+      const a = atual[(i + atual.length - 1) % atual.length]!;
+      const b = atual[i]!;
+      const c = atual[(i + 1) % atual.length]!;
+      const repetido = distancia(a, b) <= tolerancia;
+      const colinear = Math.abs((b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x)) <= tolerancia * (distancia(a, b) + distancia(b, c));
+      if (repetido || colinear) {
+        atual = atual.filter((_, k) => k !== i);
+        mudou = true;
+        break;
+      }
+    }
+  }
+  return atual;
+}
+
+/**
+ * Absorve degraus de um contorno ORTOGONAL: lado curto (< `degrauMinimo`) entre dois lados
+ * paralelos de mesmo sentido (escada). O mais curto dos dois lados vizinhos é levado ao
+ * alinhamento do outro — o degrau some e a área muda no máximo degrau × lado curto.
+ */
+export function simplificarDegraus(pontos: Ponto[], degrauMinimo: number, tolerancia: number = EPSILON_GRADE): Ponto[] {
+  let atual = limparContorno(pontos.map((p) => ({ ...p })), tolerancia);
+  for (let guarda = 0; guarda < pontos.length * 4 && atual.length > 4; guarda++) {
+    const n = atual.length;
+    let alterado = false;
+    for (let i = 0; i < n && !alterado; i++) {
+      const p0 = atual[(i + n - 1) % n]!;
+      const p1 = atual[i]!;
+      const p2 = atual[(i + 1) % n]!;
+      const p3 = atual[(i + 2) % n]!;
+      if (distancia(p1, p2) >= degrauMinimo) continue;
+      const d0 = { x: p1.x - p0.x, y: p1.y - p0.y };
+      const d2 = { x: p3.x - p2.x, y: p3.y - p2.y };
+      if (d0.x * d2.x + d0.y * d2.y <= 0) continue; // não é escada (vizinhos em sentidos opostos)
+      const horizontal = Math.abs(d0.x) >= Math.abs(d0.y);
+      const novo = atual.map((p) => ({ ...p }));
+      const moverAnterior = distancia(p0, p1) <= distancia(p2, p3);
+      const mover = moverAnterior ? [(i + n - 1) % n, i] : [(i + 1) % n, (i + 2) % n];
+      const alvo = moverAnterior ? p2 : p1;
+      for (const k of mover) {
+        if (horizontal) novo[k]!.y = alvo.y;
+        else novo[k]!.x = alvo.x;
+      }
+      atual = limparContorno(novo, tolerancia);
+      alterado = true;
+    }
+    if (!alterado) break;
+  }
+  return atual;
 }
 
 function segmentoOrtogonal(s: SegmentoParede, tolerancia: number): boolean {
@@ -121,7 +216,15 @@ export function sugerirTelhados(ambientes: AmbienteCoberto[], paredes: SegmentoP
   const validos = ambientes.filter((a) => a.pontos.length >= 3);
   for (const grupo of agruparAdjacentes(validos, opcoes.tolerancia)) {
     const contornos = contornoTelhado(grupo, paredesDoBloco(grupo, paredes, opcoes.tolerancia), opcoes);
-    for (const pontos of contornos) {
+    for (const bruto of contornos) {
+      let pontos = ehOrtogonal(bruto, opcoes.toleranciaOrtogonal)
+        ? simplificarDegraus(bruto, opcoes.degrauMinimo, opcoes.toleranciaOrtogonal)
+        : bruto;
+      const caixa = caixaEnvolvente(pontos);
+      const areaCaixa = (caixa.maxX - caixa.minX) * (caixa.maxY - caixa.minY);
+      if (pontos.length > 4 && areaPoligono(pontos) >= FRACAO_QUASE_RETANGULO * areaCaixa) {
+        pontos = retanguloParaPoligono({ x: caixa.minX, y: caixa.minY }, { x: caixa.maxX, y: caixa.maxY });
+      }
       const membros = grupo.filter((a) => {
         const p = pontoInterno(a.pontos);
         return p !== null && pontoEmPoligono(p, pontos);
@@ -163,10 +266,45 @@ export function numeroCondutores(comprimentoM: number, calhaPorCondutorM: number
   return Math.max(1, Math.ceil(comprimentoM / calhaPorCondutorM - EPSILON_GRADE));
 }
 
-/** Condutores ao longo da calha a–b, em k/n do comprimento (k = 1..n): sempre um na ponta final. */
-export function posicoesCondutores(a: Ponto, b: Ponto, n: number): Ponto[] {
-  return Array.from({ length: n }, (_, i) => {
-    const t = (i + 1) / n;
+/**
+ * Agrupa bordas consecutivas (o fim de uma é o início da seguinte) em cadeias: cada cadeia é uma
+ * calha contínua que dobra os cantos. Devolve os pontos de cada cadeia (fechada: último = primeiro).
+ */
+export function cadeiasDeBordas(bordas: [Ponto, Ponto][], tolerancia: number): Ponto[][] {
+  const cadeias: Ponto[][] = [];
+  for (const [a, b] of bordas) {
+    const ultima = cadeias[cadeias.length - 1];
+    if (ultima && distancia(ultima[ultima.length - 1]!, a) <= tolerancia) ultima.push(b);
+    else cadeias.push([a, b]);
+  }
+  // a última cadeia continua na primeira (o contorno é fechado)
+  if (cadeias.length > 1) {
+    const primeira = cadeias[0]!;
+    const ultima = cadeias[cadeias.length - 1]!;
+    if (distancia(ultima[ultima.length - 1]!, primeira[0]!) <= tolerancia) {
+      cadeias[0] = [...ultima, ...primeira.slice(1)];
+      cadeias.pop();
+    }
+  }
+  return cadeias;
+}
+
+/**
+ * Condutores ao longo de uma cadeia de calha (pontos), em k/n do comprimento (k = 1..n): sempre
+ * um na ponta final (numa cadeia fechada, a ponta final é o ponto de partida).
+ */
+export function posicoesCondutores(cadeia: Ponto[], n: number): Ponto[] {
+  const acum = [0];
+  for (let i = 1; i < cadeia.length; i++) acum.push(acum[i - 1]! + distancia(cadeia[i - 1]!, cadeia[i]!));
+  const total = acum[acum.length - 1]!;
+  return Array.from({ length: n }, (_, k) => {
+    const alvo = ((k + 1) / n) * total;
+    let i = 1;
+    while (i < cadeia.length - 1 && acum[i]! < alvo) i++;
+    const a = cadeia[i - 1]!;
+    const b = cadeia[i]!;
+    const trecho = acum[i]! - acum[i - 1]!;
+    const t = trecho > 0 ? (alvo - acum[i - 1]!) / trecho : 0;
     return { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y) };
   });
 }
