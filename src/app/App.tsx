@@ -5,7 +5,10 @@ import { COR_DISCIPLINA, ROTULO_DISCIPLINA } from '@/core/model';
 import { useLevantamento } from '@/core/store';
 import { PainelEscala, Visualizador } from '@/features/viewer';
 import { ArvoreLevantamento } from './ArvoreLevantamento';
-import { useLevantamentoCalculado } from './levantamento';
+import { PainelPreviaAnalise } from '@/features/materiais';
+import { useAnalise } from './analise';
+import { analisarPlanta, projetoDaPrevia } from './analisarPlanta';
+import { calcularLevantamento, useLevantamentoCalculado } from './levantamento';
 import { MODULOS, type DisciplinaComModulo } from './modulos';
 import { PAINEIS } from './paineis';
 
@@ -50,6 +53,29 @@ export function App() {
   const [aba, definirAba] = useState<Aba>('arquitetura');
   const [vista, definirVista] = useState<'2d' | '3d'>('2d');
   const levantamento = useLevantamentoCalculado();
+  const projeto = useLevantamento((s) => s.projeto);
+  const analise = useAnalise();
+  const [analisando, definirAnalisando] = useState(false);
+  const [retornoAnalise, definirRetornoAnalise] = useState<string | null>(null);
+  const previa = useMemo(() => {
+    if (!analise.ativa) return null;
+    const ids = new Set(Object.values(analise.porFase).flat());
+    return calcularLevantamento(projetoDaPrevia(projeto, ids));
+  }, [analise.ativa, analise.porFase, projeto]);
+
+  const aoAnalisar = async () => {
+    definirAnalisando(true);
+    definirRetornoAnalise(null);
+    definirVista('2d');
+    try {
+      const r = await analisarPlanta();
+      if (r.erro) definirRetornoAnalise(r.erro);
+    } catch (e) {
+      definirRetornoAnalise(e instanceof Error ? `Não foi possível analisar: ${e.message}` : 'Não foi possível analisar.');
+    } finally {
+      definirAnalisando(false);
+    }
+  };
 
   useEffect(() => {
     void useLevantamento.getState().inicializar();
@@ -79,6 +105,14 @@ export function App() {
           aria-label="Nome do levantamento"
         />
         <span className="espaco" />
+        {retornoAnalise && (
+          <span className="retorno-analise" role="status">
+            {retornoAnalise}
+          </span>
+        )}
+        <button className="primario" disabled={analisando || (analise.ativa && analise.fase !== 'concluida')} onClick={() => void aoAnalisar()}>
+          {analisando ? 'Analisando…' : 'Analisar planta'}
+        </button>
         {PAINEIS.Vista3D && (
           <div className="linha">
             <button className={vista === '2d' ? 'ativo' : ''} onClick={() => definirVista('2d')}>
@@ -128,11 +162,26 @@ export function App() {
       </aside>
 
       <main className="centro">
-        {vista === '3d' && PAINEIS.Vista3D ? <PAINEIS.Vista3D /> : <Visualizador derivados={derivados} />}
+        {vista === '3d' && PAINEIS.Vista3D ? <PAINEIS.Vista3D /> : <Visualizador
+            derivados={derivados}
+            {...(analise.ativa
+              ? { animacao: { ativa: analise.ativa, fase: analise.fase, progresso: analise.progresso, pagina: analise.pagina, porFase: analise.porFase } }
+              : {})}
+          />}
       </main>
 
       <aside className="coluna direita">
-        <ArvoreLevantamento levantamento={levantamento} />
+        {analise.ativa && previa ? (
+          <PainelPreviaAnalise
+            fase={analise.fase}
+            progresso={analise.progresso}
+            previa={previa}
+            aoPular={analise.pular}
+            aoFechar={analise.fechar}
+          />
+        ) : (
+          <ArvoreLevantamento levantamento={levantamento} />
+        )}
       </aside>
     </div>
   );

@@ -83,3 +83,6 @@ h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: v
   .coluna.esquerda { order: 2; border-right: 0; border-bottom: 1px solid var(--borda); overflow: visible; }
   .coluna.direita { order: 3; border-left: 0; overflow: visible; }
 }
+
+/* Botão "Analisar planta" e retorno no topo */
+.topo .retorno-analise { font-size: 12px; color: #ffb347; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
