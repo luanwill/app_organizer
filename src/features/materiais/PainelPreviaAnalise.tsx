@@ -17,8 +17,7 @@ import {
   type SecaoPrevia,
 } from './previa';
 import {
-  DESTAQUES,
-  FASE_DA_SECAO,
+  FASE_MATERIAIS,
   ROTULO_FASE_PREVIA,
   TEXTO_AGUARDANDO_MATERIAIS,
   TEXTO_CHAMADA_FINAL,
@@ -59,9 +58,8 @@ const estiloCor = (cor: string): CSSProperties => ({ '--cor': cor }) as CSSPrope
 
 function Secao({ secao, fase, progresso, reduzido }: { secao: SecaoPrevia; fase: FasePrevia; progresso: number; reduzido: boolean }) {
   const { disciplina } = secao;
-  const fasesDaSecao = DESTAQUES[disciplina].map((d) => d.fase);
-  const ativa = fasesDaSecao.includes(fase);
-  const encerrada = fasesDaSecao.every((f) => indiceFase(fase) > indiceFase(f));
+  const ativa = secao.fasesDestaques.includes(fase);
+  const encerrada = secao.fasesDestaques.every((f) => indiceFase(fase) > indiceFase(f));
   const visiveis = secao.destaques.flatMap((d) => {
     const t = andamento(d.fase, fase, progresso);
     return t === null ? [] : [{ ...d, t: reduzido ? 1 : t }];
@@ -71,7 +69,12 @@ function Secao({ secao, fase, progresso, reduzido }: { secao: SecaoPrevia; fase:
     <section className={`prev-cartao prev-entrar${ativa ? ' prev-ativo' : ''}`} style={estiloCor(COR_DISCIPLINA[disciplina])}>
       <header className="prev-cartao-titulo">
         <span className="bolinha" style={{ background: COR_DISCIPLINA[disciplina] }} />
-        <span>{ROTULO_DISCIPLINA[disciplina]}</span>
+        <span>{secao.rotulo}</span>
+        {secao.faltantesNomeados.map((nome) => (
+          <span key={nome} className="prev-faltantes" title={`Dado faltante: ${nome}`}>
+            ⚠ Falta: {nome}
+          </span>
+        ))}
         {secao.faltantes > 0 && (
           <span className="prev-faltantes" title="Dados faltantes: veja os alertas na árvore">
             ⚠ {secao.faltantes} {secao.faltantes === 1 ? 'dado faltante' : 'dados faltantes'}
@@ -99,8 +102,8 @@ export function PainelPreviaAnalise({ fase, progresso, previa, aoPular, aoFechar
   const resumo = useMemo(() => resumirPrevia(previa), [previa]);
   const concluida = fase === 'concluida';
   const geral = progressoGeral(fase, progresso);
-  const secoes = resumo.secoes.filter((s) => andamento(FASE_DA_SECAO[s.disciplina], fase, progresso) !== null);
-  const materiaisVisiveis = andamento(FASE_DA_SECAO.materiais, fase, progresso) !== null;
+  const secoes = resumo.secoes.filter((s) => andamento(s.fase, fase, progresso) !== null);
+  const materiaisVisiveis = andamento(FASE_MATERIAIS, fase, progresso) !== null;
   const total = resumo.materiais.length;
 
   return (
@@ -137,7 +140,7 @@ export function PainelPreviaAnalise({ fase, progresso, previa, aoPular, aoFechar
 
       <div className="prev-secoes">
         {secoes.map((s) => (
-          <Secao key={s.disciplina} secao={s} fase={fase} progresso={progresso} reduzido={reduzido} />
+          <Secao key={s.id} secao={s} fase={fase} progresso={progresso} reduzido={reduzido} />
         ))}
       </div>
 

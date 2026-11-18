@@ -10,6 +10,9 @@ export type FaseAnalise =
   | 'paredes'
   | 'ambientes'
   | 'estrutura'
+  | 'laje'
+  | 'telhado'
+  | 'calhas'
   | 'eletrica'
   | 'hidraulica'
   | 'materiais'
@@ -20,6 +23,9 @@ export const ORDEM_FASES: FaseAnalise[] = [
   'paredes',
   'ambientes',
   'estrutura',
+  'laje',
+  'telhado',
+  'calhas',
   'eletrica',
   'hidraulica',
   'materiais',
@@ -32,6 +38,9 @@ export const DURACAO_FASE_MS: Record<FaseAnalise, number> = {
   paredes: 1800,
   ambientes: 1600,
   estrutura: 1200,
+  laje: 1000,
+  telhado: 1200,
+  calhas: 900,
   eletrica: 1200,
   hidraulica: 1000,
   materiais: 1800,
@@ -43,6 +52,9 @@ export const ROTULO_FASE: Record<FaseAnalise, string> = {
   paredes: 'Identificando paredes…',
   ambientes: 'Medindo ambientes…',
   estrutura: 'Lançando estrutura…',
+  laje: 'Lançando lajes…',
+  telhado: 'Montando o telhado…',
+  calhas: 'Posicionando calhas e condutores…',
   eletrica: 'Distribuindo pontos elétricos…',
   hidraulica: 'Distribuindo pontos hidráulicos…',
   materiais: 'Levantando materiais…',

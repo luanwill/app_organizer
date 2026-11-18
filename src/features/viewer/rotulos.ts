@@ -117,3 +117,14 @@ export function rotuloDerivadoVisivel(
   const alvo = derivado.elementoId;
   return alvo !== undefined && (sobreId === alvo || selecaoIds.includes(alvo));
 }
+
+/**
+ * Centro da etiqueta do telhado: centralizada no topo do polígono, logo abaixo da borda (na faixa
+ * do beiral), para não coincidir com os rótulos de laje/ambiente no centro. Fora do polígono → centroide.
+ * `meiaAltura` = metade da altura da etiqueta (unidades do PDF).
+ */
+export function ancoraRotuloTelhado(pontos: Ponto[], margem: number, meiaAltura: number): Ponto {
+  const caixa = caixaEnvolvente(pontos);
+  const candidato = { x: (caixa.minX + caixa.maxX) / 2, y: caixa.minY + margem + meiaAltura };
+  return pontoEmPoligono(candidato, pontos) ? candidato : centroidePoligono(pontos);
+}

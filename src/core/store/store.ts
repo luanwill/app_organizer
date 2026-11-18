@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { StoreApi, UseBoundStore } from 'zustand';
-import { projetoVazio } from '@/core/model';
+import { parametrosPadrao, projetoVazio } from '@/core/model';
 import type {
   Disciplina,
   Elemento,
@@ -42,6 +42,14 @@ function mesclarProfundo<T>(base: T, patch: unknown): T {
     resultado[chave] = ehObjetoSimples(atual) && ehObjetoSimples(valor) ? mesclarProfundo(atual, valor) : valor;
   }
   return resultado as T;
+}
+
+/**
+ * Completa os parâmetros de um projeto salvo/importado com os padrões atuais (campos novos do
+ * contrato, ex.: estrutura.cobertura). Valores salvos vencem, inclusive null. Não toca em `atualizadoEm`.
+ */
+export function completarProjeto(projeto: Projeto): Projeto {
+  return { ...projeto, parametros: mesclarProfundo(parametrosPadrao(), projeto.parametros) };
 }
 
 /** Restaura as escalas do snapshot sem perder dimensões de página medidas depois dele. */
@@ -135,7 +143,7 @@ export function criarStore(persistencia: Persistencia): UseBoundStore<StoreApi<L
           if (salvo) {
             limparHistorico();
             set({
-              projeto: salvo.projeto,
+              projeto: completarProjeto(salvo.projeto),
               pdfDados: salvo.pdf,
               paginaAtual: salvo.paginaAtual ?? PAGINA_INICIAL,
               selecaoIds: [],
@@ -168,7 +176,7 @@ export function criarStore(persistencia: Persistencia): UseBoundStore<StoreApi<L
 
       carregarProjeto(projeto) {
         limparHistorico();
-        set({ projeto, paginaAtual: PAGINA_INICIAL, selecaoIds: [], ...flags() });
+        set({ projeto: completarProjeto(projeto), paginaAtual: PAGINA_INICIAL, selecaoIds: [], ...flags() });
       },
 
       definirPdf(nome, dados, totalPaginas) {

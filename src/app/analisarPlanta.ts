@@ -26,6 +26,9 @@ export interface ResultadoAnalise {
 export function faseDoElemento(e: Elemento): FaseAnalise | null {
   if (e.tipo === 'parede') return 'paredes';
   if (e.tipo === 'ambiente') return 'ambientes';
+  if (e.tipo === 'laje') return 'laje';
+  if (e.tipo === 'telhado') return 'telhado';
+  if (e.tipo === 'calha') return 'calhas';
   if (e.disciplina === 'estrutura') return 'estrutura';
   if (e.disciplina === 'eletrica') return 'eletrica';
   if (e.disciplina === 'hidraulica') return 'hidraulica';

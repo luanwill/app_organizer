@@ -125,10 +125,77 @@ describe('calcularMateriais — composições padrão', () => {
     expect(m[0]?.quantidade).toBeGreaterThan(10);
   });
 
-  it('todo serviço com composição padrão tem uma composição genérica (sem detalhe)', () => {
+  it('todo serviço com composição padrão tem uma genérica (sem detalhe), exceto telhamento e madeiramento', () => {
     const servicos = new Set(COMPOSICOES_PADRAO.map((c) => c.servico));
+    for (const s of ['telhamento', 'madeiramento'] as const) expect(COMPOSICOES_PADRAO.some((c) => c.servico === s && !c.detalhe)).toBe(false);
+    servicos.delete('telhamento');
+    servicos.delete('madeiramento');
     for (const s of servicos) expect(COMPOSICOES_PADRAO.some((c) => c.servico === s && !c.detalhe)).toBe(true);
     expect(new Set(COMPOSICOES_PADRAO.map((c) => c.id)).size).toBe(COMPOSICOES_PADRAO.length);
+  });
+});
+
+describe('calcularMateriais — cobertura', () => {
+  const TIPOS = ['ceramica', 'concreto', 'fibrocimento', 'metalica', 'sanduiche'];
+
+  it('há composição de telhamento, madeiramento e cumeeira para cada tipo de telha', () => {
+    for (const servicoCob of ['telhamento', 'madeiramento', 'cumeeira'] as const) {
+      for (const t of TIPOS) expect(COMPOSICOES_PADRAO.some((c) => c.servico === servicoCob && c.detalhe === t), `${servicoCob} ${t}`).toBe(true);
+    }
+  });
+
+  it('telhamento cerâmico: 16 un/m² + 5% de perda; concreto 10,5 un/m²', () => {
+    const m = calcularMateriais(
+      [servico('telhamento', 100, { detalhe: 'ceramica' }), servico('telhamento', 10, { detalhe: 'concreto' })],
+      COMPOSICOES_PADRAO,
+    );
+    expect(qtd(m, 'Telha cerâmica')).toBeCloseTo(1680, 9);
+    expect(qtd(m, 'Telha de concreto')).toBeCloseTo(110.25, 9);
+    expect(achar(m, 'Telha cerâmica')?.origem).toBe(SERVICOS.telhamento.descricao);
+  });
+
+  it('chapas (fibrocimento/metálica/sanduíche) em m² de chapa com recobrimento e fixação', () => {
+    for (const t of ['fibrocimento', 'metalica', 'sanduiche']) {
+      const m = calcularMateriais([servico('telhamento', 10, { detalhe: t })], COMPOSICOES_PADRAO);
+      const chapa = m.find((x) => x.unidade === 'm²');
+      expect(chapa?.quantidade, t).toBeGreaterThan(10);
+      expect(m.some((x) => x.unidade === 'un' && /parafuso|gancho/i.test(x.material)), t).toBe(true);
+    }
+  });
+
+  it('sem tipo de telha, telhamento e madeiramento não geram material (nada é assumido)', () => {
+    expect(calcularMateriais([servico('telhamento', 10), servico('madeiramento', 10)], COMPOSICOES_PADRAO)).toEqual([]);
+  });
+
+  it('madeiramento: cerâmica com madeira m³ e ripas; fibrocimento só terças', () => {
+    const cer = calcularMateriais([servico('madeiramento', 100, { detalhe: 'ceramica' })], COMPOSICOES_PADRAO);
+    expect(achar(cer, 'Madeira serrada (tesouras, terças e caibros)')?.unidade).toBe('m³');
+    expect(achar(cer, 'Ripa de madeira')?.unidade).toBe('m');
+    const fib = calcularMateriais([servico('madeiramento', 100, { detalhe: 'fibrocimento' })], COMPOSICOES_PADRAO);
+    expect(achar(fib, 'Madeira serrada (terças)')?.unidade).toBe('m³');
+    expect(achar(fib, 'Ripa de madeira')).toBeUndefined();
+  });
+
+  it('cumeeira: cerâmica em peças + argamassa; sem detalhe, comprimento de peças', () => {
+    const cer = calcularMateriais([servico('cumeeira', 10, { detalhe: 'ceramica' })], COMPOSICOES_PADRAO);
+    expect(achar(cer, 'Cumeeira cerâmica')?.unidade).toBe('un');
+    expect(achar(cer, 'Argamassa para cumeeira')?.unidade).toBe('m³');
+    const gen = calcularMateriais([servico('cumeeira', 10)], COMPOSICOES_PADRAO);
+    expect(gen).toHaveLength(1);
+    expect(gen[0]).toMatchObject({ unidade: 'm' });
+    expect(gen[0]!.quantidade).toBeCloseTo(10.5, 9);
+  });
+
+  it('calha 10 m → 5 m² de chapa (desenv. 50 cm) + 10%; rufo 10 m → 3,3 m² + 10%', () => {
+    const m = calcularMateriais([servico('calha', 10), servico('rufo', 10)], COMPOSICOES_PADRAO);
+    expect(qtd(m, 'Chapa galvanizada para calha (desenvolvimento 50 cm)')).toBeCloseTo(5.5, 9);
+    expect(qtd(m, 'Chapa galvanizada para rufo (desenvolvimento 33 cm)')).toBeCloseTo(3.63, 9);
+  });
+
+  it('condutor 12 m → 2 barras de 6 m de PVC 100 mm (+5%) e conexões', () => {
+    const m = calcularMateriais([servico('condutor', 12)], COMPOSICOES_PADRAO);
+    expect(qtd(m, 'Tubo PVC 100 mm (barra 6 m)')).toBeCloseTo(2.1, 9);
+    expect(achar(m, 'Conexões PVC 100 mm (curvas/luvas)')?.unidade).toBe('un');
   });
 });
 

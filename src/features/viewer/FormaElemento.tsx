@@ -1,8 +1,8 @@
 /** Desenho (react-konva) de um elemento, de uma etiqueta e de uma rota derivada. */
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import type Konva from 'konva';
 import type { KonvaEventObject } from 'konva/lib/Node';
-import { Circle, Group, Label, Line, Rect, RegularPolygon, Tag, Text } from 'react-konva';
+import { Circle, Group, Label, Line, Rect, RegularPolygon, Shape, Tag, Text } from 'react-konva';
 import { COR_DISCIPLINA, COR_PENDENTE, type Elemento, type GeometriaDerivada, type Ponto } from '@/core/model';
 import { centroidePoligono } from '@/core/calc';
 import {
@@ -16,20 +16,27 @@ import {
   ESTILO_TIPO,
   LARGURA_DERIVADO_PX,
   LARGURA_EXTRA_SELECAO_PX,
+  LARGURA_CUMEEIRA_PX,
   LARGURA_TOQUE_PX,
   MARGEM_ROTULO_AMBIENTE_PX,
   OPACIDADE_FUNDO_ETIQUETA,
+  OPACIDADE_HACHURA,
   OPACIDADE_PAREDE,
   PADDING_ETIQUETA_PX,
+  PASSO_HACHURA_PX,
   TAMANHO_FONTE_PEQUENA_PX,
   TAMANHO_FONTE_PX,
+  TIPOS_HACHURADOS,
   TIPOS_PONTO_COM_ROTULO_FIXO,
+  TRACEJADO_CUMEEIRA,
   TRACEJADO_DERIVADO,
   TRACEJADO_PENDENTE,
+  TRACEJADO_RUFO,
   type EstiloTipo,
 } from './config';
+import { linhasCumeeira, linhasHachura, tracejadoCalha, type Segmento } from './cobertura';
 import { larguraParedeUnidades } from './elementos';
-import { ancoraRotuloAmbiente, rotuloVisivel } from './rotulos';
+import { ancoraRotuloAmbiente, ancoraRotuloTelhado, rotuloVisivel } from './rotulos';
 
 function achatar(pontos: Ponto[]): number[] {
   return pontos.flatMap((p) => [p.x, p.y]);
@@ -86,6 +93,55 @@ export function Etiqueta({ x, y, zoom, texto, centralizada, cantoSuperiorEsquerd
   );
 }
 
+/** Recorta o desenho pelo polígono. */
+function recortarPoligono(pontos: Ponto[]) {
+  return (ctx: Konva.Context) => {
+    ctx.beginPath();
+    pontos.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+    ctx.closePath();
+  };
+}
+
+/** Segmentos desenhados num único nó (Shape). */
+function desenharSegmentos(segmentos: Segmento[]) {
+  return (ctx: Konva.Context, shape: Konva.Shape) => {
+    ctx.beginPath();
+    for (const { a, b } of segmentos) {
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+    }
+    ctx.strokeShape(shape);
+  };
+}
+
+/** Hachura diagonal discreta recortada pelo polígono (laje, telhado). Não recebe o mouse. */
+export const Hachura = memo(function Hachura(props: { pontos: Ponto[]; zoom: number; cor: string; opacidade?: number }) {
+  const { pontos, zoom, cor, opacidade = OPACIDADE_HACHURA } = props;
+  const segmentos = useMemo(() => linhasHachura(pontos, PASSO_HACHURA_PX / zoom), [pontos, zoom]);
+  return (
+    <Group clipFunc={recortarPoligono(pontos)} listening={false} opacity={opacidade}>
+      <Shape sceneFunc={desenharSegmentos(segmentos)} stroke={cor} strokeWidth={1} strokeScaleEnabled={false} />
+    </Group>
+  );
+});
+
+/** Cumeeira/espigões (ou o trecho `fracao` deles, na animação), recortados pelo polígono. */
+export function Cumeeira(props: { pontos: Ponto[]; segmentos: Segmento[]; cor: string; fracao?: number }) {
+  const { pontos, segmentos, cor, fracao = 1 } = props;
+  const parciais = fracao >= 1 ? segmentos : segmentos.map(({ a, b }) => ({ a, b: { x: a.x + (b.x - a.x) * fracao, y: a.y + (b.y - a.y) * fracao } }));
+  return (
+    <Group clipFunc={recortarPoligono(pontos)} listening={false}>
+      <Shape
+        sceneFunc={desenharSegmentos(parciais)}
+        stroke={cor}
+        strokeWidth={LARGURA_CUMEEIRA_PX}
+        strokeScaleEnabled={false}
+        dash={TRACEJADO_CUMEEIRA}
+      />
+    </Group>
+  );
+}
+
 export function Simbolo({ estilo, cor, tracejado }: { estilo: EstiloTipo; cor: string; tracejado?: number[] }) {
   const t = estilo.tamanhoPx;
   const comum = {
@@ -129,7 +185,11 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
   const estilo = ESTILO_TIPO[el.tipo];
   const pendente = el.status === 'pendente';
   const cor = pendente ? COR_PENDENTE : COR_DISCIPLINA[el.disciplina];
-  const tracejado = pendente ? TRACEJADO_PENDENTE : estilo.tracejado;
+  const tracejado = pendente
+    ? TRACEJADO_PENDENTE
+    : el.tipo === 'calha'
+      ? tracejadoCalha(el.props.funcao, TRACEJADO_RUFO)
+      : estilo.tracejado;
   const pressionar = (e: KonvaEventObject<MouseEvent>) => {
     if (e.evt.button === 0) props.aoPressionar(el.id, e.evt.shiftKey);
   };
@@ -191,9 +251,16 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
     : estilo.larguraPx;
   // nome do ambiente: no canto superior esquerdo interno (o centro costuma ter o ponto de luz)
   const noCanto = el.tipo === 'ambiente' && fechado;
+  const hachurado = fechado && TIPOS_HACHURADOS.includes(el.tipo);
+  // telhado: fica por baixo e só recebe o clique pelo contorno (não cobre ambientes/pilares/paredes)
+  const soContorno = el.tipo === 'telhado';
+  const preenchimento = fechado && estilo.preenchimento > 0 ? comAlfa(cor, estilo.preenchimento) : undefined;
+  const cumeeira = el.tipo === 'telhado' ? linhasCumeeira(pontos, el.props.aguas, el.props.direcao) : [];
   const centro = noCanto
     ? ancoraRotuloAmbiente(pontos, MARGEM_ROTULO_AMBIENTE_PX / zoom)
-    : fechado
+    : el.tipo === 'telhado'
+      ? ancoraRotuloTelhado(pontos, MARGEM_ROTULO_AMBIENTE_PX / zoom, (TAMANHO_FONTE_PX / 2 + PADDING_ETIQUETA_PX) / zoom)
+      : fechado
       ? centroidePoligono(pontos)
       : pontoMedio(pontos);
   return (
@@ -210,6 +277,9 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
           listening={false}
         />
       )}
+      {soContorno && preenchimento && <Line points={coords} closed fill={preenchimento} listening={false} />}
+      {hachurado && <Hachura pontos={pontos} zoom={zoom} cor={cor} />}
+      {cumeeira.length > 0 && <Cumeeira pontos={pontos} segmentos={cumeeira} cor={cor} />}
       <Line
         points={coords}
         closed={fechado}
@@ -218,7 +288,9 @@ export const FormaElemento = memo(function FormaElemento(props: FormaElementoPro
         strokeWidth={largura}
         strokeScaleEnabled={ehParede}
         dash={ehParede && tracejado ? tracejado.map((d) => d / zoom) : tracejado}
-        fill={fechado && estilo.preenchimento > 0 ? comAlfa(cor, estilo.preenchimento) : undefined}
+        fill={soContorno ? undefined : preenchimento}
+        // sem isso o Konva preenche a área de clique de polígonos mesmo sem cor de preenchimento
+        fillEnabled={!soContorno}
         hitStrokeWidth={ehParede ? Math.max(largura, LARGURA_TOQUE_PX / zoom) : LARGURA_TOQUE_PX}
         lineJoin="round"
       />

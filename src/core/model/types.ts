@@ -106,6 +106,35 @@ export interface PropsLaje {
   espessura: number;
 }
 
+// ---- cobertura (adicionado com autorização do usuário: telhado e calhas)
+
+export type TipoTelha = 'ceramica' | 'concreto' | 'fibrocimento' | 'metalica' | 'sanduiche';
+
+/** Telhado: geometria = polígono da projeção horizontal (já com beiral). */
+export interface PropsTelhado {
+  /** null = não informado (gera "dado faltante"; não há telha padrão). */
+  tipoTelha: TipoTelha | null;
+  /** Inclinação (%); null = usar a do tipo de telha nos parâmetros. */
+  inclinacaoPct: number | null;
+  /** Nº de águas. */
+  aguas: 1 | 2 | 4;
+  /** Direção da cumeeira (2 águas) ou do caimento (1 água) na planta. */
+  direcao: 'horizontal' | 'vertical';
+  /** Beiral incluído na geometria (m), informativo. */
+  beiral: number;
+}
+
+export type FuncaoCalha = 'calha' | 'rufo' | 'condutor';
+
+/** Calha/rufo: polilinha ao longo da borda; condutor vertical: ponto (comprimento = altura). */
+export interface PropsCalha {
+  funcao: FuncaoCalha;
+  /** Desenvolvimento da chapa (cm) — calha/rufo. */
+  desenvolvimentoCm?: number | null;
+  /** Diâmetro (mm) — condutor. */
+  diametroMm?: number | null;
+}
+
 export type TipoFundacao = 'sapata' | 'bloco-estaca' | 'radier';
 
 export interface PropsFundacao {
@@ -178,6 +207,8 @@ export interface PropsPorTipo {
   'viga-superior': PropsViga; // polilinha (2 pontos)
   laje: PropsLaje; // poligono
   fundacao: PropsFundacao; // ponto (sapata/bloco) | poligono (radier)
+  telhado: PropsTelhado; // poligono (projeção horizontal com beiral)
+  calha: PropsCalha; // polilinha (calha/rufo) | ponto (condutor)
   // elétrica
   'ponto-eletrico': PropsPontoEletrico; // ponto
   quadro: PropsQuadro; // ponto
@@ -202,6 +233,8 @@ export const DISCIPLINA_DO_TIPO: Record<TipoElemento, Disciplina> = {
   'viga-superior': 'estrutura',
   laje: 'estrutura',
   fundacao: 'estrutura',
+  telhado: 'estrutura',
+  calha: 'estrutura',
   'ponto-eletrico': 'eletrica',
   quadro: 'eletrica',
   eletroduto: 'eletrica',
@@ -218,6 +251,8 @@ export interface Vinculos {
   ambienteId?: string;
   /** Ambientes cobertos por uma laje. */
   ambienteIds?: string[];
+  /** Telhado atendido por uma calha/rufo/condutor. */
+  telhadoId?: string;
   /** Parede hospedeira (esquadria) ou parede sob/sobre a viga. */
   paredeId?: string;
   /** Pilar sobre a fundação. */
@@ -333,6 +368,21 @@ export interface ParametrosEstrutura {
     radier: { espessura: number };
     espessuraLastro: number; // m
   };
+  cobertura: ParametrosCobertura;
+}
+
+export interface ParametrosCobertura {
+  /** Beiral padrão das sugestões (m). */
+  beiral: number;
+  /** Inclinação padrão (%) por tipo de telha. */
+  inclinacaoPct: Record<TipoTelha, number>;
+  /** Altura do condutor vertical (m); null = usar o pé-direito. */
+  alturaCondutor: number | null;
+  /** Comprimento máximo de calha atendido por um condutor (m). */
+  calhaPorCondutorM: number;
+  desenvolvimentoCalhaCm: number;
+  desenvolvimentoRufoCm: number;
+  diametroCondutorMm: number;
 }
 
 export interface ParametrosEletrica {
@@ -393,6 +443,12 @@ export const SERVICOS = {
   aco: { descricao: 'Aço CA-50/CA-60', unidade: 'kg' },
   lastro: { descricao: 'Lastro de concreto magro', unidade: 'm³' },
   escavacao: { descricao: 'Escavação', unidade: 'm³' },
+  telhamento: { descricao: 'Telhamento', unidade: 'm²' },
+  madeiramento: { descricao: 'Estrutura do telhado', unidade: 'm²' },
+  cumeeira: { descricao: 'Cumeeira / espigão', unidade: 'm' },
+  calha: { descricao: 'Calha', unidade: 'm' },
+  rufo: { descricao: 'Rufo', unidade: 'm' },
+  condutor: { descricao: 'Condutor vertical', unidade: 'm' },
 } as const;
 
 export type CodigoServico = keyof typeof SERVICOS;

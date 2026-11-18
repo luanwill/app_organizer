@@ -103,6 +103,15 @@ describe('o que mostrar por fase', () => {
     expect(andamento('materiais', 'concluida', 0)).toBe(1);
   });
 
+  it('fases novas (laje, telhado, calhas) entre estrutura e elétrica', () => {
+    expect(ORDEM_FASES_PREVIA).toEqual([
+      'varredura', 'paredes', 'ambientes', 'estrutura', 'laje', 'telhado', 'calhas', 'eletrica', 'hidraulica', 'materiais', 'concluida',
+    ]);
+    expect(andamento('telhado', 'laje', 1)).toBeNull();
+    expect(andamento('telhado', 'telhado', 0.3)).toBe(0.3);
+    expect(andamento('telhado', 'calhas', 0)).toBe(1);
+  });
+
   it('progresso geral cresce com as fases e termina em 1', () => {
     const valores = ORDEM_FASES_PREVIA.map((f) => progressoGeral(f, 0.5));
     for (let i = 1; i < valores.length; i++) expect(valores[i]!).toBeGreaterThan(valores[i - 1]!);
@@ -145,19 +154,20 @@ describe('resumirPrevia', () => {
       ],
     };
     const r = resumirPrevia(previa);
-    const arq = r.secoes.find((s) => s.disciplina === 'arquitetura')!;
+    const arq = r.secoes.find((s) => s.id === 'arquitetura')!;
     expect(arq.destaques.map((d) => [d.rotulo, d.valor])).toEqual([
       ['Paredes', 2],
       ['Comprimento de paredes', 9],
     ]);
     expect(arq.faltantes).toBe(2);
-    expect(r.secoes.find((s) => s.disciplina === 'estrutura')!.destaques).toEqual([]);
+    expect(arq.faltantesNomeados).toEqual([]);
+    expect(r.secoes.find((s) => s.id === 'estrutura')!.destaques).toEqual([]);
     expect(r.materiais).toEqual([{ chave: 'Bloco|un', material: 'Bloco', unidade: 'un', quantidade: 10 }]);
   });
 
   it('com um projeto real: paredes, piso, estrutura, elétrica, hidráulica e materiais', () => {
     const r = resumirPrevia(levantamentoDe(projetoPrevia()));
-    const valor = (d: string, rotulo: string) => r.secoes.find((s) => s.disciplina === d)?.destaques.find((x) => x.rotulo === rotulo)?.valor;
+    const valor = (d: string, rotulo: string) => r.secoes.find((s) => s.id === d)?.destaques.find((x) => x.rotulo === rotulo)?.valor;
     expect(valor('arquitetura', 'Paredes')).toBe(4);
     expect(valor('arquitetura', 'Comprimento de paredes')).toBeCloseTo(18, 6);
     expect(valor('arquitetura', 'Ambientes')).toBe(1);
@@ -167,6 +177,78 @@ describe('resumirPrevia', () => {
     expect(valor('eletrica', 'Pontos')).toBeGreaterThanOrEqual(1);
     expect(valor('hidraulica', 'Pontos')).toBe(1);
     expect(r.materiais.some((m) => m.material.startsWith('Bloco cerâmico'))).toBe(true);
+  });
+});
+
+const linhaEstrutura = (p: Partial<LinhaQuantitativo>): LinhaQuantitativo => linha({ disciplina: 'estrutura', ...p });
+
+/** Prévia com telhado e calhas (linhas como a estrutura emite: serviço + detalhe = tipo de telha). */
+function previaComCobertura(tipoTelhaFaltante = false): Levantamento {
+  return {
+    ...VAZIO,
+    estrutura: {
+      linhas: [
+        linhaEstrutura({ grupo: 'Pilares', descricao: 'Concreto — pilares', unidade: 'm³', quantidade: 0.5, servico: 'concreto', elementoIds: ['pil'] }),
+        linhaEstrutura({ grupo: 'Lajes', descricao: 'Lajes — área', unidade: 'm²', quantidade: 40, elementoIds: ['l1'] }),
+        linhaEstrutura({ grupo: 'Lajes', descricao: 'Concreto — lajes', unidade: 'm³', quantidade: 3, servico: 'concreto', elementoIds: ['l1'] }),
+        linhaEstrutura({ grupo: 'Lajes', descricao: 'Tela de distribuição', unidade: 'm²', quantidade: 40, ehMaterial: true, elementoIds: ['l1'] }),
+        linhaEstrutura({ grupo: 'Cobertura', descricao: 'Telhado — telhamento', unidade: 'm²', quantidade: 62.5, servico: 'telhamento', detalhe: 'ceramica', elementoIds: ['t1'] }),
+        linhaEstrutura({ grupo: 'Cobertura', descricao: 'Telhado — madeiramento', unidade: 'm²', quantidade: 62.5, servico: 'madeiramento', detalhe: 'ceramica', elementoIds: ['t1'] }),
+        linhaEstrutura({ grupo: 'Cobertura', descricao: 'Cumeeira', unidade: 'm', quantidade: 8, servico: 'cumeeira', elementoIds: ['t1'] }),
+        linhaEstrutura({ grupo: 'Calhas', descricao: 'Calha', unidade: 'm', quantidade: 12, servico: 'calha', elementoIds: ['c1'] }),
+        linhaEstrutura({ grupo: 'Calhas', descricao: 'Rufo', unidade: 'm', quantidade: 5, servico: 'rufo', elementoIds: ['c2'] }),
+        linhaEstrutura({ grupo: 'Calhas', descricao: 'Condutor', unidade: 'm', quantidade: 6, servico: 'condutor', elementoIds: ['c3', 'c4'] }),
+      ],
+      alertas: [
+        { disciplina: 'estrutura', campo: 'fck', mensagem: 'fck não informado' },
+        ...(tipoTelhaFaltante ? [{ disciplina: 'estrutura' as const, campo: 'tipoTelha', mensagem: 'Informe o tipo de telha do telhado T1' }] : []),
+      ],
+    },
+  };
+}
+
+describe('resumirPrevia — estrutura, lajes, cobertura e calhas', () => {
+  it('separa as linhas da estrutura nas quatro seções', () => {
+    const r = resumirPrevia(previaComCobertura());
+    const destaques = (id: string) => Object.fromEntries(r.secoes.find((s) => s.id === id)!.destaques.map((d) => [d.rotulo, d.valor]));
+    expect(destaques('estrutura')).toEqual({ Elementos: 1, Concreto: 0.5 });
+    expect(destaques('laje')).toEqual({ Lajes: 1, 'Área de laje': 40, Concreto: 3 });
+    expect(destaques('cobertura')).toEqual({ 'Área de telhado': 62.5, Cumeeira: 8 });
+    expect(destaques('calhas')).toEqual({ Calha: 12, Rufo: 5, Condutores: 6 });
+    expect(r.secoes.map((s) => [s.id, s.fase])).toEqual([
+      ['arquitetura', 'paredes'],
+      ['estrutura', 'estrutura'],
+      ['laje', 'laje'],
+      ['cobertura', 'telhado'],
+      ['calhas', 'calhas'],
+      ['eletrica', 'eletrica'],
+      ['hidraulica', 'hidraulica'],
+    ]);
+  });
+
+  it('"tipo de telha" faltante vira selo próprio da Cobertura; outros alertas ficam na Estrutura', () => {
+    const r = resumirPrevia(previaComCobertura(true));
+    const cobertura = r.secoes.find((s) => s.id === 'cobertura')!;
+    expect(cobertura.faltantesNomeados).toEqual(['tipo de telha']);
+    expect(cobertura.faltantes).toBe(0);
+    expect(r.secoes.find((s) => s.id === 'estrutura')!.faltantes).toBe(1);
+    expect(resumirPrevia(previaComCobertura(false)).secoes.find((s) => s.id === 'cobertura')!.faltantesNomeados).toEqual([]);
+  });
+
+  it('render: cobertura na fase telhado, calhas na fase calhas, selo âmbar e "Nada identificado" sem telhado', () => {
+    const html = (previa: Levantamento, fase: FasePrevia, progresso = 1) =>
+      renderToStaticMarkup(createElement(PainelPreviaAnalise, { fase, progresso, previa, aoPular: () => {}, aoFechar: () => {} }));
+    const comTelhado = previaComCobertura(true);
+    expect(html(comTelhado, 'laje')).not.toContain('Cobertura');
+    const telhado = html(comTelhado, 'telhado');
+    expect(telhado).toContain('Cobertura');
+    expect(telhado).toContain('62,50 m²');
+    expect(telhado).toContain('Falta: tipo de telha');
+    expect(telhado).not.toContain('Calhas e condutores');
+    expect(html(comTelhado, 'calhas')).toContain('12,00 m');
+    const semTelhado = html(VAZIO, 'concluida');
+    const trecho = semTelhado.slice(semTelhado.indexOf('Cobertura'));
+    expect(trecho.slice(0, 400)).toContain('Nada identificado');
   });
 });
 

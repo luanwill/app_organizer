@@ -47,6 +47,7 @@
   animation: prev-pulsar 1.6s ease-in-out infinite;
 }
 .prev-cartao-titulo { display: flex; align-items: center; gap: 6px; font-weight: 600; margin-bottom: 6px; }
+.prev-cartao-titulo { flex-wrap: wrap; }
 .prev-cartao-titulo > span:nth-child(2) { flex: 1; }
 .prev-faltantes {
   font-size: 11px;

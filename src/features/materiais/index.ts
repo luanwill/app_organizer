@@ -17,7 +17,8 @@ export {
   valorContagem,
 } from './previa';
 export type { DestaquePrevia, MaterialPrevia, ResumoPrevia, SecaoPrevia } from './previa';
-export type { FasePrevia } from './previaConfig';
+export type { FasePrevia, IdSecaoPrevia } from './previaConfig';
+export { COMPOSICOES_COBERTURA } from './composicoesCobertura';
 
 /** Verificação de tipo e objeto pronto para o registro em src/app/modulos.ts. */
 export const materiaisApi = { COMPOSICOES_PADRAO, calcularMateriais } satisfies MateriaisApi;

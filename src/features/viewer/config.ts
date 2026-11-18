@@ -98,7 +98,21 @@ export const ESTILO_TIPO: Record<TipoElemento, EstiloTipo> = {
   reservatorio: { larguraPx: 1.5, preenchimento: 0, simbolo: 'quadrado', tamanhoPx: 18, simboloCheio: true, letra: 'R' },
   'caixa-inspecao': { larguraPx: 1.5, preenchimento: 0, simbolo: 'quadrado', tamanhoPx: 14, simboloCheio: false, letra: 'C' },
   tubo: { larguraPx: 2, preenchimento: 0, simbolo: 'losango', tamanhoPx: 8, simboloCheio: true, letra: '' },
+  telhado: { larguraPx: 1.5, preenchimento: 0.07, simbolo: 'quadrado', tamanhoPx: 12, simboloCheio: false, letra: 'T' },
+  // calha/rufo: linha grossa (rufo tracejado: TRACEJADO_RUFO); condutor (ponto): círculo "CD"
+  calha: { larguraPx: 3.5, preenchimento: 0, simbolo: 'circulo', tamanhoPx: 19, simboloCheio: true, letra: 'CD' },
 };
+
+/** Tracejado do rufo (px de tela). */
+export const TRACEJADO_RUFO = [7, 3, 2, 3];
+/** Polígonos com hachura diagonal discreta. */
+export const TIPOS_HACHURADOS: readonly TipoElemento[] = ['laje', 'telhado'];
+/** Espaçamento da hachura (px de tela) e opacidade das linhas. */
+export const PASSO_HACHURA_PX = 10;
+export const OPACIDADE_HACHURA = 0.35;
+/** Cumeeira/espigões do telhado (px de tela). */
+export const LARGURA_CUMEEIRA_PX = 1.5;
+export const TRACEJADO_CUMEEIRA = [8, 4];
 
 /**
  * Elementos de ponto cujo rótulo de texto fica sempre visível (em fonte pequena). Nos demais, o
@@ -118,6 +132,12 @@ export function comAlfa(corHex: string, opacidade: number): string {
 // ---------------------------------------------------------------- animação "analisando a planta"
 /** Cor de destaque do tema (= --destaque de src/app/tema.css; o Konva precisa do valor literal). */
 export const COR_DESTAQUE = '#4da3ff';
+/** Cor das calhas e condutores na apresentação. */
+export const COR_CALHA_ANIMACAO = '#8fd8ff';
+/** Quanto o telhado "sobe" ao aparecer (px de tela). */
+export const SUBIDA_TELHADO_PX = 18;
+/** Preenchimento mínimo dos polígonos enquanto surgem. */
+export const OPACIDADE_MIN_PREENCHIMENTO_ANIMACAO = 0.12;
 /** Fração da fase que a animação de UM elemento dura (os elementos entram em sequência). */
 export const DURACAO_ELEMENTO_FRACAO = 0.3;
 /** Escurecimento do PDF na faixa ainda não varrida. */

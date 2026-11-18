@@ -459,7 +459,9 @@ export function AreaPlanta(props: AreaPlantaProps) {
       <>
         {/* polígonos embaixo; rotas derivadas sobre eles (para receberem o mouse); linhas e pontos por cima;
             o elemento sob o mouse vai por último, para o rótulo não ficar atrás do símbolo vizinho */}
-        {emOrdem.filter((el) => el.geometria.tipo === 'poligono').map(desenharElemento)}
+        {/* o telhado fica por baixo de todos */}
+        {emOrdem.filter((el) => el.tipo === 'telhado').map(desenharElemento)}
+        {emOrdem.filter((el) => el.geometria.tipo === 'poligono' && el.tipo !== 'telhado').map(desenharElemento)}
         {derivadosAgora.map((d) => (
           <FormaDerivada
             key={d.id}

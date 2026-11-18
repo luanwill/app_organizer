@@ -11,6 +11,7 @@
  *    (ex.: "Aço {detalhe}" → "Aço Ø10 mm"), para o material sair separado por bitola/categoria.
  */
 import type { CodigoServico, Composicao, InsumoComposicao } from '@/core/model';
+import { COMPOSICOES_COBERTURA } from './composicoesCobertura';
 
 /** Marcador, no nome do material, substituído pelo `detalhe` da linha de serviço. */
 export const MARCADOR_DETALHE = '{detalhe}';
@@ -113,4 +114,5 @@ export const COMPOSICOES_PADRAO: Composicao[] = [
   composicao('forma', [insumo('Madeira para forma (chapa/tábua)', 'm²', 1, PERDA_FORMA_PCT)]),
   composicao('aco', [insumo(`Aço ${MARCADOR_DETALHE}`, 'kg', 1, PERDA_ACO_PCT)]),
   composicao('lastro', insumosConcreto(TRACO_MAGRO)),
+  ...COMPOSICOES_COBERTURA,
 ];

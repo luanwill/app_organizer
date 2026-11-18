@@ -51,6 +51,19 @@ describe('estado da apresentação', () => {
     expect(progressoGeral({ ...base, fase: 'concluida', progresso: 1 })).toBe(1);
   });
 
+  it('fases de cobertura entram depois da estrutura e antes da elétrica', () => {
+    const f = fasesExibidas({ estrutura: ['x'], laje: ['l'], telhado: ['t'], calhas: ['c'], eletrica: ['e'] });
+    expect(f).toEqual(['varredura', 'estrutura', 'laje', 'telhado', 'calhas', 'eletrica', 'materiais']);
+    const i = indexarRevelacao({ laje: ['l'], telhado: ['t'], calhas: ['c'] });
+    expect(estadoRevelacao('t', i, 'laje', 1).tipo).toBe('oculto');
+    expect(estadoRevelacao('l', i, 'telhado', 0).tipo).toBe('normal');
+    expect(estadoRevelacao('c', i, 'calhas', 0).tipo).toBe('animando');
+    expect(estadoRevelacao('c', i, 'eletrica', 0).tipo).toBe('normal');
+    expect(ROTULO_FASE_ANIMACAO.laje).toBe('Lançando lajes…');
+    expect(ROTULO_FASE_ANIMACAO.telhado).toBe('Montando o telhado…');
+    expect(ROTULO_FASE_ANIMACAO.calhas).toBe('Posicionando calhas e condutores…');
+  });
+
   it('rótulos das fases em pt-BR', () => {
     expect(ROTULO_FASE_ANIMACAO.varredura).toBe('Lendo a planta…');
     expect(ROTULO_FASE_ANIMACAO.paredes).toBe('Identificando paredes…');

@@ -11,6 +11,9 @@ export type FaseAnimacao =
   | 'paredes'
   | 'ambientes'
   | 'estrutura'
+  | 'laje'
+  | 'telhado'
+  | 'calhas'
   | 'eletrica'
   | 'hidraulica'
   | 'materiais'
@@ -33,6 +36,9 @@ export const ORDEM_FASES_ANIMACAO: readonly FaseAnimacao[] = [
   'paredes',
   'ambientes',
   'estrutura',
+  'laje',
+  'telhado',
+  'calhas',
   'eletrica',
   'hidraulica',
   'materiais',
@@ -44,6 +50,9 @@ export const ROTULO_FASE_ANIMACAO: Record<FaseAnimacao, string> = {
   paredes: 'Identificando paredes…',
   ambientes: 'Medindo ambientes…',
   estrutura: 'Lançando estrutura…',
+  laje: 'Lançando lajes…',
+  telhado: 'Montando o telhado…',
+  calhas: 'Posicionando calhas e condutores…',
   eletrica: 'Distribuindo pontos elétricos…',
   hidraulica: 'Distribuindo pontos hidráulicos…',
   materiais: 'Levantando materiais…',

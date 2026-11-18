@@ -470,3 +470,55 @@ describe('novoId', () => {
     expect(gerados.size).toBe(200);
   });
 });
+
+describe('compatibilidade com projetos antigos (parâmetros novos)', () => {
+  /** Projeto como era salvo antes de existir parametros.estrutura.cobertura. */
+  function projetoAntigo() {
+    const projeto = structuredClone(criarStore(criarPersistenciaMemoria()).getState().projeto);
+    projeto.atualizadoEm = '2025-05-05T05:05:05.000Z';
+    projeto.parametros.gerais.espessuraParede = 0.15; // salvo
+    projeto.parametros.estrutura.pilar.secaoB = 0.2; // salvo
+    delete (projeto.parametros.estrutura as Partial<typeof projeto.parametros.estrutura>).cobertura;
+    return projeto;
+  }
+
+  function conferir(parametros: ReturnType<typeof parametrosPadrao>) {
+    const padrao = parametrosPadrao();
+    expect(parametros.estrutura.cobertura).toEqual(padrao.estrutura.cobertura);
+    expect(parametros.estrutura.pilar).toEqual({ secaoB: 0.2, secaoH: 0.3 });
+    expect(parametros.gerais).toEqual({ peDireito: null, espessuraParede: 0.15, numeroPessoas: null });
+  }
+
+  it('inicializar completa os parâmetros sem marcar o projeto como alterado', async () => {
+    const persistencia = criarPersistenciaMemoria();
+    const salvar = vi.spyOn(persistencia, 'salvarProjeto');
+    const antigo = projetoAntigo();
+    await persistencia.salvarProjeto(antigo, 1);
+    salvar.mockClear();
+    const store = await storePronta(persistencia);
+    const { projeto } = store.getState();
+    conferir(projeto.parametros);
+    expect(projeto.atualizadoEm).toBe(antigo.atualizadoEm);
+    expect(projeto.elementos).toEqual(antigo.elementos);
+    await aguardarSalvamento();
+    expect(salvar).not.toHaveBeenCalled();
+  });
+
+  it('carregarProjeto completa os parâmetros de um JSON antigo', async () => {
+    const store = await storePronta();
+    const antigo = projetoAntigo();
+    store.getState().carregarProjeto(antigo);
+    conferir(store.getState().projeto.parametros);
+    expect(store.getState().projeto.atualizadoEm).toBe(antigo.atualizadoEm);
+    expect(antigo.parametros.estrutura.cobertura).toBeUndefined(); // entrada não é mutada
+  });
+
+  it('valores salvos em cobertura vencem o padrão', async () => {
+    const store = await storePronta();
+    const projeto = structuredClone(store.getState().projeto);
+    projeto.parametros.estrutura.cobertura.beiral = 1;
+    projeto.parametros.estrutura.cobertura.alturaCondutor = 3;
+    store.getState().carregarProjeto(projeto);
+    expect(store.getState().projeto.parametros.estrutura.cobertura).toMatchObject({ beiral: 1, alturaCondutor: 3 });
+  });
+});

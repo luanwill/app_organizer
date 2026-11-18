@@ -36,7 +36,8 @@ function EntradaNumero({ valor, aoMudar, rotulo }: { valor: number; aoMudar: (v:
   const [texto, setTexto] = useState(textoDoNumero(valor));
   useEffect(() => setTexto(textoDoNumero(valor)), [valor]);
   const confirmar = () => {
-    const n = lerNumero(texto);
+    // texto inalterado → mantém o valor exato (ex.: 1/6 exibido como 0,1667 não é regravado)
+    const n = texto.trim() === textoDoNumero(valor) ? null : lerNumero(texto);
     if (n === null || n < 0 || n === valor) setTexto(textoDoNumero(valor));
     else aoMudar(n);
   };

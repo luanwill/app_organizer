@@ -75,6 +75,15 @@ export function parametrosPadrao(): Parametros {
         radier: { espessura: 0.12 },
         espessuraLastro: 0.05,
       },
+      cobertura: {
+        beiral: 0.6,
+        inclinacaoPct: { ceramica: 30, concreto: 30, fibrocimento: 15, metalica: 10, sanduiche: 10 },
+        alturaCondutor: null,
+        calhaPorCondutorM: 10,
+        desenvolvimentoCalhaCm: 50,
+        desenvolvimentoRufoCm: 33,
+        diametroCondutorMm: 100,
+      },
     },
     eletrica: {
       limiteVAPorCircuito: 1270,

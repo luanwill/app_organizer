@@ -3,21 +3,20 @@
  * Sem React/DOM. Usa apenas as linhas 'confirmado' da prévia (o app trata os pendentes da análise
  * como confirmados numa CÓPIA do projeto; os totais reais não mudam).
  */
-import type { Levantamento, LinhaMaterial, LinhaQuantitativo } from '@/core/model';
+import type { Alerta, Levantamento, LinhaMaterial, LinhaQuantitativo } from '@/core/model';
 import { formatarNumero } from '@/core/calc';
 import {
   CASAS_PREVIA,
-  DESTAQUES,
-  FASE_DA_SECAO,
+  FASE_MATERIAIS,
   JANELA_CASCATA,
+  SECOES_PREVIA,
   ORDEM_FASES_PREVIA,
   UNIDADES_INTEIRAS,
   type DestaqueConfig,
-  type DisciplinaPrevia,
   type FasePrevia,
+  type IdSecaoPrevia,
+  type SecaoConfig,
 } from './previaConfig';
-
-export const DISCIPLINAS_PREVIA: readonly DisciplinaPrevia[] = ['arquitetura', 'estrutura', 'eletrica', 'hidraulica'];
 
 const limitar = (v: number): number => (Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0);
 
@@ -68,7 +67,7 @@ export function estadoCascata(
   fase: FasePrevia,
   progresso: number,
 ): { visivel: boolean; t: number } {
-  const base = andamento(FASE_DA_SECAO.materiais, fase, progresso);
+  const base = andamento(FASE_MATERIAIS, fase, progresso);
   if (base === null) return { visivel: false, t: 0 };
   if (base >= 1 || total <= 0) return { visivel: true, t: 1 };
   const inicio = (indice / total) * JANELA_CASCATA;
@@ -86,9 +85,17 @@ export interface DestaquePrevia {
 }
 
 export interface SecaoPrevia {
-  disciplina: DisciplinaPrevia;
+  id: IdSecaoPrevia;
+  rotulo: string;
+  disciplina: SecaoConfig['disciplina'];
+  /** Fase em que o cartão aparece. */
+  fase: FasePrevia;
+  /** Fases dos destaques (o cartão fica "ativo" nelas). */
+  fasesDestaques: FasePrevia[];
   destaques: DestaquePrevia[];
-  /** Nº de dados faltantes (alertas distintos). */
+  /** Faltantes com selo próprio (ex.: "tipo de telha"). */
+  faltantesNomeados: string[];
+  /** Nº dos demais dados faltantes (alertas distintos). */
   faltantes: number;
 }
 
@@ -123,15 +130,44 @@ function materiaisDaPrevia(materiais: LinhaMaterial[]): MaterialPrevia[] {
   return [...mapa.values()].filter((m) => m.quantidade > 0);
 }
 
+/**
+ * Alertas de cada seção: cada alerta vai para a 1ª seção da sua disciplina cujo predicado o aceita;
+ * os que sobram vão para a seção padrão da disciplina (sem predicado). Mensagens repetidas contam uma vez.
+ */
+function alertasPorSecao(previa: Levantamento): Map<IdSecaoPrevia, Alerta[]> {
+  const mapa = new Map<IdSecaoPrevia, Map<string, Alerta>>(SECOES_PREVIA.map((s) => [s.id, new Map()]));
+  for (const disciplina of new Set(SECOES_PREVIA.map((s) => s.disciplina))) {
+    const daDisciplina = SECOES_PREVIA.filter((s) => s.disciplina === disciplina);
+    const padrao = daDisciplina.find((s) => !s.alertas);
+    for (const a of previa[disciplina].alertas) {
+      const secao = daDisciplina.find((s) => s.alertas?.(a)) ?? padrao;
+      if (secao) mapa.get(secao.id)?.set(a.mensagem, a);
+    }
+  }
+  return new Map([...mapa].map(([id, m]) => [id, [...m.values()]]));
+}
+
 /** O que o painel mostra a partir da prévia: só linhas 'confirmado'; destaques zerados são omitidos. */
 export function resumirPrevia(previa: Levantamento): ResumoPrevia {
-  const secoes = DISCIPLINAS_PREVIA.map((disciplina): SecaoPrevia => {
-    const resultado = previa[disciplina];
-    const linhas = resultado.linhas.filter((l) => l.status === 'confirmado');
-    const destaques = DESTAQUES[disciplina]
+  const alertas = alertasPorSecao(previa);
+  const secoes = SECOES_PREVIA.map((cfg): SecaoPrevia => {
+    const linhas = previa[cfg.disciplina].linhas.filter((l) => l.status === 'confirmado' && cfg.linhas(l));
+    const destaques = cfg.destaques
       .map((d) => ({ rotulo: d.rotulo, unidade: d.unidade, fase: d.fase, valor: valorDestaque(d, linhas) }))
       .filter((d) => d.valor > 0);
-    return { disciplina, destaques, faltantes: new Set(resultado.alertas.map((a) => a.mensagem)).size };
+    const daSecao = alertas.get(cfg.id) ?? [];
+    const nomeados = (cfg.faltantesNomeados ?? []).filter((n) => daSecao.some(n.alerta));
+    const outros = daSecao.filter((a) => !(cfg.faltantesNomeados ?? []).some((n) => n.alerta(a)));
+    return {
+      id: cfg.id,
+      rotulo: cfg.rotulo,
+      disciplina: cfg.disciplina,
+      fase: cfg.fase,
+      fasesDestaques: [...new Set(cfg.destaques.map((d) => d.fase))],
+      destaques,
+      faltantesNomeados: nomeados.map((n) => n.nome),
+      faltantes: outros.length,
+    };
   });
   return { secoes, materiais: materiaisDaPrevia(previa.materiais) };
 }

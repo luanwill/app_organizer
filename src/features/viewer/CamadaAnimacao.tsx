@@ -8,6 +8,7 @@ import {
   BRILHO_SCANNER_PX,
   CASAS_MEDIDA,
   comAlfa,
+  COR_CALHA_ANIMACAO,
   COR_DESTAQUE,
   COR_TEXTO_SIMBOLO,
   ESPESSURA_MIN_PAREDE_PX,
@@ -23,13 +24,17 @@ import {
   OPACIDADE_ESCURECIMENTO,
   OPACIDADE_GRADE,
   OPACIDADE_GRADE_FUNDO,
+  OPACIDADE_MIN_PREENCHIMENTO_ANIMACAO,
   PASSO_GRADE_PX,
   RAIO_CABECA_TRACO_PX,
   RAIO_PULSO_PX,
+  SUBIDA_TELHADO_PX,
+  TIPOS_HACHURADOS,
   TAMANHO_FONTE_PX,
 } from './config';
 import { linhasGrade, polilinhaParcial, suavizarPop, suavizarSaida, type FaseAnimacao } from './animacao';
-import { Etiqueta, Simbolo } from './FormaElemento';
+import { linhasCumeeira } from './cobertura';
+import { Cumeeira, Etiqueta, Hachura, Simbolo } from './FormaElemento';
 import { rotuloDoElemento, type ContextoRotulo } from './rotulos';
 import { larguraParedeUnidades } from './elementos';
 
@@ -133,9 +138,15 @@ const TracoAnimado = memo(function TracoAnimado(props: { el: Elemento; t: number
   const { el, t, fase, zoom, escala } = props;
   if (el.geometria.tipo === 'ponto') return null;
   const fechado = el.geometria.tipo === 'poligono';
-  const cor = COR_DISCIPLINA[el.disciplina];
+  // calhas em azul-claro; demais na cor da disciplina
+  const cor = el.tipo === 'calha' ? COR_CALHA_ANIMACAO : COR_DISCIPLINA[el.disciplina];
   const brilho = fase === 'paredes' ? COR_DESTAQUE : cor;
   const estilo = ESTILO_TIPO[el.tipo];
+  const surgir = suavizarSaida(t);
+  const hachurado = fechado && TIPOS_HACHURADOS.includes(el.tipo);
+  const cumeeira = el.tipo === 'telhado' ? linhasCumeeira(el.geometria.pontos, el.props.aguas, el.props.direcao) : [];
+  // telhado "sobe" até a posição enquanto aparece
+  const subida = el.tipo === 'telhado' ? ((1 - surgir) * SUBIDA_TELHADO_PX) / zoom : 0;
   const ehParede = el.tipo === 'parede';
   // parede: espessura real (unidades do PDF); demais: px de tela
   const largura = ehParede ? larguraParedeUnidades(el.props.espessura, escala, zoom, ESPESSURA_MIN_PAREDE_PX) : estilo.larguraPx / zoom;
@@ -144,15 +155,17 @@ const TracoAnimado = memo(function TracoAnimado(props: { el: Elemento; t: number
   const cabeca = pts[pts.length - 1];
   const decai = 1 - t;
   return (
-    <Group listening={false}>
+    <Group listening={false} y={subida}>
       {fechado && (
         <Line
           points={achatar(el.geometria.pontos)}
           closed
-          fill={comAlfa(cor, Math.max(estilo.preenchimento, 0.12) * 1.6)}
-          opacity={suavizarSaida(t)}
+          fill={comAlfa(cor, Math.max(estilo.preenchimento * 1.6, OPACIDADE_MIN_PREENCHIMENTO_ANIMACAO))}
+          opacity={surgir}
         />
       )}
+      {hachurado && <Hachura pontos={el.geometria.pontos} zoom={zoom} cor={cor} opacidade={0.45 * surgir} />}
+      {cumeeira.length > 0 && <Cumeeira pontos={el.geometria.pontos} segmentos={cumeeira} cor={cor} fracao={surgir} />}
       {pts.length >= 2 && (
         <>
           {decai > 0 && (
@@ -178,7 +191,7 @@ const PontoAnimado = memo(function PontoAnimado(props: { el: Elemento; t: number
   if (el.geometria.tipo !== 'ponto') return null;
   const p = el.geometria.ponto;
   const estilo = ESTILO_TIPO[el.tipo];
-  const cor = COR_DISCIPLINA[el.disciplina];
+  const cor = el.tipo === 'calha' ? COR_CALHA_ANIMACAO : COR_DISCIPLINA[el.disciplina];
   const escalaPop = t < FRACAO_POP ? Math.max(0, suavizarPop(t / FRACAO_POP)) : 1;
   const pulso = suavizarSaida(t);
   const tam = estilo.tamanhoPx;
